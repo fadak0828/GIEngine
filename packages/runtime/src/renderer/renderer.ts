@@ -222,13 +222,26 @@ export class Renderer {
       case 'examining_image':
         this.popupRenderer.showImagePopup(
           state.sub.image,
-          state.sub.caption
+          state.sub.caption,
+          state.sub.innerHotspots,
+          (hotspotId: string) => {
+            this.dispatch({ type: 'INNER_HOTSPOT_CLICK', hotspotId });
+          }
         );
         break;
-      case 'word_collected':
+      case 'word_collected': {
         this.popupRenderer.dismiss();
-        this.showToast(this.i18n.resolveKey('ui.word_collected'));
+        const wordNames = state.sub.wordIds.map(wid => {
+          const wordDef = def.words?.[wid];
+          return wordDef ? this.i18n.resolveText(wordDef.display) : wid;
+        });
+        if (wordNames.length === 1) {
+          this.showWordToast(wordNames[0]);
+        } else {
+          this.showWordToast(wordNames.join(', '), wordNames.length);
+        }
         break;
+      }
       case 'transitioning':
         // Will be handled by next state update
         break;
@@ -467,6 +480,35 @@ export class Renderer {
     this.toastTimeout = setTimeout(() => {
       this.removeToast();
     }, 2000);
+  }
+
+  private showWordToast(wordDisplay: string, count?: number): void {
+    this.removeToast();
+
+    const toast = document.createElement('div');
+    toast.className = 'gi-toast gi-toast--word';
+
+    const icon = document.createElement('span');
+    icon.className = 'gi-toast-icon';
+    icon.textContent = '\u2728';
+    toast.appendChild(icon);
+
+    const text = document.createElement('span');
+    text.className = 'gi-toast-text';
+    if (count && count > 1) {
+      text.textContent = `${count}개 단어 획득: ${wordDisplay}`;
+    } else {
+      text.textContent = `「${wordDisplay}」 획득!`;
+    }
+    toast.appendChild(text);
+
+    this.toastEl = toast;
+    this.container.appendChild(toast);
+
+    this.toastTimeout = setTimeout(() => {
+      toast.classList.add('gi-toast--exit');
+      setTimeout(() => this.removeToast(), 300);
+    }, 2500);
   }
 
   private removeToast(): void {
