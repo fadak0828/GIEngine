@@ -131,6 +131,12 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <LocalizedTextInput label="내용" value={action.content} onChange={v => onChange({ ...action, content: v })} multiline />
           <LocalizedTextInput label="제목 (선택)" value={action.title ?? { ko: '', en: '' }} onChange={v => onChange({ ...action, title: v })} />
+          <WordDropdown
+            caseId={caseId}
+            wordIds={action.wordIds ?? []}
+            onChange={wordIds => onChange({ ...action, wordIds })}
+            label="조사 시 수집할 단어"
+          />
         </div>
       );
 
@@ -141,6 +147,17 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
             <input type="text" value={action.image} onChange={e => onChange({ ...action, image: e.target.value })} style={{ width: '100%' }} />
           </Field>
           <LocalizedTextInput label="캡션 (선택)" value={action.caption ?? { ko: '', en: '' }} onChange={v => onChange({ ...action, caption: v })} />
+          <WordDropdown
+            caseId={caseId}
+            wordIds={action.wordIds ?? []}
+            onChange={wordIds => onChange({ ...action, wordIds })}
+            label="조사 시 수집할 단어"
+          />
+          {action.innerHotspots && action.innerHotspots.length > 0 && (
+            <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: 8, border: '1px dashed var(--border-color)', borderRadius: 4 }}>
+              내부 핫스팟: {action.innerHotspots.length}개
+            </div>
+          )}
         </div>
       );
 
@@ -185,8 +202,17 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
     case 'toggle_layer':
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Field label="레이어 ID">
-            <input type="text" value={action.layerId} onChange={e => onChange({ ...action, layerId: e.target.value })} style={{ width: '100%' }} />
+          <Field label="대상 레이어">
+            <select
+              value={action.layerId}
+              onChange={e => onChange({ ...action, layerId: e.target.value })}
+              style={{ width: '100%' }}
+            >
+              <option value="">-- 레이어 선택 --</option>
+              {scene.layers.map(l => (
+                <option key={l.id} value={l.id}>{l.id}</option>
+              ))}
+            </select>
           </Field>
           <Field label="가시성">
             <select

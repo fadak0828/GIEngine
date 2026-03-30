@@ -5,9 +5,10 @@ interface WordDropdownProps {
   caseId: string;
   wordIds: string[];
   onChange: (wordIds: string[]) => void;
+  label?: string;
 }
 
-export function WordDropdown({ caseId, wordIds, onChange }: WordDropdownProps): React.ReactElement {
+export function WordDropdown({ caseId, wordIds, onChange, label }: WordDropdownProps): React.ReactElement {
   const words = useWords();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,7 +52,7 @@ export function WordDropdown({ caseId, wordIds, onChange }: WordDropdownProps): 
           letterSpacing: '0.05em',
         }}
       >
-        획득 단어
+        {label ?? '획득 단어'}
       </label>
 
       {/* Warning when nothing selected */}
