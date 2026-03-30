@@ -1,5 +1,7 @@
 /**
- * Tests for Task 4: Inner hotspot clicks within examining_image sub-state.
+ * Tests for inner hotspot clicks within examining_image sub-state.
+ * Updated: word_reveal inner hotspots now stay in examining_image (popup stays open),
+ * and examine inner hotspots no longer carry wordIds (use collectibleWords instead).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -21,7 +23,6 @@ const innerHotspots: Hotspot[] = [
     action: {
       type: 'examine',
       content: { ko: '내부 텍스트', en: 'Inner text' },
-      wordIds: ['word-inner'],
     },
     cursor: 'pointer',
     ariaLabel: { ko: '내부', en: 'Inner' },
@@ -95,8 +96,7 @@ function makeSave(): SaveState {
   return createInitialSaveState(testDef);
 }
 
-describe('Inner hotspot clicks (Task 4)', () => {
-  // First open the image to get into examining_image sub-state
+describe('Inner hotspot clicks', () => {
   function getExaminingImageState(): { state: GameState; save: SaveState } {
     const save = makeSave();
     const exploring: GameState = {
@@ -109,29 +109,28 @@ describe('Inner hotspot clicks (Task 4)', () => {
     return { state: result.nextState, save };
   }
 
-  it('INNER_HOTSPOT_CLICK on word_reveal inner hotspot collects the word', () => {
+  it('INNER_HOTSPOT_CLICK on word_reveal stays in examining_image and collects words', () => {
     const { state, save } = getExaminingImageState();
     const result = transition(state, save, { type: 'INNER_HOTSPOT_CLICK', hotspotId: 'inner-word' }, testDef);
     expect(result.nextState.type).toBe('exploring');
     if (result.nextState.type === 'exploring') {
-      expect(result.nextState.sub.type).toBe('word_collected');
-      if (result.nextState.sub.type === 'word_collected') {
-        expect(result.nextState.sub.wordIds).toContain('word-hidden');
-      }
+      // Stays in examining_image — popup does NOT close
+      expect(result.nextState.sub.type).toBe('examining_image');
     }
     const collected = result.saveState?.caseStates?.['case-1']?.collectedWordIds ?? [];
     expect(collected).toContain('word-hidden');
+    expect(result.effects).toContainEqual({ type: 'save_game' });
   });
 
-  it('INNER_HOTSPOT_CLICK on examine inner hotspot transitions to examining_text and collects words', () => {
+  it('INNER_HOTSPOT_CLICK on examine inner hotspot transitions to examining_text', () => {
     const { state, save } = getExaminingImageState();
     const result = transition(state, save, { type: 'INNER_HOTSPOT_CLICK', hotspotId: 'inner-examine' }, testDef);
     expect(result.nextState.type).toBe('exploring');
     if (result.nextState.type === 'exploring') {
       expect(result.nextState.sub.type).toBe('examining_text');
     }
-    const collected = result.saveState?.caseStates?.['case-1']?.collectedWordIds ?? [];
-    expect(collected).toContain('word-inner');
+    // No auto-collection since examine no longer has wordIds
+    expect(result.saveState).toBeUndefined();
   });
 
   it('INNER_HOTSPOT_CLICK with invalid hotspot ID returns no transition', () => {
