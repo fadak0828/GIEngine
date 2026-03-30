@@ -112,7 +112,7 @@ export interface ExamineAction {
   content: LocalizedText;
   title?: LocalizedText;
   highlightedWords?: string[];
-  wordIds?: string[];
+  collectibleWords?: CollectibleWord[];
 }
 
 export interface ExamineImageAction {
@@ -120,7 +120,6 @@ export interface ExamineImageAction {
   image: AssetRef;
   caption?: LocalizedText;
   innerHotspots?: Hotspot[];
-  wordIds?: string[];
 }
 
 export interface WordRevealAction {
@@ -176,6 +175,11 @@ export type WordCategory =
   | 'motive'
   | 'evidence'
   | (string & {});
+
+export interface CollectibleWord {
+  wordId: string;
+  textMatch: LocalizedText;
+}
 
 // --- Puzzle ---
 
@@ -313,7 +317,7 @@ export type GameState =
 
 export type ExploringSubState =
   | { type: 'idle' }
-  | { type: 'examining_text'; content: LocalizedText; title?: LocalizedText; highlightedWords?: string[] }
+  | { type: 'examining_text'; content: LocalizedText; title?: LocalizedText; highlightedWords?: string[]; collectibleWords?: CollectibleWord[] }
   | { type: 'examining_image'; image: AssetRef; caption?: LocalizedText; innerHotspots?: Hotspot[] }
   | { type: 'word_collected'; wordIds: string[] }
   | { type: 'transitioning'; targetSceneId: string }
@@ -347,7 +351,8 @@ export type GameEvent =
   | { type: 'HOTSPOT_CLICK'; hotspotId: string }
   | { type: 'INNER_HOTSPOT_CLICK'; hotspotId: string }
   | { type: 'OPEN_PUZZLE_OVERLAY'; puzzleId: string }
-  | { type: 'CLOSE_PUZZLE_OVERLAY' };
+  | { type: 'CLOSE_PUZZLE_OVERLAY' }
+  | { type: 'COLLECT_WORD_IN_POPUP'; wordId: string };
 
 // --- State Transition Result ---
 
@@ -363,7 +368,8 @@ export type SideEffect =
   | { type: 'show_popup'; content: PopupContent }
   | { type: 'close_popup' }
   | { type: 'animation'; target: string; animation: string }
-  | { type: 'unlock_case'; caseId: string };
+  | { type: 'unlock_case'; caseId: string }
+  | { type: 'word_collected_in_popup'; wordId: string };
 
 export interface PopupContent {
   title?: LocalizedText;
