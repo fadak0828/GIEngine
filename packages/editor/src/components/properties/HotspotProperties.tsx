@@ -2,6 +2,8 @@ import React from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { LocalizedTextInput } from '@/components/shared/LocalizedTextInput';
 import { WordDropdown } from '@/components/words/WordDropdown';
+import { CollectibleWordsEditor } from './CollectibleWordsEditor';
+import { InnerHotspotEditor } from './InnerHotspotEditor';
 import type { Hotspot, HotspotAction, Scene } from '@gi-engine/core';
 
 interface HotspotPropertiesProps {
@@ -131,11 +133,10 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <LocalizedTextInput label="내용" value={action.content} onChange={v => onChange({ ...action, content: v })} multiline />
           <LocalizedTextInput label="제목 (선택)" value={action.title ?? { ko: '', en: '' }} onChange={v => onChange({ ...action, title: v })} />
-          <WordDropdown
+          <CollectibleWordsEditor
             caseId={caseId}
-            wordIds={action.wordIds ?? []}
-            onChange={wordIds => onChange({ ...action, wordIds })}
-            label="조사 시 수집할 단어"
+            collectibleWords={action.collectibleWords ?? []}
+            onChange={collectibleWords => onChange({ ...action, collectibleWords })}
           />
         </div>
       );
@@ -147,17 +148,11 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
             <input type="text" value={action.image} onChange={e => onChange({ ...action, image: e.target.value })} style={{ width: '100%' }} />
           </Field>
           <LocalizedTextInput label="캡션 (선택)" value={action.caption ?? { ko: '', en: '' }} onChange={v => onChange({ ...action, caption: v })} />
-          <WordDropdown
+          <InnerHotspotEditor
             caseId={caseId}
-            wordIds={action.wordIds ?? []}
-            onChange={wordIds => onChange({ ...action, wordIds })}
-            label="조사 시 수집할 단어"
+            innerHotspots={action.innerHotspots ?? []}
+            onChange={innerHotspots => onChange({ ...action, innerHotspots })}
           />
-          {action.innerHotspots && action.innerHotspots.length > 0 && (
-            <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: 8, border: '1px dashed var(--border-color)', borderRadius: 4 }}>
-              내부 핫스팟: {action.innerHotspots.length}개
-            </div>
-          )}
         </div>
       );
 
