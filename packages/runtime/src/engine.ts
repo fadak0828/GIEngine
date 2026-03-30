@@ -379,6 +379,9 @@ export class GIEngine {
           console.log('[GIEngine] Case unlocked:', effect.caseId);
         }
         break;
+      case 'word_collected_in_popup':
+        this.renderer.handleWordCollectedInPopup(effect.wordId, this.definition);
+        break;
     }
   }
 

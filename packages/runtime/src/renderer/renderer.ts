@@ -112,6 +112,13 @@ export class Renderer {
     return this.subPuzzleRenderer;
   }
 
+  handleWordCollectedInPopup(wordId: string, def: GameDefinition): void {
+    this.popupRenderer.markWordCollected(wordId);
+    const wordDef = def.words?.[wordId];
+    const wordName = wordDef ? this.i18n.resolveText(wordDef.display) : wordId;
+    this.showWordToast(wordName);
+  }
+
   update(state: GameState, save: SaveState, def: GameDefinition): void {
     switch (state.type) {
       case 'loading':
@@ -251,7 +258,12 @@ export class Renderer {
         this.popupRenderer.showTextPopup(
           state.sub.content,
           state.sub.title,
-          state.sub.highlightedWords
+          state.sub.highlightedWords,
+          state.sub.collectibleWords,
+          caseState.collectedWordIds,
+          (wordId: string) => {
+            this.dispatch({ type: 'COLLECT_WORD_IN_POPUP', wordId });
+          }
         );
         break;
       case 'examining_image':

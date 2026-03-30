@@ -4,6 +4,7 @@ import type {
   AssetManifest,
   GameEvent,
   Hotspot,
+  CollectibleWord,
 } from '@gi-engine/core';
 import { I18nManager } from '@gi-engine/core';
 
@@ -31,7 +32,10 @@ export class PopupRenderer {
   showTextPopup(
     content: LocalizedText,
     title?: LocalizedText,
-    highlightedWords?: string[]
+    highlightedWords?: string[],
+    collectibleWords?: CollectibleWord[],
+    collectedWordIds?: string[],
+    onWordCollect?: (wordId: string) => void
   ): void {
     this.dismiss();
 
@@ -58,7 +62,26 @@ export class PopupRenderer {
     body.className = 'gi-popup-body';
 
     const text = this.i18n.resolveText(content);
-    if (highlightedWords && highlightedWords.length > 0) {
+    if (collectibleWords && collectibleWords.length > 0 && onWordCollect) {
+      body.innerHTML = this.renderCollectibleText(
+        text,
+        collectibleWords,
+        collectedWordIds ?? [],
+        highlightedWords
+      );
+      // Bind click handlers for collectible word buttons
+      const buttons = body.querySelectorAll<HTMLButtonElement>('.gi-collectible-word');
+      buttons.forEach(btn => {
+        const wordId = btn.dataset.wordId;
+        if (wordId && !btn.classList.contains('gi-collectible-word--collected')) {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onWordCollect(wordId);
+            btn.classList.add('gi-collectible-word--collected');
+          });
+        }
+      });
+    } else if (highlightedWords && highlightedWords.length > 0) {
       body.innerHTML = this.highlightText(text, highlightedWords);
     } else {
       body.textContent = text;
@@ -198,6 +221,58 @@ export class PopupRenderer {
       this.dispatch({ type: 'CLOSE_POPUP' });
     });
     return btn;
+  }
+
+  markWordCollected(wordId: string): void {
+    if (!this.overlayEl) return;
+    const btn = this.overlayEl.querySelector<HTMLElement>(
+      `.gi-collectible-word[data-word-id="${wordId}"]`
+    );
+    if (btn) {
+      btn.classList.add('gi-collectible-word--collected');
+    }
+  }
+
+  private renderCollectibleText(
+    text: string,
+    collectibleWords: CollectibleWord[],
+    collectedWordIds: string[],
+    highlightedWords?: string[]
+  ): string {
+    // First escape HTML
+    let escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Apply highlighted words (cosmetic only, non-interactive)
+    if (highlightedWords && highlightedWords.length > 0) {
+      for (const word of highlightedWords) {
+        const isCollectible = collectibleWords.some(
+          cw => this.i18n.resolveText(cw.textMatch) === word
+        );
+        if (isCollectible) continue;
+
+        const escapedWord = word.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const regex = new RegExp(`(${this.escapeRegex(escapedWord)})`, 'gi');
+        escaped = escaped.replace(regex, '<span class="gi-highlighted">$1</span>');
+      }
+    }
+
+    // Replace collectible word text matches with interactive buttons
+    for (const cw of collectibleWords) {
+      const matchText = this.i18n.resolveText(cw.textMatch);
+      const escapedMatch = matchText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const isCollected = collectedWordIds.includes(cw.wordId);
+      const collectedClass = isCollected ? ' gi-collectible-word--collected' : '';
+      const regex = new RegExp(`(${this.escapeRegex(escapedMatch)})`, 'gi');
+      escaped = escaped.replace(
+        regex,
+        `<button class="gi-collectible-word${collectedClass}" data-word-id="${cw.wordId}">$1</button>`
+      );
+    }
+
+    return escaped;
   }
 
   private highlightText(text: string, words: string[]): string {
