@@ -42,6 +42,8 @@ export class Renderer {
   private toastEl: HTMLElement | null = null;
   private toastTimeout: ReturnType<typeof setTimeout> | null = null;
   private currentView: string = '';
+  private lastSlotAssignments: Record<string, string | null> = {};
+  private lastCollectedWordIds: string[] = [];
 
   constructor(opts: RendererOptions) {
     this.container = opts.container;
@@ -126,6 +128,8 @@ export class Renderer {
     if (!except.includes('popup')) this.popupRenderer.dismiss();
     this.removeCompletion();
     this.removeLoading();
+    this.lastSlotAssignments = {};       // Reset diff state when view changes
+    this.lastCollectedWordIds = [];      // Reset word tracking
   }
 
   // --- Loading ---
@@ -251,16 +255,19 @@ export class Renderer {
     // Collect words for this case from the game definition
     const caseWords = this.collectWordsForCase(def, state.caseId, caseState);
 
-    // Compute which words are assigned to slots
+    // Compute which words are currently assigned to any slot
     const assignedWordIds = new Set<string>();
     for (const wordId of Object.values(puzzleState.slotAssignments)) {
       if (wordId) assignedWordIds.add(wordId);
     }
 
     if (this.currentView !== `thinking:${state.puzzleId}`) {
+      // First visit to this puzzle: full mount
       this.clearView([]);
       this.removeControls();
       this.currentView = `thinking:${state.puzzleId}`;
+      // Snapshot current assignments so the diff starts clean
+      this.lastSlotAssignments = { ...puzzleState.slotAssignments };
 
       if ('template' in puzzle) {
         this.deductionRenderer.render(
@@ -270,9 +277,36 @@ export class Renderer {
           assignedWordIds
         );
       }
+    } else {
+      // Repeat visit (e.g. after ASSIGN_WORD / UNASSIGN_WORD dispatch):
+      // Apply incremental DOM updates — do NOT re-mount the deduction UI
+      const current = puzzleState.slotAssignments;
+
+      for (const slotId of Object.keys(current)) {
+        const newWordId = current[slotId] ?? null;
+        const oldWordId = this.lastSlotAssignments[slotId] ?? null;
+        if (newWordId !== oldWordId) {
+          this.deductionRenderer.updateSlotContent(slotId, newWordId, caseWords);
+          this.lastSlotAssignments[slotId] = newWordId;
+        }
+      }
+
+      // Also handle slots that existed in lastSlotAssignments but were removed
+      // (e.g. if the puzzle template changed — defensive)
+      for (const slotId of Object.keys(this.lastSlotAssignments)) {
+        if (!(slotId in current)) {
+          this.deductionRenderer.updateSlotContent(slotId, null, caseWords);
+          delete this.lastSlotAssignments[slotId];
+        }
+      }
+
+      // Sync word bank assigned state for all words
+      for (const word of caseWords) {
+        this.deductionRenderer.updateWordBankItem(word.id, assignedWordIds.has(word.id));
+      }
     }
 
-    // Handle sub-states
+    // Sub-state handling (same position as before — after the mount/update branch)
     if (state.sub.type === 'showing_result') {
       this.deductionRenderer.showValidationResults(state.sub.results);
     }
@@ -437,34 +471,60 @@ export class Renderer {
 
   /**
    * Collect all Word objects that the player has collected for a specific case.
-   * Words are defined per-case in the game definition's acts.
-   * We find all words referenced by word_reveal hotspot actions in the case's scenes.
+   * Primary path: look up from the global words dictionary (def.words).
+   * Fallback: scan scenes in the current case for word_reveal actions.
+   * Last resort: emit warning and use ID as display label.
    */
   private collectWordsForCase(
     def: GameDefinition,
     caseId: string,
     caseState: CaseState
   ): Word[] {
-    const caseData = findCase(def, caseId);
-    if (!caseData) return [];
+    const results: Word[] = [];
 
-    // Build a word map from all scenes' word_reveal actions
-    const wordMap = new Map<string, Word>();
+    for (const wordId of caseState.collectedWordIds) {
+      // Primary path: look up from the global words dictionary
+      // Covers all cases — including words collected cross-case
+      const wordDef = def.words?.[wordId];
+      if (wordDef) {
+        results.push({
+          id: wordId,
+          display: wordDef.display,
+          category: wordDef.category,
+          hint: wordDef.hint,
+          caseId,
+        });
+        continue;
+      }
 
-    const extractWords = (scenes: Scene[]) => {
-      for (const scene of scenes) {
-        for (const hotspot of scene.hotspots) {
-          this.extractWordsFromAction(hotspot.action, def, caseId, wordMap);
+      // Fallback path: scan scenes in the current case for word_reveal actions
+      // Preserves backward compatibility with game definitions that lack def.words
+      const caseData = findCase(def, caseId);
+      if (caseData) {
+        const wordMap = new Map<string, Word>();
+        for (const scene of caseData.scenes) {
+          for (const hotspot of scene.hotspots) {
+            this.extractWordsFromAction(hotspot.action, def, caseId, wordMap);
+          }
+        }
+        const found = wordMap.get(wordId);
+        if (found) {
+          results.push(found);
+          continue;
         }
       }
-    };
 
-    extractWords(caseData.scenes);
+      // Last resort: emit warning and use ID as display label
+      // Prevents silent data loss — the word appears but with a visible broken label
+      console.warn(`[GIEngine] No word definition found for collected word: "${wordId}"`);
+      results.push({
+        id: wordId,
+        display: { ko: wordId, en: wordId },
+        caseId,
+      });
+    }
 
-    // Return only collected words
-    return caseState.collectedWordIds
-      .map(id => wordMap.get(id))
-      .filter((w): w is Word => w !== undefined);
+    return results;
   }
 
   private extractWordsFromAction(

@@ -51,7 +51,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
     setErrorMessage(null);
     try {
       const exporterModule = await import('@gi-engine/exporter');
-      const exportResult = exporterModule.browserExport({ gameDefinition: project as never, mode });
+      const exportResult = await exporterModule.browserExport({ gameDefinition: project as never, mode });
 
       // Trigger download
       const blob = new Blob([exportResult.html], { type: 'text/html;charset=utf-8' });
