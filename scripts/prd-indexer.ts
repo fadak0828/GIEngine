@@ -1,8 +1,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
 import { parseRequirements } from './parser.js';
 import { inferStatus } from './inferrer.js';
 import type { ProjectIndex, PackageStats, GitSummary, Commit, Requirement, Override } from './types.js';
@@ -167,6 +166,10 @@ function applyStatusInference(
 ): Requirement[] {
   // Collect all export names across all packages
   const allExports = Object.values(packages).flatMap(p => p.exports);
+  // Package names that have at least one test file
+  const packagesWithTests = new Set(
+    Object.entries(packages).filter(([, p]) => p.testFiles > 0).map(([name]) => name)
+  );
 
   return requirements.map(req => {
     // Check override first
@@ -175,7 +178,15 @@ function applyStatusInference(
       return { ...req, status: override.status, statusSource: 'manual' as const, evidence: override.note ? [override.note] : [] };
     }
 
-    const result = inferStatus(req, allExports, false, gitSummary.recentCommits);
+    // Derive hasTestFile: true if any package with tests has an export matching this req's keywords
+    const reqKeywords = [...req.tags, ...req.title.toLowerCase().split(/[\s\-_,()[\]]+/).filter(w => w.length > 2)];
+    const hasTestFile = [...packagesWithTests].some(pkgName =>
+      packages[pkgName].exports.some(exp =>
+        reqKeywords.some(kw => exp.toLowerCase().includes(kw))
+      )
+    );
+
+    const result = inferStatus(req, allExports, hasTestFile, gitSummary.recentCommits);
     return { ...req, status: result.status, statusSource: 'auto' as const, evidence: result.evidence };
   });
 }

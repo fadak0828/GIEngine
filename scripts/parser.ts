@@ -7,7 +7,6 @@ export function parseRequirements(content: string, sourceFile: string): Requirem
   const lines = content.split('\n');
 
   let currentSection = '';
-  let sectionIndex = 0;
   let itemIndexInSection = 0;
 
   for (const line of lines) {
@@ -15,7 +14,6 @@ export function parseRequirements(content: string, sourceFile: string): Requirem
     const headingMatch = line.match(/^#{2,3}\s+(.+)/);
     if (headingMatch) {
       currentSection = headingMatch[1].trim();
-      sectionIndex++;
       itemIndexInSection = 0;
       continue;
     }
@@ -25,7 +23,7 @@ export function parseRequirements(content: string, sourceFile: string): Requirem
     if (checklistMatch) {
       const title = checklistMatch[1].trim();
       itemIndexInSection++;
-      requirements.push(makeRequirement(title, sourceFile, currentSection, sectionIndex, itemIndexInSection));
+      requirements.push(makeRequirement(title, sourceFile, currentSection, itemIndexInSection));
       continue;
     }
 
@@ -34,7 +32,7 @@ export function parseRequirements(content: string, sourceFile: string): Requirem
     if (numberedMatch) {
       const title = numberedMatch[1].trim();
       itemIndexInSection++;
-      requirements.push(makeRequirement(title, sourceFile, currentSection, sectionIndex, itemIndexInSection));
+      requirements.push(makeRequirement(title, sourceFile, currentSection, itemIndexInSection));
       continue;
     }
   }
@@ -46,10 +44,9 @@ function makeRequirement(
   title: string,
   sourceFile: string,
   section: string,
-  sectionIndex: number,
   itemIndex: number,
 ): Requirement {
-  const id = generateId(sourceFile, sectionIndex, itemIndex);
+  const id = generateId(sourceFile, section, itemIndex);
   const priority = inferPriority(section);
   const tags = extractTags(sourceFile, section);
 
@@ -66,9 +63,9 @@ function makeRequirement(
   };
 }
 
-/** Deterministic ID from source file + section position. Stable across rebuilds. */
-function generateId(sourceFile: string, sectionIndex: number, itemIndex: number): string {
-  const raw = `${sourceFile}:${sectionIndex}:${itemIndex}`;
+/** Deterministic ID from source file + section heading text + item position. Stable across rebuilds as long as section text doesn't change. */
+function generateId(sourceFile: string, sectionText: string, itemIndex: number): string {
+  const raw = `${sourceFile}:${sectionText}:${itemIndex}`;
   const hash = createHash('sha1').update(raw).digest('hex').slice(0, 6);
   return `REQ-${hash}`;
 }

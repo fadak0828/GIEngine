@@ -1,8 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
 import { formatSummary, formatProgress, formatRemaining } from './formatter.js';
 import type { ProjectIndex } from './types.js';
 
@@ -17,9 +16,19 @@ type QueryType = 'summary' | 'progress' | 'remaining';
 function loadIndex(): ProjectIndex {
   if (!existsSync(INDEX_PATH)) {
     console.error('⚠️  docs/project-index.json not found. Running indexer first...');
-    execSync('npm run prd:index', { cwd: ROOT, stdio: 'inherit' });
+    try {
+      execSync('npm run prd:index', { cwd: ROOT, stdio: 'inherit' });
+    } catch {
+      console.error('❌ Failed to build index. Run: npm run prd:index');
+      process.exit(1);
+    }
   }
-  return JSON.parse(readFileSync(INDEX_PATH, 'utf8')) as ProjectIndex;
+  try {
+    return JSON.parse(readFileSync(INDEX_PATH, 'utf8')) as ProjectIndex;
+  } catch (err) {
+    console.error(`❌ Failed to read docs/project-index.json: ${err}`);
+    process.exit(1);
+  }
 }
 
 function parseQueryType(arg: string | undefined): QueryType {
