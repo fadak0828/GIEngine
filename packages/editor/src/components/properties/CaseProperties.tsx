@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Case } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
+import { SubPuzzleEditor } from './SubPuzzleEditor';
 
 interface CasePropertiesProps {
   caseData: Case;
@@ -154,6 +155,9 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
       >
         퍼즐 편집 열기
       </button>
+
+      {/* Sub-puzzle editor */}
+      <SubPuzzleEditor caseData={caseData} />
     </div>
   );
 }
