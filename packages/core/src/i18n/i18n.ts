@@ -1,0 +1,68 @@
+import type { Locale, LocalizedText } from '../models/types.js';
+
+const ENGINE_TEXTS: Record<string, LocalizedText> = {
+  'ui.validate': { ko: '확인', en: 'Check' },
+  'ui.back': { ko: '돌아가기', en: 'Back' },
+  'ui.case_select': { ko: '사건 선택', en: 'Select Case' },
+  'ui.locked': { ko: '잠김', en: 'Locked' },
+  'ui.completed': { ko: '완료', en: 'Completed' },
+  'ui.word_collected': { ko: '단어 수집!', en: 'Word collected!' },
+  'ui.puzzle_solved': { ko: '퍼즐 해결!', en: 'Puzzle solved!' },
+  'ui.all_correct': { ko: '모두 정답!', en: 'All correct!' },
+  'ui.try_again': { ko: '다시 시도해보세요', en: 'Try again' },
+  'ui.exploring': { ko: '탐색', en: 'Explore' },
+  'ui.thinking': { ko: '추리', en: 'Think' },
+  'ui.word_bank': { ko: '단어 목록', en: 'Word Bank' },
+  'ui.mute': { ko: '음소거', en: 'Mute' },
+  'ui.unmute': { ko: '음소거 해제', en: 'Unmute' },
+  'ui.loading': { ko: '로딩 중...', en: 'Loading...' },
+  'ui.case_complete_title': { ko: '사건 해결!', en: 'Case Solved!' },
+  'ui.next_case': { ko: '다음 사건', en: 'Next Case' },
+  'ui.game_complete': { ko: '게임 완료!', en: 'Game Complete!' },
+};
+
+export class I18nManager {
+  private locale: Locale;
+  private fallbackLocale: Locale;
+
+  constructor(locale: Locale = 'ko', fallbackLocale: Locale = 'ko') {
+    this.locale = locale;
+    this.fallbackLocale = fallbackLocale;
+  }
+
+  resolveText(text: LocalizedText): string {
+    const resolved = text[this.locale];
+    if (resolved) return resolved;
+
+    const fallback = text[this.fallbackLocale];
+    if (fallback) return fallback;
+
+    // 어떤 로케일이든 첫 번째 값 반환
+    const values = Object.values(text);
+    if (values.length > 0 && values[0]) return values[0];
+
+    console.warn(`[i18n] Missing text for locale "${this.locale}"`);
+    return '';
+  }
+
+  resolveKey(key: string): string {
+    const text = ENGINE_TEXTS[key];
+    if (!text) {
+      console.warn(`[i18n] Unknown engine text key: "${key}"`);
+      return key;
+    }
+    return this.resolveText(text);
+  }
+
+  setLocale(locale: Locale): void {
+    this.locale = locale;
+  }
+
+  getLocale(): Locale {
+    return this.locale;
+  }
+
+  getFallbackLocale(): Locale {
+    return this.fallbackLocale;
+  }
+}

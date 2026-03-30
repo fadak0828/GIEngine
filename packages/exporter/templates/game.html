@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--
+  GIEngine HTML Shell Template (Reference)
+
+  This file serves as a reference for the HTML structure assembled by template.ts.
+  The actual assembly is done programmatically in packages/exporter/src/template.ts.
+
+  Structure:
+  - Full HTML5 document with viewport meta tags
+  - <style> block containing runtime CSS + base reset
+  - <div id="gi-engine-root"> as the mount point
+  - <script type="application/json" id="gi-game-data"> containing the full game JSON
+  - <script> containing the runtime JS with auto-boot logic
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title><!-- Game title inserted here --></title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body { background: #0a0a0a; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; }
+    #gi-engine-root { width: 100%; height: 100%; position: relative; }
+    .gi-loading { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 1.5rem; }
+    /* === Runtime CSS injected here === */
+  </style>
+</head>
+<body>
+  <div id="gi-engine-root">
+    <div class="gi-loading">Loading...</div>
+  </div>
+
+  <script type="application/json" id="gi-game-data">
+    <!-- Full game JSON injected here -->
+  </script>
+
+  <script>
+    // Runtime JS injected here with auto-boot wrapper
+  </script>
+</body>
+</html>

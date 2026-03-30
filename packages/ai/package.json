@@ -1,0 +1,13 @@
+{
+  "name": "@gi-engine/ai",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@gi-engine/core": "*",
+    "@google/generative-ai": "^0.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

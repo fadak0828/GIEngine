@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.vite/
+*.html
+!packages/exporter/templates/*.html

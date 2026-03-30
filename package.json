@@ -1,0 +1,22 @@
+{
+  "name": "gi-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Golden Idol style detective/deduction game engine",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint packages/*/src/**/*.ts",
+    "typecheck": "tsc --build"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.0",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

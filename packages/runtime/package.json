@@ -1,0 +1,26 @@
+{
+  "name": "@gi-engine/runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "dependencies": {
+    "@gi-engine/core": "*"
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.8.9",
+    "vite": "^7.3.1"
+  }
+}

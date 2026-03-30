@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "outDir": "dist",
+    "rootDir": "../..",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@gi-engine/exporter": ["../exporter/src/browser.ts"],
+      "@gi-engine/ai": ["../ai/src/index.ts"]
+    }
+  },
+  "include": ["src", "tests"],
+  "references": [
+    { "path": "../core" }
+  ]
+}

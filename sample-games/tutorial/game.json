@@ -1,0 +1,596 @@
+{
+  "id": "tutorial-manor-mystery",
+  "version": "1.0.0",
+  "title": {
+    "ko": "저택의 미스터리",
+    "en": "The Manor Mystery"
+  },
+  "description": {
+    "ko": "부유한 사업가 박 회장이 자신의 저택에서 숨진 채 발견되었다. 세 가지 사건의 단서를 모아 진실을 밝혀라.",
+    "en": "Wealthy businessman Chairman Park was found dead in his manor. Gather clues across three cases to uncover the truth."
+  },
+  "supportedLocales": ["ko", "en"],
+  "settings": {
+    "validationFeedbackDuration": 2500,
+    "autoSaveInterval": 30000,
+    "debug": false,
+    "unlockMode": "sequential",
+    "cssPrefix": "gi-"
+  },
+  "acts": [
+    {
+      "id": "act-1",
+      "title": { "ko": "제1막: 저택의 그림자", "en": "Act 1: Shadows of the Manor" },
+      "cases": [
+        {
+          "id": "case-1",
+          "title": { "ko": "저택의 비밀", "en": "The Manor's Secret" },
+          "description": {
+            "ko": "박 회장의 저택에서 첫 번째 단서를 찾아라. 거실과 서재를 조사하여 사건의 실마리를 풀어라.",
+            "en": "Find the first clue in Chairman Park's manor. Investigate the living room and study to unravel the case."
+          },
+          "scenes": [
+            {
+              "id": "scene-living-room",
+              "name": { "ko": "거실", "en": "Living Room" },
+              "background": "bg-living-room",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-drawer-open",
+                  "image": "img-drawer-open",
+                  "position": { "x": 1200, "y": 600 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-examine-letter",
+                  "area": { "type": "rect", "x": 400, "y": 350, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "examine",
+                    "content": {
+                      "ko": "테이블 위에 편지가 놓여 있다. '오늘 밤 서재에서 만나자. 중요한 이야기가 있다. - 김비서' 라고 적혀 있다.",
+                      "en": "A letter lies on the table. It reads: 'Meet me in the study tonight. I have something important to tell you. - Secretary Kim'"
+                    },
+                    "title": { "ko": "편지", "en": "Letter" },
+                    "highlightedWords": ["word-secretary-kim", "word-study"]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "테이블 위 편지 조사", "en": "Examine letter on table" }
+                },
+                {
+                  "id": "hs-word-knife",
+                  "area": { "type": "rect", "x": 800, "y": 500, "width": 100, "height": 80 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-knife"],
+                    "feedback": { "ko": "칼을 발견했다!", "en": "Found a knife!" }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "칼 조사", "en": "Examine knife" }
+                },
+                {
+                  "id": "hs-word-park",
+                  "area": { "type": "circle", "cx": 960, "cy": 200, "radius": 60 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-park"],
+                    "feedback": { "ko": "초상화에서 박 회장을 확인했다.", "en": "Identified Chairman Park in the portrait." }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "초상화 조사", "en": "Examine portrait" }
+                },
+                {
+                  "id": "hs-word-living-room",
+                  "area": { "type": "rect", "x": 100, "y": 900, "width": 300, "height": 80 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-living-room"],
+                    "feedback": { "ko": "'거실'이라는 단어를 획득했다.", "en": "Acquired the word 'living room'." }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "장소 표시판 확인", "en": "Check location sign" }
+                },
+                {
+                  "id": "hs-word-secretary-kim",
+                  "area": { "type": "rect", "x": 1500, "y": 300, "width": 150, "height": 120 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-secretary-kim"],
+                        "feedback": { "ko": "'김비서'라는 단어를 획득했다.", "en": "Acquired the word 'Secretary Kim'." }
+                      },
+                      {
+                        "type": "examine",
+                        "content": {
+                          "ko": "벽에 걸린 사진 속에 김비서가 보인다. 박 회장의 오른팔로 알려져 있다.",
+                          "en": "Secretary Kim is visible in a photo on the wall. Known as Chairman Park's right-hand man."
+                        }
+                      }
+                    ]
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "벽의 사진 조사", "en": "Examine photo on wall" }
+                },
+                {
+                  "id": "hs-drawer-toggle",
+                  "area": { "type": "rect", "x": 1200, "y": 650, "width": 180, "height": 100 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-drawer-open"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서랍 열기/닫기", "en": "Open/close drawer" }
+                },
+                {
+                  "id": "hs-word-study-from-drawer",
+                  "area": { "type": "rect", "x": 1220, "y": 620, "width": 140, "height": 60 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-study"],
+                    "feedback": { "ko": "서랍 안에서 '서재' 열쇠를 발견했다!", "en": "Found a 'study' key inside the drawer!" }
+                  },
+                  "cursor": "pointer",
+                  "condition": { "type": "layer_visible", "layerId": "layer-drawer-open" },
+                  "ariaLabel": { "ko": "서랍 안 열쇠 조사", "en": "Examine key in drawer" }
+                },
+                {
+                  "id": "hs-navigate-study",
+                  "area": { "type": "rect", "x": 1700, "y": 400, "width": 200, "height": 400 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-study",
+                    "transition": "slide_left"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서재로 이동", "en": "Go to study" }
+                }
+              ]
+            },
+            {
+              "id": "scene-study",
+              "name": { "ko": "서재", "en": "Study" },
+              "background": "bg-study",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "hotspots": [
+                {
+                  "id": "hs-examine-diary",
+                  "area": { "type": "rect", "x": 500, "y": 400, "width": 250, "height": 180 },
+                  "action": {
+                    "type": "examine",
+                    "content": {
+                      "ko": "박 회장의 일기장이다. 마지막 페이지에 '김비서가 회사 자금을 횡령한 증거를 발견했다. 내일 경찰에 신고하겠다.'라고 적혀 있다.",
+                      "en": "Chairman Park's diary. The last page reads: 'I found evidence that Secretary Kim embezzled company funds. I will report to the police tomorrow.'"
+                    },
+                    "title": { "ko": "일기장", "en": "Diary" }
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "일기장 조사", "en": "Examine diary" }
+                },
+                {
+                  "id": "hs-navigate-living-room",
+                  "area": { "type": "rect", "x": 0, "y": 400, "width": 100, "height": 400 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-living-room",
+                    "transition": "slide_right"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "거실로 돌아가기", "en": "Return to living room" }
+                }
+              ]
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-case1-main",
+              "title": { "ko": "사건의 진상", "en": "The Truth of the Case" },
+              "description": {
+                "ko": "단서를 바탕으로 빈칸을 채워 사건의 진상을 밝혀라.",
+                "en": "Fill in the blanks based on clues to reveal the truth."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "slot", "slotId": "killer", "placeholder": { "ko": "범인", "en": "killer" }, "acceptCategory": "person" },
+                  { "type": "text", "content": { "ko": "이(가) ", "en": " attacked the victim in " } },
+                  { "type": "slot", "slotId": "place", "placeholder": { "ko": "장소", "en": "place" }, "acceptCategory": "place" },
+                  { "type": "text", "content": { "ko": "에서 ", "en": " using " } },
+                  { "type": "slot", "slotId": "weapon", "placeholder": { "ko": "무기", "en": "weapon" }, "acceptCategory": "object" },
+                  { "type": "text", "content": { "ko": "을(를) 사용하여 피해자를 공격했다.", "en": "." } }
+                ]
+              },
+              "answers": {
+                "killer": { "correctWordId": "word-secretary-kim" },
+                "place": { "correctWordId": "word-study", "partiallyCorrectWordIds": ["word-living-room"] },
+                "weapon": { "correctWordId": "word-knife" }
+              }
+            },
+            "sub": [
+              {
+                "id": "puzzle-case1-charid",
+                "title": { "ko": "인물 식별", "en": "Character Identification" },
+                "type": "character_id",
+                "characters": [
+                  {
+                    "portrait": "portrait-park",
+                    "nameSlotId": "char-slot-park",
+                    "answerId": "word-park"
+                  },
+                  {
+                    "portrait": "portrait-kim",
+                    "nameSlotId": "char-slot-kim",
+                    "answerId": "word-secretary-kim"
+                  },
+                  {
+                    "portrait": "portrait-lee",
+                    "nameSlotId": "char-slot-lee",
+                    "answerId": "word-housekeeper-lee"
+                  }
+                ]
+              }
+            ]
+          },
+          "prerequisites": [],
+          "thumbnail": "thumb-case1"
+        },
+        {
+          "id": "case-2",
+          "title": { "ko": "독약의 흔적", "en": "Trace of Poison" },
+          "description": {
+            "ko": "주방과 정원에서 독약의 흔적을 추적하라. 김비서의 범행 방법이 더 복잡했음이 드러난다.",
+            "en": "Trace the poison in the kitchen and garden. Secretary Kim's method turns out to be more complex."
+          },
+          "scenes": [
+            {
+              "id": "scene-kitchen",
+              "name": { "ko": "주방", "en": "Kitchen" },
+              "background": "bg-kitchen",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "hotspots": [
+                {
+                  "id": "hs-examine-recipe",
+                  "area": { "type": "rect", "x": 300, "y": 200, "width": 220, "height": 160 },
+                  "action": {
+                    "type": "examine",
+                    "content": {
+                      "ko": "요리 레시피 노트가 펼쳐져 있다. 하지만 레시피 사이에 '아코니틴 - 3방울'이라는 메모가 끼워져 있다. 독약 조제 방법인 것 같다.",
+                      "en": "A recipe notebook lies open. But a note reading 'Aconitine - 3 drops' is tucked between recipes. It appears to be poison preparation instructions."
+                    },
+                    "title": { "ko": "레시피 노트", "en": "Recipe Notebook" }
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "레시피 노트 조사", "en": "Examine recipe notebook" }
+                },
+                {
+                  "id": "hs-word-poison",
+                  "area": { "type": "rect", "x": 700, "y": 500, "width": 120, "height": 90 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-poison"],
+                    "feedback": { "ko": "선반에서 독약 병을 발견했다!", "en": "Found a poison bottle on the shelf!" }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "선반 조사", "en": "Examine shelf" }
+                },
+                {
+                  "id": "hs-word-wine",
+                  "area": { "type": "rect", "x": 1100, "y": 400, "width": 100, "height": 150 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-wine"],
+                    "feedback": { "ko": "와인 잔을 발견했다. 잔 안에 미세한 잔여물이 남아있다.", "en": "Found a wine glass. Faint residue remains inside." }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "와인 잔 조사", "en": "Examine wine glass" }
+                },
+                {
+                  "id": "hs-word-kitchen",
+                  "area": { "type": "rect", "x": 50, "y": 50, "width": 200, "height": 60 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-kitchen"],
+                    "feedback": { "ko": "'주방'이라는 단어를 획득했다.", "en": "Acquired the word 'kitchen'." }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "장소 이름 확인", "en": "Check location name" }
+                },
+                {
+                  "id": "hs-word-dinner",
+                  "area": { "type": "rect", "x": 1400, "y": 600, "width": 180, "height": 120 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-dinner"],
+                    "feedback": { "ko": "식탁 위에 저녁 식사 흔적이 남아있다.", "en": "Traces of dinner remain on the table." }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "식탁 조사", "en": "Examine dining table" }
+                },
+                {
+                  "id": "hs-navigate-garden",
+                  "area": { "type": "rect", "x": 1750, "y": 300, "width": 170, "height": 500 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-garden",
+                    "transition": "slide_left"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "정원으로 이동", "en": "Go to garden" }
+                }
+              ]
+            },
+            {
+              "id": "scene-garden",
+              "name": { "ko": "정원", "en": "Garden" },
+              "background": "bg-garden",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "hotspots": [
+                {
+                  "id": "hs-examine-flowers",
+                  "area": { "type": "rect", "x": 600, "y": 500, "width": 300, "height": 200 },
+                  "action": {
+                    "type": "examine",
+                    "content": {
+                      "ko": "정원 한쪽에 투구꽃(아코니툼)이 심어져 있다. 이 식물에서 아코니틴 독을 추출할 수 있다. 최근 꺾인 흔적이 있다.",
+                      "en": "Monkshood (Aconitum) is planted in a corner of the garden. Aconitine poison can be extracted from this plant. There are signs of recent cutting."
+                    },
+                    "title": { "ko": "투구꽃", "en": "Monkshood Flowers" }
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "꽃 조사", "en": "Examine flowers" }
+                },
+                {
+                  "id": "hs-navigate-kitchen",
+                  "area": { "type": "rect", "x": 0, "y": 400, "width": 100, "height": 400 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-kitchen",
+                    "transition": "slide_right"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "주방으로 돌아가기", "en": "Return to kitchen" }
+                }
+              ]
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-case2-main",
+              "title": { "ko": "독살의 방법", "en": "Method of Poisoning" },
+              "description": {
+                "ko": "김비서가 어떻게 독을 사용했는지 밝혀라.",
+                "en": "Reveal how Secretary Kim used the poison."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "text", "content": { "ko": "범인은 ", "en": "The culprit extracted " } },
+                  { "type": "slot", "slotId": "substance", "placeholder": { "ko": "물질", "en": "substance" }, "acceptCategory": "object" },
+                  { "type": "text", "content": { "ko": "을(를) ", "en": " and mixed it into " } },
+                  { "type": "slot", "slotId": "medium", "placeholder": { "ko": "매개체", "en": "medium" }, "acceptCategory": "object" },
+                  { "type": "text", "content": { "ko": "에 섞어 ", "en": " during " } },
+                  { "type": "slot", "slotId": "timing", "placeholder": { "ko": "시점", "en": "timing" }, "acceptCategory": "time" },
+                  { "type": "text", "content": { "ko": "에 피해자에게 전달했다.", "en": " to deliver it to the victim." } }
+                ]
+              },
+              "answers": {
+                "substance": { "correctWordId": "word-poison" },
+                "medium": { "correctWordId": "word-wine" },
+                "timing": { "correctWordId": "word-dinner", "partiallyCorrectWordIds": ["word-night"] }
+              }
+            },
+            "sub": []
+          },
+          "prerequisites": ["case-1"],
+          "thumbnail": "thumb-case2"
+        }
+      ]
+    },
+    {
+      "id": "act-2",
+      "title": { "ko": "제2막: 최후의 진실", "en": "Act 2: The Final Truth" },
+      "cases": [
+        {
+          "id": "case-3",
+          "title": { "ko": "최후의 진실", "en": "The Final Truth" },
+          "description": {
+            "ko": "모든 단서를 종합하여 사건의 전모를 밝혀라. 서재에서 마지막 증거를 발견하라.",
+            "en": "Combine all clues to reveal the full picture. Discover the final evidence in the study."
+          },
+          "scenes": [
+            {
+              "id": "scene-study-final",
+              "name": { "ko": "서재 (재조사)", "en": "Study (Reinvestigation)" },
+              "background": "bg-study-final",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "hotspots": [
+                {
+                  "id": "hs-examine-safe",
+                  "area": { "type": "rect", "x": 800, "y": 300, "width": 300, "height": 250 },
+                  "action": {
+                    "type": "examine",
+                    "content": {
+                      "ko": "금고 안에서 횡령 증거 서류와 녹음기가 발견되었다. 녹음에는 김비서가 '회장님, 그 서류는 제가 처리하겠습니다'라고 말하는 내용이 담겨 있다.",
+                      "en": "Embezzlement evidence documents and a recorder were found in the safe. The recording contains Secretary Kim saying 'Chairman, I will handle those documents.'"
+                    },
+                    "title": { "ko": "금고", "en": "Safe" }
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "금고 조사", "en": "Examine safe" }
+                },
+                {
+                  "id": "hs-examine-timeline",
+                  "area": { "type": "rect", "x": 200, "y": 600, "width": 400, "height": 200 },
+                  "action": {
+                    "type": "examine",
+                    "content": {
+                      "ko": "수사관이 정리한 타임라인: 저녁 7시 - 김비서가 와인을 준비함. 저녁 8시 - 박 회장과 김비서가 서재에서 만남. 저녁 9시 - 박 회장이 쓰러진 채 발견됨.",
+                      "en": "Investigator's timeline: 7 PM - Secretary Kim prepared wine. 8 PM - Chairman Park and Secretary Kim met in the study. 9 PM - Chairman Park found collapsed."
+                    },
+                    "title": { "ko": "수사 타임라인", "en": "Investigation Timeline" }
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "타임라인 조사", "en": "Examine timeline" }
+                },
+                {
+                  "id": "hs-word-embezzlement",
+                  "area": { "type": "rect", "x": 1300, "y": 400, "width": 200, "height": 100 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-embezzlement"],
+                    "feedback": { "ko": "'횡령'이라는 핵심 동기를 발견했다!", "en": "Discovered 'embezzlement' as the key motive!" }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서류 조사", "en": "Examine documents" }
+                },
+                {
+                  "id": "hs-word-night",
+                  "area": { "type": "rect", "x": 1500, "y": 100, "width": 150, "height": 80 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-night"],
+                    "feedback": { "ko": "'밤'이라는 단어를 획득했다.", "en": "Acquired the word 'night'." }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "창문 밖 확인", "en": "Check outside window" }
+                }
+              ]
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-case3-main",
+              "title": { "ko": "사건의 전모", "en": "The Full Picture" },
+              "description": {
+                "ko": "모든 단서를 종합하여 사건의 전모를 완성하라.",
+                "en": "Combine all clues to complete the full picture of the case."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "slot", "slotId": "culprit", "placeholder": { "ko": "범인", "en": "culprit" }, "acceptCategory": "person" },
+                  { "type": "text", "content": { "ko": "은(는) ", "en": " committed the crime because of " } },
+                  { "type": "slot", "slotId": "motive", "placeholder": { "ko": "동기", "en": "motive" }, "acceptCategory": "motive" },
+                  { "type": "text", "content": { "ko": " 때문에 범행을 저질렀다.", "en": "." } },
+                  { "type": "line_break" },
+                  { "type": "slot", "slotId": "method", "placeholder": { "ko": "수단", "en": "method" }, "acceptCategory": "object" },
+                  { "type": "text", "content": { "ko": "을(를) ", "en": " was mixed into " } },
+                  { "type": "slot", "slotId": "delivery", "placeholder": { "ko": "전달 수단", "en": "delivery method" }, "acceptCategory": "object" },
+                  { "type": "text", "content": { "ko": "에 섞어 ", "en": " and delivered in " } },
+                  { "type": "slot", "slotId": "location", "placeholder": { "ko": "장소", "en": "location" }, "acceptCategory": "place" },
+                  { "type": "text", "content": { "ko": "에서 범행을 실행했다.", "en": "." } }
+                ]
+              },
+              "answers": {
+                "culprit": { "correctWordId": "word-secretary-kim" },
+                "motive": { "correctWordId": "word-embezzlement" },
+                "method": { "correctWordId": "word-poison" },
+                "delivery": { "correctWordId": "word-wine" },
+                "location": { "correctWordId": "word-study", "partiallyCorrectWordIds": ["word-living-room", "word-kitchen"] }
+              }
+            },
+            "sub": []
+          },
+          "prerequisites": ["case-2"],
+          "thumbnail": "thumb-case3"
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "items": {
+      "bg-living-room": {
+        "id": "bg-living-room",
+        "type": "image",
+        "src": "assets/backgrounds/living-room.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "저택 거실 배경", "en": "Manor living room background" }
+      },
+      "bg-study": {
+        "id": "bg-study",
+        "type": "image",
+        "src": "assets/backgrounds/study.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "서재 배경", "en": "Study background" }
+      },
+      "bg-kitchen": {
+        "id": "bg-kitchen",
+        "type": "image",
+        "src": "assets/backgrounds/kitchen.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "주방 배경", "en": "Kitchen background" }
+      },
+      "bg-garden": {
+        "id": "bg-garden",
+        "type": "image",
+        "src": "assets/backgrounds/garden.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "정원 배경", "en": "Garden background" }
+      },
+      "bg-study-final": {
+        "id": "bg-study-final",
+        "type": "image",
+        "src": "assets/backgrounds/study-final.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "서재 재조사 배경", "en": "Study reinvestigation background" }
+      },
+      "img-drawer-open": {
+        "id": "img-drawer-open",
+        "type": "image",
+        "src": "assets/layers/drawer-open.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "열린 서랍", "en": "Open drawer" }
+      },
+      "portrait-park": {
+        "id": "portrait-park",
+        "type": "image",
+        "src": "assets/portraits/park.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "박 회장 초상화", "en": "Chairman Park portrait" }
+      },
+      "portrait-kim": {
+        "id": "portrait-kim",
+        "type": "image",
+        "src": "assets/portraits/kim.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "김비서 초상화", "en": "Secretary Kim portrait" }
+      },
+      "portrait-lee": {
+        "id": "portrait-lee",
+        "type": "image",
+        "src": "assets/portraits/lee.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "이 가정부 초상화", "en": "Housekeeper Lee portrait" }
+      },
+      "thumb-case1": {
+        "id": "thumb-case1",
+        "type": "image",
+        "src": "assets/thumbnails/case1.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "사건 1 썸네일", "en": "Case 1 thumbnail" }
+      },
+      "thumb-case2": {
+        "id": "thumb-case2",
+        "type": "image",
+        "src": "assets/thumbnails/case2.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "사건 2 썸네일", "en": "Case 2 thumbnail" }
+      },
+      "thumb-case3": {
+        "id": "thumb-case3",
+        "type": "image",
+        "src": "assets/thumbnails/case3.png",
+        "mimeType": "image/png",
+        "alt": { "ko": "사건 3 썸네일", "en": "Case 3 thumbnail" }
+      }
+    }
+  }
+}

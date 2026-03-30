@@ -1,0 +1,19 @@
+{
+  "name": "@gi-engine/exporter",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "gi-export": "dist/cli.js"
+  },
+  "dependencies": {
+    "@gi-engine/core": "*",
+    "@gi-engine/runtime": "*"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
