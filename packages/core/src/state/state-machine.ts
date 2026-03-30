@@ -190,6 +190,39 @@ function handleExploring(
       };
     }
 
+    case 'COLLECT_WORD_IN_POPUP': {
+      // Only valid while in examining_text or examining_image sub-states
+      if (state.sub.type !== 'examining_text' && state.sub.type !== 'examining_image') {
+        return noTransition(state);
+      }
+      if (caseState.collectedWordIds.includes(event.wordId)) {
+        // Already collected — return effect only for UI feedback, no save change
+        return {
+          nextState: state,
+          effects: [{ type: 'word_collected_in_popup', wordId: event.wordId }],
+        };
+      }
+
+      const popupUpdatedCaseState: CaseState = {
+        ...caseState,
+        collectedWordIds: [...caseState.collectedWordIds, event.wordId],
+      };
+
+      return {
+        nextState: state,  // Sub-state does NOT change — popup stays open
+        saveState: {
+          caseStates: {
+            ...save.caseStates,
+            [state.caseId]: popupUpdatedCaseState,
+          },
+        },
+        effects: [
+          { type: 'word_collected_in_popup', wordId: event.wordId } as SideEffect,
+          { type: 'save_game' },
+        ],
+      };
+    }
+
     case 'TOGGLE_LAYER': {
       const layerVisible = caseState.layerVisibility[event.layerId];
       const newVisible = event.visible ?? !layerVisible;
@@ -239,7 +272,7 @@ function handleExploring(
       };
     }
 
-    // Task 4: Inner hotspot clicks within examining_image
+    // Inner hotspot clicks within examining_image
     case 'INNER_HOTSPOT_CLICK': {
       if (state.sub.type !== 'examining_image' || !state.sub.innerHotspots) {
         return noTransition(state);
@@ -247,6 +280,45 @@ function handleExploring(
       const innerHotspot = state.sub.innerHotspots.find(h => h.id === event.hotspotId);
       if (!innerHotspot) return noTransition(state);
 
+      // word_reveal inside examining_image: collect without dismissing popup
+      if (innerHotspot.action.type === 'word_reveal') {
+        const newWords = innerHotspot.action.wordIds.filter(
+          id => !caseState.collectedWordIds.includes(id)
+        );
+        if (newWords.length === 0) {
+          return {
+            nextState: state,
+            effects: innerHotspot.action.wordIds.map(wordId => ({
+              type: 'word_collected_in_popup' as const,
+              wordId,
+            })),
+          };
+        }
+
+        const innerUpdatedCaseState: CaseState = {
+          ...caseState,
+          collectedWordIds: [...caseState.collectedWordIds, ...newWords],
+        };
+
+        return {
+          nextState: state,  // Stay in examining_image
+          saveState: {
+            caseStates: {
+              ...save.caseStates,
+              [state.caseId]: innerUpdatedCaseState,
+            },
+          },
+          effects: [
+            ...newWords.map(wordId => ({
+              type: 'word_collected_in_popup' as const,
+              wordId,
+            })),
+            { type: 'save_game' } as SideEffect,
+          ],
+        };
+      }
+
+      // Non-word_reveal inner hotspots: delegate to handleHotspotAction (may change sub-state)
       return handleHotspotAction(state, save, def, innerHotspot, caseState);
     }
 
@@ -420,18 +492,6 @@ function handleHotspotAction(
 
   switch (action.type) {
     case 'examine': {
-      // Task 3: collect words from examine action if wordIds present
-      const examineNewWords = (action.wordIds ?? []).filter(
-        id => !caseState.collectedWordIds.includes(id)
-      );
-      const examineUpdatedCaseState: CaseState | null =
-        examineNewWords.length > 0
-          ? {
-              ...caseState,
-              collectedWordIds: [...caseState.collectedWordIds, ...examineNewWords],
-            }
-          : null;
-
       return {
         nextState: {
           ...state,
@@ -440,35 +500,14 @@ function handleHotspotAction(
             content: action.content,
             title: action.title,
             highlightedWords: action.highlightedWords,
+            collectibleWords: action.collectibleWords,
           },
         },
-        ...(examineUpdatedCaseState
-          ? {
-              saveState: {
-                caseStates: {
-                  ...save.caseStates,
-                  [state.caseId]: examineUpdatedCaseState,
-                },
-              },
-              effects: [{ type: 'save_game' } as SideEffect],
-            }
-          : { effects: [] }),
+        effects: [],
       };
     }
 
     case 'examine_image': {
-      // Task 3: collect words from examine_image action if wordIds present
-      const examImgNewWords = (action.wordIds ?? []).filter(
-        id => !caseState.collectedWordIds.includes(id)
-      );
-      const examImgUpdatedCaseState: CaseState | null =
-        examImgNewWords.length > 0
-          ? {
-              ...caseState,
-              collectedWordIds: [...caseState.collectedWordIds, ...examImgNewWords],
-            }
-          : null;
-
       return {
         nextState: {
           ...state,
@@ -479,17 +518,7 @@ function handleHotspotAction(
             innerHotspots: action.innerHotspots,
           },
         },
-        ...(examImgUpdatedCaseState
-          ? {
-              saveState: {
-                caseStates: {
-                  ...save.caseStates,
-                  [state.caseId]: examImgUpdatedCaseState,
-                },
-              },
-              effects: [{ type: 'save_game' } as SideEffect],
-            }
-          : { effects: [] }),
+        effects: [],
       };
     }
 
