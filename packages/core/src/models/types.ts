@@ -112,6 +112,7 @@ export interface ExamineAction {
   content: LocalizedText;
   title?: LocalizedText;
   highlightedWords?: string[];
+  wordIds?: string[];
 }
 
 export interface ExamineImageAction {
@@ -119,6 +120,7 @@ export interface ExamineImageAction {
   image: AssetRef;
   caption?: LocalizedText;
   innerHotspots?: Hotspot[];
+  wordIds?: string[];
 }
 
 export interface WordRevealAction {
@@ -312,9 +314,10 @@ export type GameState =
 export type ExploringSubState =
   | { type: 'idle' }
   | { type: 'examining_text'; content: LocalizedText; title?: LocalizedText; highlightedWords?: string[] }
-  | { type: 'examining_image'; image: AssetRef; caption?: LocalizedText }
-  | { type: 'word_collected'; wordId: string }
-  | { type: 'transitioning'; targetSceneId: string };
+  | { type: 'examining_image'; image: AssetRef; caption?: LocalizedText; innerHotspots?: Hotspot[] }
+  | { type: 'word_collected'; wordIds: string[] }
+  | { type: 'transitioning'; targetSceneId: string }
+  | { type: 'puzzle_overlay'; puzzleId: string };
 
 export type ThinkingSubState =
   | { type: 'editing' }
@@ -341,7 +344,10 @@ export type GameEvent =
   | { type: 'COLLECT_WORD'; wordId: string }
   | { type: 'TOGGLE_LAYER'; layerId: string; visible?: boolean }
   | { type: 'CHANGE_LOCALE'; locale: Locale }
-  | { type: 'HOTSPOT_CLICK'; hotspotId: string };
+  | { type: 'HOTSPOT_CLICK'; hotspotId: string }
+  | { type: 'INNER_HOTSPOT_CLICK'; hotspotId: string }
+  | { type: 'OPEN_PUZZLE_OVERLAY'; puzzleId: string }
+  | { type: 'CLOSE_PUZZLE_OVERLAY' };
 
 // --- State Transition Result ---
 
