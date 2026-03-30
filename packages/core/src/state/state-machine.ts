@@ -178,7 +178,7 @@ function handleExploring(
       return {
         nextState: {
           ...state,
-          sub: { type: 'word_collected', wordId: event.wordId },
+          sub: { type: 'word_collected', wordIds: [event.wordId] },
         },
         saveState: {
           caseStates: {
@@ -239,6 +239,171 @@ function handleExploring(
       };
     }
 
+    // Task 4: Inner hotspot clicks within examining_image
+    case 'INNER_HOTSPOT_CLICK': {
+      if (state.sub.type !== 'examining_image' || !state.sub.innerHotspots) {
+        return noTransition(state);
+      }
+      const innerHotspot = state.sub.innerHotspots.find(h => h.id === event.hotspotId);
+      if (!innerHotspot) return noTransition(state);
+
+      return handleHotspotAction(state, save, def, innerHotspot, caseState);
+    }
+
+    // Task 5: Puzzle overlay in exploring state
+    case 'OPEN_PUZZLE_OVERLAY': {
+      const puzzle = findPuzzle(caseData.puzzles, event.puzzleId);
+      if (!puzzle) return noTransition(state);
+
+      return {
+        nextState: {
+          ...state,
+          sub: { type: 'puzzle_overlay', puzzleId: event.puzzleId },
+        },
+        effects: [],
+      };
+    }
+
+    case 'CLOSE_PUZZLE_OVERLAY': {
+      return {
+        nextState: { ...state, sub: { type: 'idle' } },
+        effects: [],
+      };
+    }
+
+    // Task 5: Puzzle word operations in puzzle_overlay sub-state
+    case 'ASSIGN_WORD': {
+      if (state.sub.type !== 'puzzle_overlay') return noTransition(state);
+      const overlayPuzzleState = caseState.puzzleStates[state.sub.puzzleId];
+      if (!overlayPuzzleState) return noTransition(state);
+
+      const newAssignments = {
+        ...overlayPuzzleState.slotAssignments,
+        [event.slotId]: event.wordId,
+      };
+      // Remove word from other slots
+      for (const [slotId, wordId] of Object.entries(newAssignments)) {
+        if (slotId !== event.slotId && wordId === event.wordId) {
+          newAssignments[slotId] = null;
+        }
+      }
+
+      const updatedOverlayPuzzleState = { ...overlayPuzzleState, slotAssignments: newAssignments };
+      const updatedOverlayCaseState: CaseState = {
+        ...caseState,
+        puzzleStates: {
+          ...caseState.puzzleStates,
+          [state.sub.puzzleId]: updatedOverlayPuzzleState,
+        },
+      };
+
+      return {
+        nextState: state,
+        saveState: {
+          caseStates: { ...save.caseStates, [state.caseId]: updatedOverlayCaseState },
+        },
+        effects: [{ type: 'save_game' }],
+      };
+    }
+
+    case 'UNASSIGN_WORD': {
+      if (state.sub.type !== 'puzzle_overlay') return noTransition(state);
+      const unassignPuzzleState = caseState.puzzleStates[state.sub.puzzleId];
+      if (!unassignPuzzleState) return noTransition(state);
+
+      const unassignAssignments = {
+        ...unassignPuzzleState.slotAssignments,
+        [event.slotId]: null,
+      };
+
+      const updatedUnassignPuzzleState = { ...unassignPuzzleState, slotAssignments: unassignAssignments };
+      const updatedUnassignCaseState: CaseState = {
+        ...caseState,
+        puzzleStates: {
+          ...caseState.puzzleStates,
+          [state.sub.puzzleId]: updatedUnassignPuzzleState,
+        },
+      };
+
+      return {
+        nextState: state,
+        saveState: {
+          caseStates: { ...save.caseStates, [state.caseId]: updatedUnassignCaseState },
+        },
+        effects: [{ type: 'save_game' }],
+      };
+    }
+
+    case 'CLEAR_ALL_WORDS': {
+      if (state.sub.type !== 'puzzle_overlay') return noTransition(state);
+      const clearPuzzleState = caseState.puzzleStates[state.sub.puzzleId];
+      if (!clearPuzzleState) return noTransition(state);
+
+      const clearedSlots: Record<string, string | null> = {};
+      for (const slotId of Object.keys(clearPuzzleState.slotAssignments)) {
+        clearedSlots[slotId] = null;
+      }
+
+      const clearedOverlayPuzzleState = {
+        ...clearPuzzleState,
+        slotAssignments: clearedSlots,
+        lastValidation: undefined,
+      };
+      const clearedOverlayCaseState: CaseState = {
+        ...caseState,
+        puzzleStates: {
+          ...caseState.puzzleStates,
+          [state.sub.puzzleId]: clearedOverlayPuzzleState,
+        },
+      };
+
+      return {
+        nextState: state,
+        saveState: {
+          caseStates: { ...save.caseStates, [state.caseId]: clearedOverlayCaseState },
+        },
+        effects: [{ type: 'save_game' }],
+      };
+    }
+
+    case 'VALIDATE_PUZZLE': {
+      if (state.sub.type !== 'puzzle_overlay') return noTransition(state);
+      const valPuzzle = findPuzzle(caseData.puzzles, state.sub.puzzleId);
+      if (!valPuzzle) return noTransition(state);
+      const valPuzzleState = caseState.puzzleStates[state.sub.puzzleId];
+      if (!valPuzzleState) return noTransition(state);
+
+      let valResult;
+      if ('answers' in valPuzzle) {
+        valResult = validatePuzzle(valPuzzle as any, valPuzzleState.slotAssignments);
+      } else {
+        valResult = validateSubPuzzle(valPuzzle as any, valPuzzleState.slotAssignments);
+      }
+
+      const updatedValPuzzleState = {
+        ...valPuzzleState,
+        lastValidation: valResult.slotResults,
+        attemptCount: valPuzzleState.attemptCount + 1,
+        solved: valResult.allCorrect,
+      };
+
+      const updatedValCaseState: CaseState = {
+        ...caseState,
+        puzzleStates: {
+          ...caseState.puzzleStates,
+          [state.sub.puzzleId]: updatedValPuzzleState,
+        },
+      };
+
+      return {
+        nextState: state,
+        saveState: {
+          caseStates: { ...save.caseStates, [state.caseId]: updatedValCaseState },
+        },
+        effects: [{ type: 'save_game' }],
+      };
+    }
+
     default:
       return noTransition(state);
   }
@@ -254,7 +419,19 @@ function handleHotspotAction(
   const action = hotspot.action;
 
   switch (action.type) {
-    case 'examine':
+    case 'examine': {
+      // Task 3: collect words from examine action if wordIds present
+      const examineNewWords = (action.wordIds ?? []).filter(
+        id => !caseState.collectedWordIds.includes(id)
+      );
+      const examineUpdatedCaseState: CaseState | null =
+        examineNewWords.length > 0
+          ? {
+              ...caseState,
+              collectedWordIds: [...caseState.collectedWordIds, ...examineNewWords],
+            }
+          : null;
+
       return {
         nextState: {
           ...state,
@@ -265,10 +442,33 @@ function handleHotspotAction(
             highlightedWords: action.highlightedWords,
           },
         },
-        effects: [],
+        ...(examineUpdatedCaseState
+          ? {
+              saveState: {
+                caseStates: {
+                  ...save.caseStates,
+                  [state.caseId]: examineUpdatedCaseState,
+                },
+              },
+              effects: [{ type: 'save_game' } as SideEffect],
+            }
+          : { effects: [] }),
       };
+    }
 
-    case 'examine_image':
+    case 'examine_image': {
+      // Task 3: collect words from examine_image action if wordIds present
+      const examImgNewWords = (action.wordIds ?? []).filter(
+        id => !caseState.collectedWordIds.includes(id)
+      );
+      const examImgUpdatedCaseState: CaseState | null =
+        examImgNewWords.length > 0
+          ? {
+              ...caseState,
+              collectedWordIds: [...caseState.collectedWordIds, ...examImgNewWords],
+            }
+          : null;
+
       return {
         nextState: {
           ...state,
@@ -276,10 +476,22 @@ function handleHotspotAction(
             type: 'examining_image',
             image: action.image,
             caption: action.caption,
+            innerHotspots: action.innerHotspots,
           },
         },
-        effects: [],
+        ...(examImgUpdatedCaseState
+          ? {
+              saveState: {
+                caseStates: {
+                  ...save.caseStates,
+                  [state.caseId]: examImgUpdatedCaseState,
+                },
+              },
+              effects: [{ type: 'save_game' } as SideEffect],
+            }
+          : { effects: [] }),
       };
+    }
 
     case 'word_reveal': {
       const newWords = action.wordIds.filter(id => !caseState.collectedWordIds.includes(id));
@@ -293,7 +505,7 @@ function handleHotspotAction(
       return {
         nextState: {
           ...state,
-          sub: { type: 'word_collected', wordId: newWords[0] },
+          sub: { type: 'word_collected', wordIds: newWords },
         },
         saveState: {
           caseStates: {
