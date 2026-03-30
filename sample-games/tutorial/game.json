@@ -592,5 +592,67 @@
         "alt": { "ko": "사건 3 썸네일", "en": "Case 3 thumbnail" }
       }
     }
+  },
+  "words": {
+    "word-secretary-kim": {
+      "id": "word-secretary-kim",
+      "display": { "ko": "김비서", "en": "Secretary Kim" },
+      "category": "person"
+    },
+    "word-knife": {
+      "id": "word-knife",
+      "display": { "ko": "칼", "en": "Knife" },
+      "category": "object"
+    },
+    "word-park": {
+      "id": "word-park",
+      "display": { "ko": "박 회장", "en": "Chairman Park" },
+      "category": "person"
+    },
+    "word-study": {
+      "id": "word-study",
+      "display": { "ko": "서재", "en": "Study" },
+      "category": "place"
+    },
+    "word-living-room": {
+      "id": "word-living-room",
+      "display": { "ko": "거실", "en": "Living Room" },
+      "category": "place"
+    },
+    "word-poison": {
+      "id": "word-poison",
+      "display": { "ko": "독약", "en": "Poison" },
+      "category": "object"
+    },
+    "word-wine": {
+      "id": "word-wine",
+      "display": { "ko": "와인 잔", "en": "Wine Glass" },
+      "category": "object"
+    },
+    "word-kitchen": {
+      "id": "word-kitchen",
+      "display": { "ko": "주방", "en": "Kitchen" },
+      "category": "place"
+    },
+    "word-dinner": {
+      "id": "word-dinner",
+      "display": { "ko": "저녁 식사", "en": "Dinner" },
+      "category": "time"
+    },
+    "word-night": {
+      "id": "word-night",
+      "display": { "ko": "밤", "en": "Night" },
+      "category": "time"
+    },
+    "word-embezzlement": {
+      "id": "word-embezzlement",
+      "display": { "ko": "횡령", "en": "Embezzlement" },
+      "category": "motive"
+    },
+    "word-housekeeper-lee": {
+      "id": "word-housekeeper-lee",
+      "display": { "ko": "이 가정부", "en": "Housekeeper Lee" },
+      "category": "person"
+    }
   }
 }

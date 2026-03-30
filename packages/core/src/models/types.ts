@@ -22,6 +22,7 @@ export interface GameDefinition {
   settings: GameSettings;
   acts: Act[];
   assets: AssetManifest;
+  words?: Record<string, WordDefinition>;
 }
 
 export interface GameSettings {
@@ -147,6 +148,13 @@ export interface CompositeAction {
 export type ActionSequence = HotspotAction[];
 
 // --- Word & WordBank ---
+
+export interface WordDefinition {
+  id: string;
+  display: LocalizedText;
+  category?: WordCategory;
+  hint?: LocalizedText;
+}
 
 export interface Word {
   id: string;

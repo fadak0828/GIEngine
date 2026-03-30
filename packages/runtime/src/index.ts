@@ -16,3 +16,22 @@ export { AudioManager } from './audio/audio-manager.js';
 
 // Default export
 export { GIEngine as default } from './engine.js';
+
+// IIFE boot contract — called by exported HTML template
+import type { GameDefinition } from '@gi-engine/core';
+import { GIEngine as _GIEngine } from './engine.js';
+
+if (typeof window !== 'undefined') {
+  (window as any).__giEngineBoot__ = async function(
+    root: HTMLElement,
+    gameData: GameDefinition
+  ): Promise<void> {
+    root.innerHTML = '';
+    const engine = new _GIEngine({
+      container: root,
+      definition: gameData,
+      loadSave: true,
+    });
+    await engine.start();
+  };
+}

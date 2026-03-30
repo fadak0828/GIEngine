@@ -4,7 +4,10 @@
  */
 import type { GameDefinition } from '@gi-engine/core';
 import { assembleHtml } from './template.js';
-import { PLACEHOLDER_RUNTIME_JS, PLACEHOLDER_RUNTIME_CSS } from './runtime-placeholder.js';
+// @ts-ignore — Vite ?raw import; resolved at editor build time from pre-built runtime IIFE
+import runtimeJs from '../../runtime/dist/index.iife.js?raw';
+// @ts-ignore — Vite ?raw import; resolved at editor build time from pre-built runtime CSS
+import runtimeCss from '../../runtime/dist/runtime.css?raw';
 
 export interface BrowserExportOptions {
   gameDefinition: GameDefinition;
@@ -51,15 +54,15 @@ export function browserExport(options: BrowserExportOptions): BrowserExportResul
   // 3. Assemble HTML using the browser-safe template
   const html = assembleHtml({
     title,
-    css: PLACEHOLDER_RUNTIME_CSS,
-    js: PLACEHOLDER_RUNTIME_JS,
+    css: runtimeCss,
+    js: runtimeJs,
     gameData: gameDataJson,
     lang,
   });
 
   // 4. Compute sizes (TextEncoder is browser-safe)
-  const jsSize = byteLength(PLACEHOLDER_RUNTIME_JS);
-  const cssSize = byteLength(PLACEHOLDER_RUNTIME_CSS);
+  const jsSize = byteLength(runtimeJs);
+  const cssSize = byteLength(runtimeCss);
   const totalSize = byteLength(html);
 
   // Compute inlined asset bytes: sum of all base64 inline strings in the asset library.

@@ -12,6 +12,8 @@
  * - VALIDATE_PUZZLE with a sub-puzzle
  * - CLOSE_PUZZLE with a solved non-main sub-puzzle
  * - word_reveal for already-collected words
+ * - composite action: multiple word_reveal sub-actions accumulate correctly (fix coverage)
+ * - composite action: word_reveal + toggle_layer — second sub-action sees updated caseState
  */
 
 import { describe, it, expect } from 'vitest';
@@ -91,6 +93,35 @@ const testDef: GameDefinition = {
                   action: { type: 'word_reveal', wordIds: ['word-knife'] },
                   cursor: 'pointer',
                   ariaLabel: { ko: '칼', en: 'Knife' },
+                },
+                // composite: two sequential word_reveal actions (tests accumulation fix)
+                {
+                  id: 'hs-composite-two-words',
+                  area: { type: 'rect', x: 50, y: 50, width: 10, height: 10 },
+                  action: {
+                    type: 'composite',
+                    actions: [
+                      { type: 'word_reveal', wordIds: ['word-alpha'] },
+                      { type: 'word_reveal', wordIds: ['word-beta'] },
+                    ],
+                  },
+                  cursor: 'pointer',
+                  ariaLabel: { ko: '복합 단어', en: 'Composite Words' },
+                },
+                // composite: word_reveal then toggle_layer — second sub-action must see
+                // the updated caseState produced by the first (accumulation fix)
+                {
+                  id: 'hs-composite-word-then-layer',
+                  area: { type: 'rect', x: 60, y: 60, width: 10, height: 10 },
+                  action: {
+                    type: 'composite',
+                    actions: [
+                      { type: 'word_reveal', wordIds: ['word-gamma'] },
+                      { type: 'toggle_layer', layerId: 'layer-comp', visible: true },
+                    ],
+                  },
+                  cursor: 'pointer',
+                  ariaLabel: { ko: '단어+레이어', en: 'Word+Layer' },
                 },
               ],
               layers: [],
@@ -297,6 +328,29 @@ describe('Exploring: additional hotspot actions and events', () => {
     const result = transition(exploring, save, { type: 'HOTSPOT_CLICK', hotspotId: 'hs-word-dupe' }, testDef);
     // Already collected → noTransition
     expect(result.nextState).toEqual(exploring);
+  });
+
+  it('composite: two sequential word_reveal sub-actions both accumulate into collectedWordIds', () => {
+    // This is the key test for the composite action fix:
+    // both word-alpha and word-beta must appear in the final caseState.
+    const result = transition(exploring, makeSave(), { type: 'HOTSPOT_CLICK', hotspotId: 'hs-composite-two-words' }, testDef);
+    const collected = result.saveState?.caseStates?.['case-1']?.collectedWordIds ?? [];
+    expect(collected).toContain('word-alpha');
+    expect(collected).toContain('word-beta');
+  });
+
+  it('composite: second sub-action (toggle_layer) sees updated caseState from first (word_reveal)', () => {
+    // After the composite: the word must be collected AND the layer must be toggled.
+    const result = transition(exploring, makeSave(), { type: 'HOTSPOT_CLICK', hotspotId: 'hs-composite-word-then-layer' }, testDef);
+    const collected = result.saveState?.caseStates?.['case-1']?.collectedWordIds ?? [];
+    expect(collected).toContain('word-gamma');
+    // toggle_layer final sub-action is the last, so nextState.sub is idle
+    expect(result.nextState.type).toBe('exploring');
+    if (result.nextState.type === 'exploring') {
+      expect(result.nextState.sub.type).toBe('idle');
+    }
+    // Layer visibility from toggle_layer should be present in the merged save state
+    expect(result.saveState?.caseStates?.['case-1']?.layerVisibility?.['layer-comp']).toBe(true);
   });
 });
 

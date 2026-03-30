@@ -383,7 +383,7 @@ export class Renderer {
 
     // Puzzle button
     const caseData = findCase(def, state.caseId);
-    if (caseData) {
+    if (caseData && caseData.puzzles?.main) {
       const puzzleBtn = document.createElement('button');
       puzzleBtn.className = 'gi-hud-btn';
       puzzleBtn.textContent = this.i18n.resolveKey('ui.thinking');
@@ -476,9 +476,14 @@ export class Renderer {
     if (action.type === 'word_reveal') {
       for (const wordId of action.wordIds) {
         if (!wordMap.has(wordId)) {
+          const wordDef = def.words?.[wordId];
+          if (!wordDef) {
+            console.warn(`[GIEngine] Word definition missing for id: "${wordId}". Using id as label.`);
+          }
           wordMap.set(wordId, {
             id: wordId,
-            display: { ko: wordId, en: wordId },
+            display: wordDef?.display ?? { ko: wordId, en: wordId },
+            category: wordDef?.category,
             caseId,
           });
         }

@@ -331,14 +331,54 @@ function handleHotspotAction(
       };
     }
 
-    case 'composite':
-      // 복합 동작: 첫 번째 동작만 즉시 실행 (나머지는 런타임에서 순차 처리)
-      if (action.actions.length > 0) {
-        const first = action.actions[0];
-        const virtualHotspot: Hotspot = { ...hotspot, action: first };
-        return handleHotspotAction(state, save, def, virtualHotspot, caseState);
+    case 'composite': {
+      if (action.actions.length === 0) return noTransition(state);
+
+      // Process all sub-actions, accumulating state changes
+      let currentResult: StateTransitionResult = noTransition(state);
+      let accumulatedSaveState: Partial<SaveState> = {};
+      const accumulatedEffects: SideEffect[] = [];
+
+      // Track the working case state so each sub-action sees updates from previous ones
+      let workingCaseState = caseState;
+
+      for (const subAction of action.actions) {
+        const virtualHotspot: Hotspot = { ...hotspot, action: subAction };
+        const workingSave: SaveState = {
+          ...save,
+          caseStates: {
+            ...save.caseStates,
+            [state.caseId]: workingCaseState,
+          },
+          ...accumulatedSaveState,
+        };
+
+        const workingState = currentResult.nextState as GameState & { type: 'exploring' };
+        const subResult = handleHotspotAction(
+          workingState,
+          workingSave,
+          def,
+          virtualHotspot,
+          workingCaseState
+        );
+
+        // Merge results — last sub-action's nextState wins for the sub field
+        currentResult = subResult;
+        if (subResult.saveState?.caseStates?.[state.caseId]) {
+          workingCaseState = subResult.saveState.caseStates[state.caseId] as CaseState;
+        }
+        if (subResult.saveState) {
+          accumulatedSaveState = { ...accumulatedSaveState, ...subResult.saveState };
+        }
+        accumulatedEffects.push(...subResult.effects);
       }
-      return noTransition(state);
+
+      return {
+        nextState: currentResult.nextState,
+        saveState: accumulatedSaveState,
+        effects: accumulatedEffects,
+      };
+    }
 
     default:
       return noTransition(state);
