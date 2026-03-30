@@ -1007,6 +1007,306 @@
   opacity: 1;
 }
 
+/* --- Puzzle Bar --- */
+.gi-puzzle-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(10, 8, 5, 0.85);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--gi-border);
+  z-index: 16;
+}
+
+.gi-puzzle-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--gi-font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--gi-text);
+  background: var(--gi-surface);
+  border: 1px solid var(--gi-border);
+  border-radius: var(--gi-radius);
+  cursor: pointer;
+  transition: all var(--gi-transition-fast);
+  text-transform: uppercase;
+}
+
+.gi-puzzle-tab:hover {
+  background: var(--gi-surface-hover);
+  border-color: var(--gi-border-light);
+  color: var(--gi-text-bright);
+}
+
+.gi-puzzle-tab:focus-visible {
+  outline: 2px solid var(--gi-accent);
+  outline-offset: 2px;
+}
+
+.gi-puzzle-tab-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.gi-puzzle-tab-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.gi-puzzle-tab--solved {
+  border-color: var(--gi-correct);
+  color: #7cd694;
+  opacity: 0.75;
+}
+
+/* --- Puzzle Overlay --- */
+.gi-puzzle-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--gi-overlay);
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: gi-fade-in 0.25s ease;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.gi-puzzle-overlay-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--gi-border);
+  background: var(--gi-surface);
+  color: var(--gi-text);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--gi-transition-fast);
+  z-index: 1;
+}
+
+.gi-puzzle-overlay-close:hover {
+  background: var(--gi-surface-hover);
+  color: var(--gi-text-bright);
+}
+
+.gi-puzzle-overlay-content {
+  width: 100%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* --- Sub-Puzzle --- */
+.gi-sub-puzzle {
+  background: var(--gi-parchment);
+  border: 1px solid var(--gi-border);
+  border-radius: var(--gi-radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px var(--gi-shadow);
+}
+
+.gi-sub-puzzle-header h3 {
+  font-family: var(--gi-font-body);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gi-text-bright);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.gi-sub-puzzle-controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+/* --- Character ID Grid --- */
+.gi-character-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gi-character-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--gi-surface);
+  border: 1px solid var(--gi-border);
+  border-radius: var(--gi-radius-lg);
+}
+
+.gi-character-portrait {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--gi-bg-alt);
+  border: 2px solid var(--gi-border);
+}
+
+.gi-character-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Timeline --- */
+.gi-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.gi-timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gi-border);
+}
+
+.gi-timeline-label {
+  font-family: var(--gi-font-ui);
+  font-size: 0.85rem;
+  color: var(--gi-text-dim);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+/* --- Relationship --- */
+.gi-relationship {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.gi-relationship-edge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.gi-relationship-node {
+  font-family: var(--gi-font-body);
+  font-size: 0.95rem;
+  color: var(--gi-text-bright);
+  padding: 0.25rem 0.5rem;
+  background: var(--gi-surface);
+  border: 1px solid var(--gi-border);
+  border-radius: var(--gi-radius);
+  white-space: nowrap;
+}
+
+.gi-relationship-arrow {
+  color: var(--gi-text-dim);
+  font-size: 1.1rem;
+}
+
+/* --- Inner Hotspots --- */
+.gi-inner-hotspot {
+  background: rgba(232, 200, 116, 0.08);
+  border: 2px solid rgba(232, 200, 116, 0.3);
+  border-radius: var(--gi-radius);
+  animation: gi-inner-hotspot-pulse 2s ease-in-out infinite;
+  transition: all var(--gi-transition-fast);
+}
+
+.gi-inner-hotspot:hover,
+.gi-inner-hotspot:focus-visible {
+  background: rgba(232, 200, 116, 0.2);
+  border-color: rgba(232, 200, 116, 0.6);
+  animation: none;
+}
+
+@keyframes gi-inner-hotspot-pulse {
+  0%, 100% { border-color: rgba(232, 200, 116, 0.15); box-shadow: 0 0 0 0 rgba(232, 200, 116, 0); }
+  50% { border-color: rgba(232, 200, 116, 0.45); box-shadow: 0 0 10px 2px rgba(232, 200, 116, 0.15); }
+}
+
+/* --- Collectible Words in Popups --- */
+.gi-collectible-word {
+  display: inline;
+  padding: 0.1rem 0.15rem;
+  margin: 0 0.05rem;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--gi-text-accent);
+  background: rgba(196, 148, 58, 0.1);
+  border: none;
+  border-bottom: 2px dashed var(--gi-accent);
+  cursor: pointer;
+  transition: all var(--gi-transition-fast);
+  font-weight: 600;
+}
+
+.gi-collectible-word:hover {
+  background: rgba(196, 148, 58, 0.2);
+  border-bottom-style: solid;
+}
+
+.gi-collectible-word--collected {
+  color: var(--gi-correct);
+  border-bottom-color: var(--gi-correct);
+  border-bottom-style: solid;
+  background: var(--gi-correct-bg);
+  cursor: default;
+  pointer-events: none;
+}
+
+/* --- Toast Variants --- */
+.gi-toast--word {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(196, 148, 58, 0.92);
+}
+
+.gi-toast--exit {
+  animation: gi-toast-out 0.3s ease forwards;
+}
+
+@keyframes gi-toast-out {
+  to { opacity: 0; transform: translateY(10px); }
+}
+
+.gi-toast-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.gi-toast-text {
+  white-space: nowrap;
+}
+
 /* --- Accessibility: Reduced Motion --- */
 @media (prefers-reduced-motion: reduce) {
   .gi-engine *,
