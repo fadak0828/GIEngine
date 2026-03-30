@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-03-30T12:18:59.506Z",
-  "lastCommit": "ceeb7ff",
+  "generatedAt": "2026-03-30T12:25:39.924Z",
+  "lastCommit": "4b13c14",
   "requirements": [
     {
       "id": "REQ-2733f0",
@@ -6954,8 +6954,33 @@
     }
   },
   "gitSummary": {
-    "totalCommits": 12,
+    "totalCommits": 15,
     "recentCommits": [
+      {
+        "hash": "4b13c14",
+        "message": "feat(prd): add Claude Code skill for /prd subcommands",
+        "date": "2026-03-30",
+        "files": [
+          ".claude/skills/prd/SKILL.md"
+        ]
+      },
+      {
+        "hash": "1d39b9b",
+        "message": "feat(prd): implement query engine (summary/progress/remaining)",
+        "date": "2026-03-30",
+        "files": [
+          "scripts/prd-query.ts"
+        ]
+      },
+      {
+        "hash": "96d4175",
+        "message": "feat(prd): implement indexer — scans docs/code/git into project-index.json",
+        "date": "2026-03-30",
+        "files": [
+          "docs/project-index.json",
+          "scripts/prd-indexer.ts"
+        ]
+      },
       {
         "hash": "ceeb7ff",
         "message": "feat(prd): add markdown formatters with unit tests",
@@ -7095,6 +7120,10 @@
       }
     ],
     "activeFiles": [
+      ".claude/skills/prd/SKILL.md",
+      "scripts/prd-query.ts",
+      "docs/project-index.json",
+      "scripts/prd-indexer.ts",
       "scripts/__tests__/formatter.test.ts",
       "scripts/formatter.ts",
       "scripts/__tests__/inferrer.test.ts",
