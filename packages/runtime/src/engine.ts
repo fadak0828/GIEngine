@@ -146,6 +146,7 @@ export class GIEngine {
       dispatch,
       i18n: this.i18n,
       getDeductionRenderer: () => this.renderer.getDeductionRenderer(),
+      getSubPuzzleRenderer: () => this.renderer.getSubPuzzleRenderer(),
     });
 
     // Audio

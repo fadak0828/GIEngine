@@ -1,5 +1,6 @@
 import type { GameEvent, Word } from '@gi-engine/core';
 import type { DeductionRenderer } from '../renderer/deduction-renderer.js';
+import type { SubPuzzleRenderer } from '../renderer/sub-puzzle-renderer.js';
 import { I18nManager } from '@gi-engine/core';
 
 export interface DragDropManagerOptions {
@@ -7,6 +8,7 @@ export interface DragDropManagerOptions {
   dispatch: (event: GameEvent) => void;
   i18n: I18nManager;
   getDeductionRenderer: () => DeductionRenderer;
+  getSubPuzzleRenderer?: () => SubPuzzleRenderer;
 }
 
 interface DragState {
