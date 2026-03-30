@@ -34,8 +34,7 @@ export function AIPuzzleGenerator({ caseId, caseTitle, caseDescription }: AIPuzz
     setPhase('loading');
     setErrorMessage(null);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const aiModule = await (new Function('s', 'return import(s)'))('@gi-engine/ai') as {
+      const aiModule = await import('@gi-engine/ai') as {
         generatePuzzle: (req: {
           caseTitle: string;
           caseDescription: string;

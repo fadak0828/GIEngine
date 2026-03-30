@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { ExportModal } from '@/components/export/ExportModal';
+import { AISettingsModal } from '@/components/ai/AISettings';
 
 export function Toolbar(): React.ReactElement {
   const project = useEditorStore(s => s.project);
@@ -9,6 +10,7 @@ export function Toolbar(): React.ReactElement {
   const { newProject, saveProject, setEditorLocale } = useEditorStore();
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
 
   const handleOpen = () => {
     const input = document.createElement('input');
@@ -89,6 +91,15 @@ export function Toolbar(): React.ReactElement {
         </span>
       )}
 
+      {/* AI settings */}
+      <button
+        onClick={() => setAiSettingsOpen(true)}
+        style={btnStyle}
+        title="AI 모델 설정"
+      >
+        AI 설정
+      </button>
+
       <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
 
       {/* Locale toggle */}
@@ -115,8 +126,9 @@ export function Toolbar(): React.ReactElement {
         </button>
       </div>
 
-      {/* Export modal */}
+      {/* Modals */}
       <ExportModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
+      <AISettingsModal open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
     </header>
   );
 }

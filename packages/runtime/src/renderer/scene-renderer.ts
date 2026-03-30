@@ -222,7 +222,13 @@ export class SceneRenderer {
   private resolveAssetSrc(ref: string): string {
     const asset = this.assets.items[ref];
     if (!asset) return ref; // fallback: treat ref as direct URL
-    if (asset.inline) return asset.inline;
+    if (asset.inline) {
+      // If inline is already a full data URI, use it directly
+      if (asset.inline.startsWith('data:')) return asset.inline;
+      // Otherwise, reconstruct data URI from raw base64 + mimeType
+      const mime = asset.mimeType || 'application/octet-stream';
+      return `data:${mime};base64,${asset.inline}`;
+    }
     return asset.src;
   }
 }

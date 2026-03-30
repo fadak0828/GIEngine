@@ -24,6 +24,7 @@ function formatSize(bytes: number): string {
 
 export function ExportModal({ open, onClose }: ExportModalProps): React.ReactElement | null {
   const project = useEditorStore(s => s.project);
+  const words = useEditorStore(s => s.words);
 
   const [phase, setPhase] = useState<Phase>('idle');
   const [mode, setMode] = useState<'development' | 'production'>('production');
@@ -50,8 +51,20 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
     setResult(null);
     setErrorMessage(null);
     try {
+      // Merge editor words into the game definition's words dictionary
+      const wordsDict: Record<string, { id: string; display: { ko: string; en: string }; category?: string; hint?: { ko: string; en: string } }> = { ...(project as any).words };
+      for (const w of words) {
+        wordsDict[w.id] = {
+          id: w.id,
+          display: w.display,
+          ...(w.category ? { category: w.category } : {}),
+          ...(w.hint ? { hint: w.hint } : {}),
+        };
+      }
+      const exportDef = { ...project, words: wordsDict };
+
       const exporterModule = await import('@gi-engine/exporter');
-      const exportResult = await exporterModule.browserExport({ gameDefinition: project as never, mode });
+      const exportResult = await exporterModule.browserExport({ gameDefinition: exportDef as never, mode });
 
       // Trigger download
       const blob = new Blob([exportResult.html], { type: 'text/html;charset=utf-8' });

@@ -11,6 +11,7 @@ import type {
 } from '../models/types.js';
 import { getAllCases, findCase, findScene, findPuzzle } from '../models/types.js';
 import { validatePuzzle, validateSubPuzzle } from '../validator/validator.js';
+import { createInitialSaveState } from '../save/initial-state.js';
 
 /**
  * 상태 전이 함수.
@@ -27,6 +28,14 @@ export function transition(
     return {
       nextState: state,
       saveState: { currentLocale: event.locale },
+      effects: [{ type: 'save_game' }],
+    };
+  }
+
+  if (event.type === 'RESET_GAME') {
+    return {
+      nextState: { type: 'case_select' },
+      saveState: createInitialSaveState(def),
       effects: [{ type: 'save_game' }],
     };
   }
@@ -456,6 +465,34 @@ function handleThinking(
         nextState: { ...state, sub: { type: 'editing' } },
         saveState: {
           caseStates: { ...save.caseStates, [state.caseId]: updatedCaseState },
+        },
+        effects: [{ type: 'save_game' }],
+      };
+    }
+
+    case 'CLEAR_ALL_WORDS': {
+      const clearedAssignments: Record<string, string | null> = {};
+      for (const slotId of Object.keys(puzzleState.slotAssignments)) {
+        clearedAssignments[slotId] = null;
+      }
+
+      const clearedPuzzleState = {
+        ...puzzleState,
+        slotAssignments: clearedAssignments,
+        lastValidation: undefined,
+      };
+      const clearedCaseState: CaseState = {
+        ...caseState,
+        puzzleStates: {
+          ...caseState.puzzleStates,
+          [state.puzzleId]: clearedPuzzleState,
+        },
+      };
+
+      return {
+        nextState: { ...state, sub: { type: 'editing' } },
+        saveState: {
+          caseStates: { ...save.caseStates, [state.caseId]: clearedCaseState },
         },
         effects: [{ type: 'save_game' }],
       };

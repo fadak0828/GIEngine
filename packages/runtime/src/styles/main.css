@@ -112,7 +112,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 /* --- Scene Layers --- */
@@ -233,14 +233,15 @@
 .gi-slot {
   display: inline-block;
   min-width: 80px;
-  padding: 0.15rem 0.6rem;
-  margin: 0 0.2rem;
+  padding: 0.4rem 0.8rem;
+  margin: 0.15rem 0.25rem;
   border-bottom: 2px dashed var(--gi-border-light);
-  background: transparent;
+  border: 2px dashed var(--gi-border-light);
+  background: rgba(90, 75, 55, 0.08);
   text-align: center;
   vertical-align: baseline;
   transition: all var(--gi-transition-fast);
-  border-radius: 2px;
+  border-radius: var(--gi-radius);
   cursor: default;
   font-family: var(--gi-font-body);
   font-size: inherit;
@@ -255,8 +256,8 @@
 }
 
 .gi-slot--filled {
-  border-bottom-style: solid;
-  border-bottom-color: var(--gi-accent);
+  border-style: solid;
+  border-color: var(--gi-accent);
   color: var(--gi-text-accent);
   background: rgba(196, 148, 58, 0.08);
   font-style: normal;
@@ -265,25 +266,30 @@
 }
 
 .gi-slot--drag-over {
-  border-bottom-color: var(--gi-text-bright);
-  background: rgba(232, 200, 116, 0.12);
-  transform: scale(1.02);
+  border-color: var(--gi-text-bright);
+  border-style: solid;
+  background: rgba(232, 200, 116, 0.15);
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(232, 200, 116, 0.25);
 }
 
 .gi-slot--correct {
-  border-bottom-color: var(--gi-correct);
+  border-color: var(--gi-correct);
+  border-style: solid;
   background: var(--gi-correct-bg);
   color: #7cd694;
 }
 
 .gi-slot--partial {
-  border-bottom-color: var(--gi-partial);
+  border-color: var(--gi-partial);
+  border-style: solid;
   background: var(--gi-partial-bg);
   color: #e8c44a;
 }
 
 .gi-slot--incorrect {
-  border-bottom-color: var(--gi-incorrect);
+  border-color: var(--gi-incorrect);
+  border-style: solid;
   background: var(--gi-incorrect-bg);
   color: #d47070;
 }
@@ -935,6 +941,70 @@
   background: var(--gi-incorrect-bg);
   border: 1px solid var(--gi-incorrect);
   color: #d47070;
+}
+
+/* --- Solved Celebration Overlay --- */
+.gi-solved-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 8, 5, 0.85);
+  z-index: 60;
+  animation: gi-fade-in 0.4s ease;
+}
+
+.gi-solved-content {
+  text-align: center;
+  animation: gi-solved-pop 0.5s ease;
+}
+
+@keyframes gi-solved-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.gi-solved-title {
+  font-family: var(--gi-font-body);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gi-text-accent);
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 30px rgba(232, 200, 116, 0.4);
+}
+
+.gi-solved-btn {
+  font-size: 1rem;
+  padding: 0.75rem 2.5rem;
+}
+
+/* --- Case Select Footer --- */
+.gi-case-select-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gi-border);
+}
+
+.gi-reset-btn {
+  opacity: 0.6;
+  transition: opacity var(--gi-transition-fast);
+}
+
+.gi-reset-btn:hover {
+  opacity: 1;
 }
 
 /* --- Accessibility: Reduced Motion --- */

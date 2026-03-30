@@ -19,6 +19,11 @@ const ENGINE_TEXTS: Record<string, LocalizedText> = {
   'ui.case_complete_title': { ko: '사건 해결!', en: 'Case Solved!' },
   'ui.next_case': { ko: '다음 사건', en: 'Next Case' },
   'ui.game_complete': { ko: '게임 완료!', en: 'Game Complete!' },
+  'ui.clear_words': { ko: '전체 초기화', en: 'Clear All' },
+  'ui.reset_game': { ko: '게임 초기화', en: 'Reset Game' },
+  'ui.reset_confirm': { ko: '정말 게임을 초기화하시겠습니까? 모든 진행 상황이 삭제됩니다.', en: 'Are you sure you want to reset? All progress will be lost.' },
+  'ui.case_solved_msg': { ko: '사건을 해결했습니다!', en: 'Case solved!' },
+  'ui.continue': { ko: '계속하기', en: 'Continue' },
 };
 
 export class I18nManager {

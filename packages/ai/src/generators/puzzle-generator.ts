@@ -3,7 +3,7 @@ import { geminiClient } from '../client.js';
 import { buildPuzzlePrompt } from '../prompts/puzzle-prompts.js';
 
 /**
- * Generate a fill-in-the-blank puzzle using Gemini 2.0 Flash with JSON mode.
+ * Generate a fill-in-the-blank puzzle using the user-selected text model.
  */
 export async function generatePuzzle(
   request: PuzzleGenerateRequest,
@@ -15,7 +15,7 @@ export async function generatePuzzle(
     locale: request.locale,
   });
 
-  const raw = await geminiClient.generateText(prompt, 'gemini-2.0-flash');
+  const raw = await geminiClient.generateText(prompt);
 
   // Strip markdown code fences if present
   const jsonText = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();

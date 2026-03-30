@@ -1,9 +1,32 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useEditorStore } from '@/store/editor-store';
-import type { Hotspot, Locale } from '@gi-engine/core';
+import type { Hotspot, Locale, Case, Scene } from '@gi-engine/core';
 
-// Inline type to avoid compile-time dependency on @gi-engine/ai
+// Inline types to avoid compile-time dependency on @gi-engine/ai
 type BackgroundStyle = 'realistic' | 'painterly' | 'pixel-art' | 'noir';
+
+interface HotspotPromptInfo {
+  id: string;
+  label: string;
+  positionZone: string;
+  relativeSize: 'small' | 'medium' | 'large';
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  actionType: string;
+  contentHint?: string;
+  revealedWords?: string[];
+}
+
+interface GameContextForPrompt {
+  gameTitle?: string;
+  gameDescription?: string;
+  caseTitle: string;
+  caseDescription: string;
+  sceneName: string;
+  siblingSceneNames?: string[];
+  hotspots: HotspotPromptInfo[];
+  sceneWords?: Array<{ display: string; category?: string }>;
+}
 
 interface AIBackgroundModalProps {
   open: boolean;
@@ -28,11 +51,16 @@ const STYLE_DESCRIPTORS: Record<BackgroundStyle, string> = {
   noir: 'noir style, black and white, dramatic shadows, high contrast, moody atmosphere',
 };
 
-// Inline hotspot context computation (pure string function, no external deps needed)
+// ── Hotspot context computation ─────────────────────────────────
+
 interface HotspotContext {
   label: string;
   positionZone: string;
   relativeSize: 'small' | 'medium' | 'large';
+  centerX: number;
+  centerY: number;
+  width: number;
+  height: number;
 }
 
 function computeHotspotContextsInline(
@@ -71,11 +99,161 @@ function computeHotspotContextsInline(
       }
     }
     if (!label) label = hotspot.id;
-    return { label, positionZone, relativeSize };
+    return { label, positionZone, relativeSize, centerX: Math.round(cx), centerY: Math.round(cy), width: Math.round(bw), height: Math.round(bh) };
   });
 }
 
-function buildContextualPromptInline(
+// ── Build HotspotPromptInfo from raw hotspots ───────────────────
+
+function buildHotspotPromptInfos(
+  dimensions: { width: number; height: number },
+  hotspots: Hotspot[],
+  locale: Locale,
+  wordDisplayMap: Map<string, { display: string; category?: string }>,
+): HotspotPromptInfo[] {
+  const contexts = computeHotspotContextsInline(dimensions, hotspots, locale);
+  return hotspots.map((hotspot, i) => {
+    const ctx = contexts[i];
+    const action = hotspot.action;
+    let contentHint: string | undefined;
+    let revealedWords: string[] | undefined;
+
+    if (action.type === 'examine' && action.content) {
+      const text = action.content[locale] || action.content.ko || action.content.en || '';
+      if (text) contentHint = text.length > 80 ? text.slice(0, 80) + '…' : text;
+    } else if (action.type === 'examine_image' && action.caption) {
+      const cap = action.caption[locale] || action.caption.ko || action.caption.en || '';
+      if (cap) contentHint = cap;
+    } else if (action.type === 'word_reveal' && action.wordIds) {
+      revealedWords = action.wordIds
+        .map(id => wordDisplayMap.get(id)?.display || id)
+        .filter(Boolean);
+    } else if (action.type === 'composite' && 'actions' in action) {
+      // Extract word reveals and examine content from composite actions
+      const subActions = (action as { actions: Array<{ type: string; wordIds?: string[]; content?: Record<string, string> }> }).actions;
+      const words: string[] = [];
+      for (const sub of subActions) {
+        if (sub.type === 'word_reveal' && sub.wordIds) {
+          words.push(...sub.wordIds.map(id => wordDisplayMap.get(id)?.display || id));
+        }
+        if (sub.type === 'examine' && sub.content && !contentHint) {
+          const text = sub.content[locale] || sub.content.ko || sub.content.en || '';
+          if (text) contentHint = text.length > 80 ? text.slice(0, 80) + '…' : text;
+        }
+      }
+      if (words.length > 0) revealedWords = words;
+    }
+
+    return {
+      id: hotspot.id,
+      label: ctx.label,
+      positionZone: ctx.positionZone,
+      relativeSize: ctx.relativeSize,
+      position: { x: ctx.centerX, y: ctx.centerY },
+      size: { width: ctx.width, height: ctx.height },
+      actionType: action.type,
+      contentHint,
+      revealedWords,
+    };
+  });
+}
+
+// ── Rich prompt builder (inline preview version — structured JSON) ──
+
+function describeHotspotVisualInline(h: HotspotPromptInfo): string {
+  switch (h.actionType) {
+    case 'examine':
+      return h.contentHint
+        ? `Examinable object containing clues about: ${h.contentHint}`
+        : 'Examinable object — should be visually distinct and inviting to inspect';
+    case 'examine_image':
+      return 'A visual clue the player can inspect closely — render with fine detail';
+    case 'word_reveal':
+      if (h.revealedWords && h.revealedWords.length > 0) {
+        return `Contains hidden evidence (${h.revealedWords.join(', ')}) — depict an object that could plausibly conceal written information`;
+      }
+      return 'Contains hidden evidence — depict an object that could conceal information';
+    case 'navigate':
+      return 'A passage, door, or pathway leading to another area — should clearly read as a traversable exit';
+    case 'toggle_layer':
+      return 'An interactive element that changes the scene — render with a subtle visual affordance';
+    case 'composite':
+      if (h.revealedWords && h.revealedWords.length > 0) {
+        return `Complex interactive object revealing evidence (${h.revealedWords.join(', ')}) — render prominently`;
+      }
+      return 'Complex interactive element with multiple effects — render as a notable focal point';
+    default:
+      return 'An interactive element — should be visually identifiable';
+  }
+}
+
+function buildRichPromptInline(
+  description: string,
+  gameContext: GameContextForPrompt,
+  style: BackgroundStyle,
+): string {
+  const styleTokens = STYLE_DESCRIPTORS[style].split(', ');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prompt: Record<string, any> = {
+    role: 'Generate a background image for a "Golden Idol"-style mystery/deduction game. The player explores scenes, examines objects, collects word-clues, and solves puzzles.',
+    metadata: {
+      ...(gameContext.gameTitle ? { game: gameContext.gameTitle } : {}),
+      case_title: gameContext.caseTitle,
+      story: gameContext.caseDescription,
+      scene: gameContext.sceneName,
+      scene_description: description,
+      ...(gameContext.siblingSceneNames && gameContext.siblingSceneNames.length > 0
+        ? { connected_locations: gameContext.siblingSceneNames }
+        : {}),
+    },
+    art_direction: {
+      style: styleTokens,
+      composition: 'wide-angle establishing shot, point-and-click adventure background',
+      environment: description,
+    },
+    constraints: {
+      negative_prompt: [
+        'text', 'letters', 'words', 'readable writing', 'UI elements',
+        'human characters', 'human figures', 'people',
+      ],
+      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment.',
+    },
+  };
+
+  if (gameContext.sceneWords && gameContext.sceneWords.length > 0) {
+    prompt.story_elements = {
+      key_evidence: gameContext.sceneWords.map(w => ({
+        name: w.display,
+        type: w.category || 'clue',
+        note: 'Do not render as text — represent indirectly through objects and atmosphere',
+      })),
+    };
+  }
+
+  if (gameContext.hotspots.length > 0) {
+    prompt.interactive_objects = gameContext.hotspots.map(h => ({
+      id: h.id,
+      label: h.label,
+      properties: {
+        position_zone: h.positionZone,
+        relative_size: h.relativeSize,
+        pixel_center: h.position,
+        pixel_size: h.size,
+      },
+      details: {
+        action: h.actionType,
+        visual_description: describeHotspotVisualInline(h),
+      },
+    }));
+  }
+
+  return JSON.stringify(prompt, null, 2);
+}
+
+// ── Simple prompt builder (fallback) ────────────────────────────
+
+function buildSimplePromptInline(
   description: string,
   dimensions: { width: number; height: number },
   hotspots: Hotspot[],
@@ -104,6 +282,8 @@ function buildContextualPromptInline(
   );
 }
 
+// ── Main component ──────────────────────────────────────────────
+
 export function AIBackgroundModal({
   open,
   onClose,
@@ -113,6 +293,8 @@ export function AIBackgroundModal({
   sceneDimensions,
 }: AIBackgroundModalProps): React.ReactElement | null {
   const { addAsset, updateScene } = useEditorStore();
+  const project = useEditorStore(s => s.project);
+  const words = useEditorStore(s => s.words);
   const ui = useEditorStore(s => s.ui);
   const locale = ui.editorLocale;
 
@@ -121,18 +303,85 @@ export function AIBackgroundModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Contextual prompt state
   const [promptDraft, setPromptDraft] = useState('');
   const [isPromptManuallyEdited, setIsPromptManuallyEdited] = useState(false);
   const [contextExpanded, setContextExpanded] = useState(false);
 
-  // Auto-compute prompt from description + hotspots + style
+  // Build game context from editor state
+  const gameContext = useMemo((): GameContextForPrompt | null => {
+    if (!project) return null;
+    let theCase: Case | null = null;
+    for (const act of project.acts) {
+      const found = act.cases.find(c => c.id === caseId);
+      if (found) { theCase = found; break; }
+    }
+    if (!theCase) return null;
+
+    const scene: Scene | undefined = theCase.scenes.find(s => s.id === sceneId);
+    if (!scene) return null;
+
+    const caseTitle = theCase.title[locale as keyof typeof theCase.title] || theCase.title.ko || theCase.title.en || '';
+    const caseDesc = theCase.description[locale as keyof typeof theCase.description] || theCase.description.ko || theCase.description.en || '';
+    const sceneName = scene.name[locale as keyof typeof scene.name] || scene.name.ko || scene.name.en || '';
+
+    // Sibling scene names (other scenes in the same case)
+    const siblingSceneNames = theCase.scenes
+      .filter(s => s.id !== sceneId)
+      .map(s => s.name[locale as keyof typeof s.name] || s.name.ko || s.name.en || '')
+      .filter(Boolean);
+
+    // Words that can be found in this scene (via word_reveal hotspots)
+    const revealedWordIds = new Set<string>();
+    for (const h of hotspots) {
+      if (h.action.type === 'word_reveal' && h.action.wordIds) {
+        h.action.wordIds.forEach(id => revealedWordIds.add(id));
+      }
+      if (h.action.type === 'composite' && 'actions' in h.action) {
+        const subs = (h.action as { actions: Array<{ type: string; wordIds?: string[] }> }).actions;
+        for (const sub of subs) {
+          if (sub.type === 'word_reveal' && sub.wordIds) {
+            sub.wordIds.forEach(id => revealedWordIds.add(id));
+          }
+        }
+      }
+    }
+
+    const wordDisplayMap = new Map<string, { display: string; category?: string }>();
+    const caseWords = words.filter(w => w.caseId === caseId);
+    for (const w of caseWords) {
+      wordDisplayMap.set(w.id, {
+        display: w.display[locale] || w.display.ko || w.id,
+        category: w.category,
+      });
+    }
+
+    const sceneWords = Array.from(revealedWordIds)
+      .map(id => wordDisplayMap.get(id))
+      .filter((w): w is { display: string; category?: string } => w !== undefined);
+
+    const hotspotInfos = buildHotspotPromptInfos(sceneDimensions, hotspots, locale, wordDisplayMap);
+
+    return {
+      gameTitle: project.title[locale as keyof typeof project.title] || project.title.ko || project.title.en || undefined,
+      gameDescription: project.description[locale as keyof typeof project.description] || project.description.ko || project.description.en || undefined,
+      caseTitle,
+      caseDescription: caseDesc,
+      sceneName,
+      siblingSceneNames: siblingSceneNames.length > 0 ? siblingSceneNames : undefined,
+      hotspots: hotspotInfos,
+      sceneWords: sceneWords.length > 0 ? sceneWords : undefined,
+    };
+  }, [project, caseId, sceneId, hotspots, words, locale, sceneDimensions]);
+
+  // Auto-compute prompt from description + game context + style
   const autoPrompt = useMemo(() => {
     if (!description.trim()) return '';
-    return buildContextualPromptInline(description.trim(), sceneDimensions, hotspots, locale, style);
-  }, [description, sceneDimensions, hotspots, locale, style]);
+    if (gameContext) {
+      return buildRichPromptInline(description.trim(), gameContext, style);
+    }
+    return buildSimplePromptInline(description.trim(), sceneDimensions, hotspots, locale, style);
+  }, [description, gameContext, sceneDimensions, hotspots, locale, style]);
 
-  // Sync promptDraft when autoPrompt changes, unless manually edited
   useEffect(() => {
     if (!isPromptManuallyEdited) {
       setPromptDraft(autoPrompt);
@@ -144,24 +393,37 @@ export function AIBackgroundModal({
   const hotspotContexts = computeHotspotContextsInline(sceneDimensions, hotspots, locale);
 
   const handleGenerate = async () => {
-    const effectiveDescription = promptDraft.trim() || description.trim();
+    const effectiveDescription = isPromptManuallyEdited
+      ? promptDraft.trim()
+      : description.trim();
     if (!effectiveDescription) return;
     setIsLoading(true);
     setError(null);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const aiModule = await (new Function('s', 'return import(s)'))('@gi-engine/ai') as {
+      const aiModule = await import('@gi-engine/ai') as {
         generateBackground: (req: {
           sceneDescription: string;
           style: BackgroundStyle;
           aspectRatio: '16:9';
+          gameContext?: GameContextForPrompt;
         }) => Promise<{ asset: { id: string; type: 'image'; src: string; inline?: string; mimeType: string; alt?: { ko: string; en: string } }; promptUsed: string }>;
       };
-      const result = await aiModule.generateBackground({
-        sceneDescription: effectiveDescription,
-        style,
-        aspectRatio: '16:9',
-      });
+
+      // When prompt is manually edited, pass it as sceneDescription directly (no gameContext)
+      // When auto-generated, pass original description + gameContext for structured prompt
+      const result = isPromptManuallyEdited
+        ? await aiModule.generateBackground({
+            sceneDescription: effectiveDescription,
+            style,
+            aspectRatio: '16:9',
+          })
+        : await aiModule.generateBackground({
+            sceneDescription: effectiveDescription,
+            style,
+            aspectRatio: '16:9',
+            gameContext: gameContext || undefined,
+          });
+
       addAsset(result.asset);
       updateScene(caseId, sceneId, { background: result.asset.id });
       onClose();
@@ -202,7 +464,7 @@ export function AIBackgroundModal({
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 480,
+          width: 520,
           maxHeight: '90vh',
           overflowY: 'auto',
           background: 'var(--bg-panel)',
@@ -233,6 +495,32 @@ export function AIBackgroundModal({
             ×
           </button>
         </div>
+
+        {/* Game context summary */}
+        {gameContext && (
+          <div style={{
+            marginBottom: 12,
+            padding: '8px 10px',
+            background: 'rgba(99, 102, 241, 0.08)',
+            border: '1px solid rgba(99, 102, 241, 0.2)',
+            borderRadius: 4,
+            fontSize: 11,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.5,
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: 2, color: 'var(--text-primary)', fontSize: 11 }}>
+              게임 컨텍스트 (프롬프트에 자동 반영)
+            </div>
+            <div>사건: {gameContext.caseTitle}</div>
+            <div>씬: {gameContext.sceneName}</div>
+            {gameContext.hotspots.length > 0 && (
+              <div>핫스팟: {gameContext.hotspots.length}개</div>
+            )}
+            {gameContext.sceneWords && gameContext.sceneWords.length > 0 && (
+              <div>단서: {gameContext.sceneWords.map(w => w.display).join(', ')}</div>
+            )}
+          </div>
+        )}
 
         {/* Scene description */}
         <div style={{ marginBottom: 12 }}>
@@ -308,7 +596,7 @@ export function AIBackgroundModal({
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                생성될 프롬프트 초안
+                생성될 프롬프트 {gameContext ? '(게임 컨텍스트 포함)' : ''}
               </label>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 {isPromptManuallyEdited && (
@@ -349,7 +637,7 @@ export function AIBackgroundModal({
                 setPromptDraft(e.target.value);
                 setIsPromptManuallyEdited(true);
               }}
-              rows={5}
+              rows={8}
               style={{
                 width: '100%',
                 padding: '6px 8px',

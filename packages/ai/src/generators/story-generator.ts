@@ -3,8 +3,8 @@ import { geminiClient } from '../client.js';
 import { buildStoryPrompt } from '../prompts/story-prompts.js';
 
 /**
- * Generate case story content (description + suggested scene names) using
- * Gemini 2.0 Flash with JSON mode.
+ * Generate case story content (description + suggested scene names)
+ * using the user-selected text model.
  */
 export async function generateStory(
   request: StoryGenerateRequest,
@@ -16,7 +16,7 @@ export async function generateStory(
     hints: request.hints,
   });
 
-  const raw = await geminiClient.generateText(prompt, 'gemini-2.0-flash');
+  const raw = await geminiClient.generateText(prompt);
 
   // Strip markdown code fences if present
   const jsonText = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();

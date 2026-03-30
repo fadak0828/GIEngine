@@ -334,8 +334,10 @@ export type GameEvent =
   | { type: 'ASSIGN_WORD'; slotId: string; wordId: string }
   | { type: 'UNASSIGN_WORD'; slotId: string }
   | { type: 'VALIDATE_PUZZLE' }
+  | { type: 'CLEAR_ALL_WORDS' }
   | { type: 'CLOSE_POPUP' }
   | { type: 'BACK_TO_SELECT' }
+  | { type: 'RESET_GAME' }
   | { type: 'COLLECT_WORD'; wordId: string }
   | { type: 'TOGGLE_LAYER'; layerId: string; visible?: boolean }
   | { type: 'CHANGE_LOCALE'; locale: Locale }

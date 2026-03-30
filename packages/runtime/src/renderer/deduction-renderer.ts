@@ -82,6 +82,12 @@ export class DeductionRenderer {
     controls.appendChild(backBtn);
 
     if (!puzzleState.solved) {
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'gi-btn';
+      clearBtn.textContent = this.i18n.resolveKey('ui.clear_words');
+      clearBtn.addEventListener('click', () => this.dispatch({ type: 'CLEAR_ALL_WORDS' }));
+      controls.appendChild(clearBtn);
+
       const validateBtn = document.createElement('button');
       validateBtn.className = 'gi-btn gi-btn--primary';
       validateBtn.textContent = this.i18n.resolveKey('ui.validate');
@@ -161,6 +167,32 @@ export class DeductionRenderer {
     const wordEl = this.wordElements.get(wordId);
     if (!wordEl) return;
     wordEl.classList.toggle('gi-word--assigned', assigned);
+  }
+
+  showSolvedCelebration(onContinue: () => void): void {
+    if (!this.rootEl) return;
+    // Prevent duplicate overlays
+    if (this.rootEl.querySelector('.gi-solved-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'gi-solved-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'gi-solved-content';
+
+    const title = document.createElement('h2');
+    title.className = 'gi-solved-title';
+    title.textContent = this.i18n.resolveKey('ui.case_solved_msg');
+    content.appendChild(title);
+
+    const btn = document.createElement('button');
+    btn.className = 'gi-btn gi-btn--primary gi-solved-btn';
+    btn.textContent = this.i18n.resolveKey('ui.continue');
+    btn.addEventListener('click', onContinue);
+    content.appendChild(btn);
+
+    overlay.appendChild(content);
+    this.rootEl.appendChild(overlay);
   }
 
   destroy(): void {

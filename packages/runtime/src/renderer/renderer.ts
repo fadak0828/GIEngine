@@ -309,6 +309,19 @@ export class Renderer {
     // Sub-state handling (same position as before — after the mount/update branch)
     if (state.sub.type === 'showing_result') {
       this.deductionRenderer.showValidationResults(state.sub.results);
+    } else if (state.sub.type === 'solved') {
+      // Show all-correct validation results + celebration overlay
+      const allCorrectResults: ValidationResult = {
+        allCorrect: true,
+        slotResults: {},
+      };
+      for (const slotId of Object.keys(puzzleState.slotAssignments)) {
+        allCorrectResults.slotResults[slotId] = 'correct';
+      }
+      this.deductionRenderer.showValidationResults(allCorrectResults);
+      this.deductionRenderer.showSolvedCelebration(() => {
+        this.dispatch({ type: 'CLOSE_PUZZLE' });
+      });
     }
   }
 
@@ -481,6 +494,8 @@ export class Renderer {
     caseState: CaseState
   ): Word[] {
     const results: Word[] = [];
+    // Lazily built fallback map for games without def.words (computed once, reused)
+    let fallbackMap: Map<string, Word> | null = null;
 
     for (const wordId of caseState.collectedWordIds) {
       // Primary path: look up from the global words dictionary
@@ -499,19 +514,21 @@ export class Renderer {
 
       // Fallback path: scan scenes in the current case for word_reveal actions
       // Preserves backward compatibility with game definitions that lack def.words
-      const caseData = findCase(def, caseId);
-      if (caseData) {
-        const wordMap = new Map<string, Word>();
-        for (const scene of caseData.scenes) {
-          for (const hotspot of scene.hotspots) {
-            this.extractWordsFromAction(hotspot.action, def, caseId, wordMap);
+      if (fallbackMap === null) {
+        fallbackMap = new Map<string, Word>();
+        const caseData = findCase(def, caseId);
+        if (caseData) {
+          for (const scene of caseData.scenes) {
+            for (const hotspot of scene.hotspots) {
+              this.extractWordsFromAction(hotspot.action, def, caseId, fallbackMap);
+            }
           }
         }
-        const found = wordMap.get(wordId);
-        if (found) {
-          results.push(found);
-          continue;
-        }
+      }
+      const found = fallbackMap.get(wordId);
+      if (found) {
+        results.push(found);
+        continue;
       }
 
       // Last resort: emit warning and use ID as display label

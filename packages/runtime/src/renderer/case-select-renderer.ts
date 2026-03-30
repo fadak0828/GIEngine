@@ -51,6 +51,22 @@ export class CaseSelectRenderer {
     }
 
     root.appendChild(grid);
+
+    // Reset button
+    const resetWrap = document.createElement('div');
+    resetWrap.className = 'gi-case-select-footer';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'gi-hud-btn gi-reset-btn';
+    resetBtn.textContent = this.i18n.resolveKey('ui.reset_game');
+    resetBtn.addEventListener('click', () => {
+      const msg = this.i18n.resolveKey('ui.reset_confirm');
+      if (confirm(msg)) {
+        this.dispatch({ type: 'RESET_GAME' });
+      }
+    });
+    resetWrap.appendChild(resetBtn);
+    root.appendChild(resetWrap);
+
     this.rootEl = root;
     this.container.appendChild(root);
   }
@@ -141,7 +157,11 @@ export class CaseSelectRenderer {
   private resolveAssetSrc(ref: string): string {
     const asset = this.assets.items[ref];
     if (!asset) return ref;
-    if (asset.inline) return asset.inline;
+    if (asset.inline) {
+      if (asset.inline.startsWith('data:')) return asset.inline;
+      const mime = asset.mimeType || 'application/octet-stream';
+      return `data:${mime};base64,${asset.inline}`;
+    }
     return asset.src;
   }
 }

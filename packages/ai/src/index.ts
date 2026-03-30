@@ -1,12 +1,14 @@
 // Public API for @gi-engine/ai
 
-export { GeminiClient, geminiClient } from './client.js';
+export { GeminiClient, geminiClient, TEXT_MODELS, IMAGE_MODELS } from './client.js';
 
 export type {
   BackgroundStyle,
   AspectRatio,
   BackgroundGenerateRequest,
   BackgroundGenerateResult,
+  GameContextForPrompt,
+  HotspotPromptInfo,
   StoryGenerateRequest,
   StoryGenerateResult,
   PuzzleGenerateRequest,
@@ -17,7 +19,7 @@ export { generateBackground } from './generators/background-generator.js';
 export { generateStory } from './generators/story-generator.js';
 export { generatePuzzle } from './generators/puzzle-generator.js';
 
-export { buildBackgroundPrompt } from './prompts/background-prompts.js';
+export { buildBackgroundPrompt, buildRichBackgroundPrompt } from './prompts/background-prompts.js';
 export type {
   BackgroundPromptOptions,
   HotspotContext,
