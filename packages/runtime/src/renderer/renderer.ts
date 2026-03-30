@@ -11,6 +11,7 @@ import type {
   GameEvent,
   AssetManifest,
   ValidationResult,
+  SubPuzzle,
 } from '@gi-engine/core';
 import { I18nManager, getAllCases, findCase, findScene, findPuzzle } from '@gi-engine/core';
 
@@ -18,6 +19,8 @@ import { SceneRenderer } from './scene-renderer.js';
 import { DeductionRenderer } from './deduction-renderer.js';
 import { CaseSelectRenderer } from './case-select-renderer.js';
 import { PopupRenderer } from './popup-renderer.js';
+import { PuzzleBarRenderer } from './puzzle-bar-renderer.js';
+import { SubPuzzleRenderer } from './sub-puzzle-renderer.js';
 
 export interface RendererOptions {
   container: HTMLElement;
@@ -44,6 +47,9 @@ export class Renderer {
   private currentView: string = '';
   private lastSlotAssignments: Record<string, string | null> = {};
   private lastCollectedWordIds: string[] = [];
+  private puzzleBarRenderer: PuzzleBarRenderer;
+  private subPuzzleRenderer: SubPuzzleRenderer;
+  private puzzleOverlayEl: HTMLElement | null = null;
 
   constructor(opts: RendererOptions) {
     this.container = opts.container;
@@ -78,6 +84,20 @@ export class Renderer {
       assets: this.assets,
       dispatch: this.dispatch,
     });
+
+    this.puzzleBarRenderer = new PuzzleBarRenderer({
+      container: this.container,
+      i18n: this.i18n,
+      assets: this.assets,
+      dispatch: this.dispatch,
+    });
+
+    this.subPuzzleRenderer = new SubPuzzleRenderer({
+      container: this.container,
+      i18n: this.i18n,
+      assets: this.assets,
+      dispatch: this.dispatch,
+    });
   }
 
   getDeductionRenderer(): DeductionRenderer {
@@ -86,6 +106,10 @@ export class Renderer {
 
   getPopupRenderer(): PopupRenderer {
     return this.popupRenderer;
+  }
+
+  getSubPuzzleRenderer(): SubPuzzleRenderer {
+    return this.subPuzzleRenderer;
   }
 
   update(state: GameState, save: SaveState, def: GameDefinition): void {
@@ -116,6 +140,9 @@ export class Renderer {
     this.deductionRenderer.destroy();
     this.caseSelectRenderer.destroy();
     this.popupRenderer.dismiss();
+    this.puzzleBarRenderer.destroy();
+    this.subPuzzleRenderer.destroy();
+    this.closePuzzleOverlay();
     this.removeControls();
     this.removeToast();
     this.currentView = '';
@@ -126,6 +153,8 @@ export class Renderer {
     if (!except.includes('deduction')) this.deductionRenderer.destroy();
     if (!except.includes('caseSelect')) this.caseSelectRenderer.destroy();
     if (!except.includes('popup')) this.popupRenderer.dismiss();
+    if (!except.includes('puzzleBar')) this.puzzleBarRenderer.destroy();
+    if (!except.includes('puzzleOverlay')) this.closePuzzleOverlay();
     this.removeCompletion();
     this.removeLoading();
     this.lastSlotAssignments = {};       // Reset diff state when view changes
@@ -207,6 +236,12 @@ export class Renderer {
       this.sceneRenderer.updateLayerVisibility(caseState);
     }
 
+    // Render puzzle bar at bottom (always visible during exploring)
+    const caseData2 = findCase(def, state.caseId);
+    if (caseData2 && caseData2.puzzles) {
+      this.puzzleBarRenderer.render(caseData2.puzzles, caseState);
+    }
+
     // Handle sub-states
     switch (state.sub.type) {
       case 'idle':
@@ -240,6 +275,11 @@ export class Renderer {
         } else {
           this.showWordToast(wordNames.join(', '), wordNames.length);
         }
+        break;
+      }
+      case 'puzzle_overlay': {
+        this.popupRenderer.dismiss();
+        this.renderPuzzleOverlay(state.sub.puzzleId, state, save, def);
         break;
       }
       case 'transitioning':
@@ -441,18 +481,6 @@ export class Renderer {
     const right = document.createElement('div');
     right.className = 'gi-controls-right';
 
-    // Puzzle button
-    const caseData = findCase(def, state.caseId);
-    if (caseData && caseData.puzzles?.main) {
-      const puzzleBtn = document.createElement('button');
-      puzzleBtn.className = 'gi-hud-btn';
-      puzzleBtn.textContent = this.i18n.resolveKey('ui.thinking');
-      puzzleBtn.addEventListener('click', () => {
-        this.dispatch({ type: 'OPEN_PUZZLE', puzzleId: caseData.puzzles.main.id });
-      });
-      right.appendChild(puzzleBtn);
-    }
-
     controls.appendChild(right);
 
     this.controlsEl = controls;
@@ -463,6 +491,87 @@ export class Renderer {
     if (this.controlsEl) {
       this.controlsEl.remove();
       this.controlsEl = null;
+    }
+  }
+
+  // --- Puzzle Overlay ---
+
+  private renderPuzzleOverlay(
+    puzzleId: string,
+    state: GameState & { type: 'exploring' },
+    save: SaveState,
+    def: GameDefinition
+  ): void {
+    const caseData = findCase(def, state.caseId);
+    if (!caseData) return;
+    const caseState = save.caseStates[state.caseId];
+    if (!caseState) return;
+
+    const puzzle = findPuzzle(caseData.puzzles, puzzleId);
+    if (!puzzle) return;
+    const puzzleState = caseState.puzzleStates[puzzleId];
+    if (!puzzleState) return;
+
+    // Collect words
+    const caseWords = this.collectWordsForCase(def, state.caseId, caseState);
+    const assignedWordIds = new Set<string>();
+    for (const wordId of Object.values(puzzleState.slotAssignments)) {
+      if (wordId) assignedWordIds.add(wordId);
+    }
+
+    // Create or reuse overlay
+    if (!this.puzzleOverlayEl) {
+      const overlay = document.createElement('div');
+      overlay.className = 'gi-puzzle-overlay';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'gi-puzzle-overlay-close';
+      closeBtn.textContent = '\u00D7';
+      closeBtn.setAttribute('aria-label', 'Close');
+      closeBtn.addEventListener('click', () => {
+        this.dispatch({ type: 'CLOSE_PUZZLE_OVERLAY' });
+      });
+      overlay.appendChild(closeBtn);
+
+      const content = document.createElement('div');
+      content.className = 'gi-puzzle-overlay-content';
+      overlay.appendChild(content);
+
+      this.puzzleOverlayEl = overlay;
+      this.container.appendChild(overlay);
+    }
+
+    const content = this.puzzleOverlayEl.querySelector<HTMLElement>('.gi-puzzle-overlay-content');
+    if (!content) return;
+
+    if ('template' in puzzle && puzzle.type === 'fill_in_blank') {
+      this.subPuzzleRenderer.destroy();
+      content.innerHTML = '';
+
+      const tempDeduction = new DeductionRenderer({
+        container: content,
+        i18n: this.i18n,
+        assets: this.assets,
+        dispatch: this.dispatch,
+      });
+      tempDeduction.render(puzzle as Puzzle, puzzleState, caseWords, assignedWordIds);
+    } else {
+      content.innerHTML = '';
+      this.subPuzzleRenderer = new SubPuzzleRenderer({
+        container: content,
+        i18n: this.i18n,
+        assets: this.assets,
+        dispatch: this.dispatch,
+      });
+      this.subPuzzleRenderer.render(puzzle as SubPuzzle, puzzleState, caseWords, assignedWordIds);
+    }
+  }
+
+  private closePuzzleOverlay(): void {
+    this.subPuzzleRenderer.destroy();
+    if (this.puzzleOverlayEl) {
+      this.puzzleOverlayEl.remove();
+      this.puzzleOverlayEl = null;
     }
   }
 
