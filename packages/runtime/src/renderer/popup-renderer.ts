@@ -3,6 +3,7 @@ import type {
   AssetRef,
   AssetManifest,
   GameEvent,
+  Hotspot,
 } from '@gi-engine/core';
 import { I18nManager } from '@gi-engine/core';
 
@@ -71,7 +72,12 @@ export class PopupRenderer {
     requestAnimationFrame(() => popup.focus());
   }
 
-  showImagePopup(image: AssetRef, caption?: LocalizedText): void {
+  showImagePopup(
+    image: AssetRef,
+    caption?: LocalizedText,
+    innerHotspots?: Hotspot[],
+    onInnerHotspotClick?: (hotspotId: string) => void
+  ): void {
     this.dismiss();
 
     const overlay = this.createOverlay();
@@ -83,13 +89,29 @@ export class PopupRenderer {
 
     popup.appendChild(this.createCloseButton());
 
+    // Image container (relative for inner hotspot positioning)
+    const imgContainer = document.createElement('div');
+    imgContainer.className = 'gi-popup-image-container';
+    imgContainer.style.position = 'relative';
+    imgContainer.style.display = 'inline-block';
+
     const src = this.resolveAssetSrc(image);
     const img = document.createElement('img');
     img.className = 'gi-popup-image';
     img.src = src;
     img.alt = caption ? this.i18n.resolveText(caption) : '';
     img.draggable = false;
-    popup.appendChild(img);
+    imgContainer.appendChild(img);
+
+    // Render inner hotspots on top of the image
+    if (innerHotspots && innerHotspots.length > 0 && onInnerHotspotClick) {
+      for (const hs of innerHotspots) {
+        const hsEl = this.createInnerHotspot(hs, onInnerHotspotClick);
+        imgContainer.appendChild(hsEl);
+      }
+    }
+
+    popup.appendChild(imgContainer);
 
     if (caption) {
       const cap = document.createElement('p');
@@ -102,6 +124,42 @@ export class PopupRenderer {
 
     popup.tabIndex = -1;
     requestAnimationFrame(() => popup.focus());
+  }
+
+  private createInnerHotspot(
+    hotspot: Hotspot,
+    onClick: (hotspotId: string) => void
+  ): HTMLElement {
+    const el = document.createElement('button');
+    el.className = 'gi-inner-hotspot';
+    el.dataset.hotspotId = hotspot.id;
+    el.setAttribute('aria-label', this.i18n.resolveText(hotspot.ariaLabel));
+    el.style.cursor = hotspot.cursor || 'pointer';
+    el.style.position = 'absolute';
+    el.tabIndex = 0;
+
+    // Position based on area (percentage-based relative to image)
+    const area = hotspot.area;
+    if (area.type === 'rect') {
+      el.style.left = `${area.x}%`;
+      el.style.top = `${area.y}%`;
+      el.style.width = `${area.width}%`;
+      el.style.height = `${area.height}%`;
+    } else if (area.type === 'circle') {
+      const diameter = area.radius * 2;
+      el.style.left = `${area.cx - area.radius}%`;
+      el.style.top = `${area.cy - area.radius}%`;
+      el.style.width = `${diameter}%`;
+      el.style.height = `${diameter}%`;
+      el.style.borderRadius = '50%';
+    }
+
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onClick(hotspot.id);
+    });
+
+    return el;
   }
 
   dismiss(): void {
