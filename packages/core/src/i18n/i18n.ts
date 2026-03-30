@@ -24,6 +24,14 @@ const ENGINE_TEXTS: Record<string, LocalizedText> = {
   'ui.reset_confirm': { ko: '정말 게임을 초기화하시겠습니까? 모든 진행 상황이 삭제됩니다.', en: 'Are you sure you want to reset? All progress will be lost.' },
   'ui.case_solved_msg': { ko: '사건을 해결했습니다!', en: 'Case solved!' },
   'ui.continue': { ko: '계속하기', en: 'Continue' },
+  'ui.word_collected_name': { ko: '「{word}」 획득!', en: 'Got "{word}"!' },
+  'ui.words_collected_count': { ko: '{count}개 단어 획득!', en: '{count} words collected!' },
+  'ui.puzzle_tab_main': { ko: '추리', en: 'Deduce' },
+  'ui.puzzle_tab_character': { ko: '인물', en: 'Characters' },
+  'ui.puzzle_tab_timeline': { ko: '타임라인', en: 'Timeline' },
+  'ui.puzzle_tab_relationship': { ko: '관계', en: 'Relations' },
+  'ui.puzzle_tab_scenario': { ko: '시나리오', en: 'Scenario' },
+  'ui.close_overlay': { ko: '닫기', en: 'Close' },
 };
 
 export class I18nManager {
