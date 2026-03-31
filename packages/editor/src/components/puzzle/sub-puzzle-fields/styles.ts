@@ -33,8 +33,8 @@ export const smallBtnStyle: React.CSSProperties = {
 
 export const dangerBtnStyle: React.CSSProperties = {
   ...smallBtnStyle,
-  color: '#ef4444',
-  borderColor: '#ef4444',
+  color: 'var(--danger)',
+  borderColor: 'var(--danger)',
 };
 
 export const cardStyle: React.CSSProperties = {

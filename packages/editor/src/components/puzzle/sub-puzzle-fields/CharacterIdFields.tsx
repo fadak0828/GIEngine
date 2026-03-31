@@ -1,8 +1,19 @@
 import React from 'react';
 import type { CharacterIdPuzzle, CharacterSlot } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
+import { ImageAssetPicker } from '@/components/shared/ImageAssetPicker';
+import { WordDropdown } from '@/components/words/WordDropdown';
 import { FieldRow } from './FieldRow';
-import { inputStyle, sectionLabelStyle, smallBtnStyle, dangerBtnStyle, cardStyle } from './styles';
+import { sectionLabelStyle, smallBtnStyle, dangerBtnStyle, cardStyle } from './styles';
+
+const readonlyIdStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
+  color: 'var(--text-muted)',
+  padding: '2px 4px',
+  background: 'var(--bg-primary)',
+  borderRadius: 2,
+};
 
 export function CharacterIdFields({
   puzzle,
@@ -45,28 +56,28 @@ export function CharacterIdFields({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {puzzle.characters.map((char, idx) => (
           <div key={idx} style={cardStyle}>
-            <FieldRow label="초상화 (Asset)">
-              <input
-                value={char.portrait}
-                onChange={e => updateCharacter(idx, { portrait: e.target.value })}
-                placeholder="asset_id"
-                style={inputStyle}
+            {/* Portrait: ImageAssetPicker */}
+            <FieldRow label="초상화">
+              <ImageAssetPicker
+                assetId={char.portrait}
+                onChange={portrait => updateCharacter(idx, { portrait })}
               />
             </FieldRow>
+
+            {/* answerId: WordDropdown singleSelect */}
+            <WordDropdown
+              caseId={caseId}
+              singleSelect
+              wordId={char.answerId}
+              onChangeSingle={answerId => updateCharacter(idx, { answerId })}
+              label="정답 단어"
+            />
+
+            {/* nameSlotId: 읽기 전용 */}
             <FieldRow label="슬롯 ID">
-              <input
-                value={char.nameSlotId}
-                onChange={e => updateCharacter(idx, { nameSlotId: e.target.value })}
-                style={inputStyle}
-              />
+              <span style={readonlyIdStyle}>{char.nameSlotId}</span>
             </FieldRow>
-            <FieldRow label="정답 ID">
-              <input
-                value={char.answerId}
-                onChange={e => updateCharacter(idx, { answerId: e.target.value })}
-                style={inputStyle}
-              />
-            </FieldRow>
+
             <button onClick={() => removeCharacter(idx)} style={dangerBtnStyle}>
               슬롯 삭제
             </button>

@@ -1,6 +1,8 @@
-import React from 'react';
-import type { Case } from '@gi-engine/core';
+import React, { useState } from 'react';
+import type { Case, SubPuzzle } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
+import { SubPuzzleEditor } from './SubPuzzleEditor';
+import { SubPuzzleModal } from './SubPuzzleModal';
 
 interface CasePropertiesProps {
   caseData: Case;
@@ -8,10 +10,31 @@ interface CasePropertiesProps {
 
 export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactElement {
   const ui = useEditorStore(s => s.ui);
-  const { updateCase, setActivePanel, setSelectedSubPuzzle } = useEditorStore();
+  const { updateCase, setActivePanel, addSubPuzzle } = useEditorStore();
 
   const locale = ui.editorLocale;
-  const subCount = caseData.puzzles.sub.length;
+
+  const [editingPuzzle, setEditingPuzzle] = useState<SubPuzzle | null>(null);
+
+  const handleEdit = (puzzle: SubPuzzle) => {
+    setEditingPuzzle(puzzle);
+  };
+
+  const handleAddAndEdit = (type: SubPuzzle['type']) => {
+    addSubPuzzle(caseData.id, type);
+    // Get the freshly added puzzle from store
+    const fresh = useEditorStore.getState();
+    const freshCase = fresh.project?.acts
+      .flatMap(a => a.cases)
+      .find(c => c.id === caseData.id);
+    const newPuzzle = freshCase?.puzzles.sub.at(-1);
+    if (newPuzzle) setEditingPuzzle(newPuzzle);
+  };
+
+  // Get live caseData from store for the modal (keeps data current)
+  const liveCaseData = useEditorStore(s =>
+    s.project?.acts.flatMap(a => a.cases).find(c => c.id === caseData.id)
+  ) ?? caseData;
 
   return (
     <div style={{ padding: 12 }}>
@@ -247,28 +270,27 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
           border: 'none',
           borderRadius: 3,
           cursor: 'pointer',
-          marginBottom: 8,
+          marginBottom: 12,
         }}
       >
         퍼즐 편집 열기
       </button>
 
-      <button
-        onClick={() => setActivePanel('subPuzzle')}
-        style={{
-          width: '100%',
-          padding: '7px 12px',
-          fontSize: 12,
-          fontWeight: 600,
-          background: 'transparent',
-          color: 'var(--accent)',
-          border: '1px solid var(--accent)',
-          borderRadius: 3,
-          cursor: 'pointer',
-        }}
-      >
-        → 서브 퍼즐 편집 열기 ({subCount})
-      </button>
+      {/* Inline SubPuzzleEditor list */}
+      <SubPuzzleEditor
+        caseData={liveCaseData}
+        onEdit={handleEdit}
+        onAddAndEdit={handleAddAndEdit}
+      />
+
+      {/* SubPuzzleModal */}
+      {editingPuzzle && (
+        <SubPuzzleModal
+          caseData={liveCaseData}
+          puzzle={editingPuzzle}
+          onClose={() => setEditingPuzzle(null)}
+        />
+      )}
     </div>
   );
 }

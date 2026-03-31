@@ -2,8 +2,18 @@ import React from 'react';
 import type { TimelinePuzzle, TimelineSlot } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
 import { LocalizedTextInput } from '@/components/shared/LocalizedTextInput';
+import { WordDropdown } from '@/components/words/WordDropdown';
 import { FieldRow } from './FieldRow';
-import { inputStyle, sectionLabelStyle, smallBtnStyle, dangerBtnStyle, cardStyle } from './styles';
+import { sectionLabelStyle, smallBtnStyle, dangerBtnStyle, cardStyle } from './styles';
+
+const readonlyIdStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
+  color: 'var(--text-muted)',
+  padding: '2px 4px',
+  background: 'var(--bg-primary)',
+  borderRadius: 2,
+};
 
 export function TimelineFields({
   puzzle,
@@ -45,25 +55,26 @@ export function TimelineFields({
       <div style={sectionLabelStyle}>타임라인 슬롯 ({puzzle.slots.length})</div>
       {puzzle.slots.map((slot, idx) => (
         <div key={idx} style={cardStyle}>
+          {/* slotId: 읽기 전용 */}
           <FieldRow label="슬롯 ID">
-            <input
-              value={slot.slotId}
-              onChange={e => updateSlot(idx, { slotId: e.target.value })}
-              style={inputStyle}
-            />
+            <span style={readonlyIdStyle}>{slot.slotId}</span>
           </FieldRow>
+
           <LocalizedTextInput
             label="라벨"
             value={slot.label}
             onChange={label => updateSlot(idx, { label })}
           />
-          <FieldRow label="정답 ID">
-            <input
-              value={slot.answerId}
-              onChange={e => updateSlot(idx, { answerId: e.target.value })}
-              style={inputStyle}
-            />
-          </FieldRow>
+
+          {/* answerId: WordDropdown singleSelect */}
+          <WordDropdown
+            caseId={caseId}
+            singleSelect
+            wordId={slot.answerId}
+            onChangeSingle={answerId => updateSlot(idx, { answerId })}
+            label="정답 단어"
+          />
+
           <button onClick={() => removeSlot(idx)} style={dangerBtnStyle}>
             슬롯 삭제
           </button>

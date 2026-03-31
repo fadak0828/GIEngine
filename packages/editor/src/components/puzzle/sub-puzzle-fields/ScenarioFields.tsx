@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ScenarioPuzzle } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
+import { WordDropdown } from '@/components/words/WordDropdown';
 import { FieldRow } from './FieldRow';
 import { inputStyle, sectionLabelStyle, smallBtnStyle, dangerBtnStyle, cardStyle } from './styles';
 
@@ -36,7 +37,7 @@ export function ScenarioFields({
     } as Partial<ScenarioPuzzle>);
   };
 
-  const updateAnswerValue = (key: string, correctWordId: string) => {
+  const updateAnswerCorrectWord = (key: string, correctWordId: string) => {
     updateSubPuzzle(caseId, puzzle.id, {
       answers: {
         ...puzzle.answers,
@@ -55,22 +56,26 @@ export function ScenarioFields({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={sectionLabelStyle}>정답 ({answerEntries.length})</div>
-      {answerEntries.map(([key, val]) => (
+      {answerEntries.map(([key]) => (
         <div key={key} style={cardStyle}>
-          <FieldRow label="슬롯 ID">
+          {/* 슬롯 키: 편집 가능 유지 (template 참조 키) */}
+          <FieldRow label="슬롯 키">
             <input
               value={key}
               onChange={e => updateAnswerKey(key, e.target.value)}
               style={inputStyle}
             />
           </FieldRow>
-          <FieldRow label="정답 단어 ID">
-            <input
-              value={val.correctWordId}
-              onChange={e => updateAnswerValue(key, e.target.value)}
-              style={inputStyle}
-            />
-          </FieldRow>
+
+          {/* correctWordId: WordDropdown singleSelect */}
+          <WordDropdown
+            caseId={caseId}
+            singleSelect
+            wordId={puzzle.answers[key]?.correctWordId ?? ''}
+            onChangeSingle={correctWordId => updateAnswerCorrectWord(key, correctWordId)}
+            label="정답 단어"
+          />
+
           <button onClick={() => removeAnswer(key)} style={dangerBtnStyle}>
             정답 삭제
           </button>
