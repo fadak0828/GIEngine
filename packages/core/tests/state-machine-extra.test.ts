@@ -471,3 +471,102 @@ describe('all_unlocked mode: VALIDATE_PUZZLE', () => {
     expect(hasUnlock).toBe(false);
   });
 });
+
+// ─── onEnter / BGM / delay tests ────────────────────────────────────────────
+
+describe('NAVIGATE_SCENE — onEnter 및 BGM 처리', () => {
+  const baseScene = {
+    id: 'scene-base',
+    name: { ko: '기지', en: 'Base' },
+    background: '',
+    dimensions: { width: 1920, height: 1080 },
+    hotspots: [],
+    layers: [],
+  };
+
+  function makeDefWithScene(sceneOverride: Partial<typeof baseScene> & { id: string }): GameDefinition {
+    return {
+      ...testDef,
+      acts: [
+        {
+          id: 'act-1',
+          title: { ko: '1막', en: 'Act 1' },
+          cases: [
+            {
+              ...testDef.acts[0].cases[0],
+              scenes: [
+                { ...baseScene, id: 'scene-start' },
+                { ...baseScene, ...sceneOverride },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  const startState: GameState = {
+    type: 'exploring',
+    caseId: 'case-1',
+    sceneId: 'scene-start',
+    sub: { type: 'idle' },
+  };
+
+  it('씬에 bgm이 있으면 play_bgm effect 생성', () => {
+    const def = makeDefWithScene({ id: 'scene-with-bgm', bgm: 'asset-music-1' });
+    const result = transition(startState, makeSave(def), { type: 'NAVIGATE_SCENE', sceneId: 'scene-with-bgm' }, def);
+    const hasBgm = result.effects.some(e => e.type === 'play_bgm' && (e as { type: 'play_bgm'; assetRef: string }).assetRef === 'asset-music-1');
+    expect(hasBgm).toBe(true);
+  });
+
+  it('씬에 bgmStop이 있으면 stop_bgm effect 생성', () => {
+    const def = makeDefWithScene({ id: 'scene-stop-bgm', bgmStop: true });
+    const result = transition(startState, makeSave(def), { type: 'NAVIGATE_SCENE', sceneId: 'scene-stop-bgm' }, def);
+    const hasStop = result.effects.some(e => e.type === 'stop_bgm');
+    expect(hasStop).toBe(true);
+  });
+
+  it('BGM 없으면 play_bgm/stop_bgm effect 없음', () => {
+    const def = makeDefWithScene({ id: 'scene-no-bgm' });
+    const result = transition(startState, makeSave(def), { type: 'NAVIGATE_SCENE', sceneId: 'scene-no-bgm' }, def);
+    const hasBgmEffect = result.effects.some(e => e.type === 'play_bgm' || e.type === 'stop_bgm');
+    expect(hasBgmEffect).toBe(false);
+  });
+
+  it('onEnter toggle_layer → toggle_layer effect 생성', () => {
+    const def = makeDefWithScene({
+      id: 'scene-on-enter',
+      onEnter: [{ type: 'toggle_layer', layerId: 'layer-secret', visible: true }],
+    });
+    const result = transition(startState, makeSave(def), { type: 'NAVIGATE_SCENE', sceneId: 'scene-on-enter' }, def);
+    const hasToggle = result.effects.some(
+      e => e.type === 'toggle_layer' && (e as { type: 'toggle_layer'; layerId: string }).layerId === 'layer-secret',
+    );
+    expect(hasToggle).toBe(true);
+  });
+
+  it('onEnter delay → 씬 전환 완료, nextState는 exploring', () => {
+    const def = makeDefWithScene({
+      id: 'scene-delay',
+      onEnter: [{ type: 'delay', duration: 1000 }],
+    });
+    const result = transition(startState, makeSave(def), { type: 'NAVIGATE_SCENE', sceneId: 'scene-delay' }, def);
+    expect(result.nextState.type).toBe('exploring');
+    if (result.nextState.type === 'exploring') {
+      expect(result.nextState.sceneId).toBe('scene-delay');
+    }
+  });
+
+  it('onEnter play_sound → play_sound effect 생성', () => {
+    const def = makeDefWithScene({
+      id: 'scene-play-sound',
+      onEnter: [{ type: 'play_sound', assetRef: 'asset-sfx-1' }],
+    });
+    const result = transition(startState, makeSave(def), { type: 'NAVIGATE_SCENE', sceneId: 'scene-play-sound' }, def);
+    const hasSfx = result.effects.some(
+      e => e.type === 'play_sound' && (e as { type: 'play_sound'; assetRef: string }).assetRef === 'asset-sfx-1',
+    );
+    expect(hasSfx).toBe(true);
+  });
+});
+});

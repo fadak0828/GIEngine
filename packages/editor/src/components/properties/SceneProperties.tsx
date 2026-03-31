@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import type { Scene } from '@gi-engine/core';
+import type { Scene, HotspotAction } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
 import { LayerPanel } from '@/components/layers/LayerPanel';
 
@@ -22,6 +22,7 @@ export function SceneProperties({
   // ── Section collapse state ─────────────────────────────────────
   const [bgOpen, setBgOpen] = useState(true);
   const [bgmOpen, setBgmOpen] = useState(true);
+  const [onEnterOpen, setOnEnterOpen] = useState(false);
 
   // ── BGM preview state ─────────────────────────────────────────
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
@@ -437,12 +438,327 @@ export function SceneProperties({
         )}
       </div>
 
+      {/* ── onEnter section ── */}
+      <div
+        style={{
+          borderTop: '1px solid var(--border-color)',
+          paddingTop: 12,
+          marginTop: 12,
+        }}
+      >
+        <SectionHeader
+          label={`씬 진입 액션 (${(scene.onEnter ?? []).length})`}
+          open={onEnterOpen}
+          onToggle={() => setOnEnterOpen(o => !o)}
+        />
+        {onEnterOpen && (
+          <OnEnterEditor
+            caseId={caseId}
+            scene={scene}
+            onEnter={scene.onEnter ?? []}
+            onChange={onEnter => updateScene(caseId, scene.id, { onEnter })}
+          />
+        )}
+      </div>
+
       {/* ── Layers section (LayerPanel manages its own collapse) ── */}
       <LayerPanel layers={scene.layers} caseId={caseId} sceneId={scene.id} />
 
       <div style={{ marginTop: 12, color: 'var(--text-muted)', fontSize: 12 }}>
         핫스팟 또는 레이어를 클릭하면 속성을 편집할 수 있습니다.
       </div>
+    </div>
+  );
+}
+
+// ── OnEnterEditor ─────────────────────────────────────────────────
+
+/**
+ * onEnter 액션 시퀀스 편집기.
+ * 씬 진입 시 자동으로 실행되는 액션들을 편집한다.
+ * examine/examine_image 같이 UI 인터랙션이 필요한 액션은 지원하지 않는다.
+ */
+function OnEnterEditor({
+  caseId,
+  scene,
+  onEnter,
+  onChange,
+}: {
+  caseId: string;
+  scene: Scene;
+  onEnter: HotspotAction[];
+  onChange: (actions: HotspotAction[]) => void;
+}): React.ReactElement {
+  const handleAdd = () => {
+    onChange([...onEnter, { type: 'delay', duration: 500 }]);
+  };
+
+  const handleRemove = (idx: number) => {
+    onChange(onEnter.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdate = (idx: number, updated: HotspotAction) => {
+    onChange(onEnter.map((a, i) => (i === idx ? updated : a)));
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
+        씬에 진입할 때 자동으로 실행되는 액션들입니다.
+      </div>
+
+      {onEnter.length === 0 && (
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '6px 0' }}>
+          액션 없음
+        </div>
+      )}
+
+      {onEnter.map((action, idx) => (
+        <OnEnterActionRow
+          key={idx}
+          idx={idx}
+          action={action}
+          scene={scene}
+          onUpdate={updated => handleUpdate(idx, updated)}
+          onRemove={() => handleRemove(idx)}
+        />
+      ))}
+
+      <button
+        onClick={handleAdd}
+        style={{
+          padding: '4px 8px',
+          fontSize: 11,
+          background: 'var(--bg-card)',
+          color: 'var(--text-secondary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 3,
+          cursor: 'pointer',
+          alignSelf: 'flex-start',
+        }}
+      >
+        + 액션 추가
+      </button>
+    </div>
+  );
+}
+
+const ON_ENTER_ACTION_TYPES: Array<{ value: HotspotAction['type']; label: string }> = [
+  { value: 'delay', label: '대기 (delay)' },
+  { value: 'toggle_layer', label: '레이어 토글' },
+  { value: 'play_sound', label: '효과음 재생' },
+  { value: 'navigate', label: '씬 이동' },
+  { value: 'word_reveal', label: '단어 획득' },
+];
+
+function makeDefaultOnEnterAction(type: HotspotAction['type']): HotspotAction {
+  switch (type) {
+    case 'delay': return { type: 'delay', duration: 500 };
+    case 'toggle_layer': return { type: 'toggle_layer', layerId: '' };
+    case 'play_sound': return { type: 'play_sound', assetRef: '' };
+    case 'navigate': return { type: 'navigate', targetSceneId: '' };
+    case 'word_reveal': return { type: 'word_reveal', wordIds: [] };
+    default: return { type: 'delay', duration: 500 };
+  }
+}
+
+function OnEnterActionRow({
+  idx,
+  action,
+  scene,
+  onUpdate,
+  onRemove,
+}: {
+  idx: number;
+  action: HotspotAction;
+  scene: Scene;
+  onUpdate: (a: HotspotAction) => void;
+  onRemove: () => void;
+}): React.ReactElement {
+  return (
+    <div
+      style={{
+        border: '1px solid var(--border-color)',
+        borderRadius: 4,
+        padding: '6px 8px',
+        background: 'var(--bg-card)',
+      }}
+    >
+      {/* Type selector + remove */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>
+          #{idx + 1}
+        </span>
+        <select
+          value={action.type}
+          onChange={e => {
+            const newType = e.target.value as HotspotAction['type'];
+            onUpdate(makeDefaultOnEnterAction(newType));
+          }}
+          style={{
+            flex: 1,
+            padding: '2px 4px',
+            fontSize: 11,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 3,
+          }}
+        >
+          {ON_ENTER_ACTION_TYPES.map(t => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+        <button
+          onClick={onRemove}
+          style={{
+            padding: '2px 6px',
+            fontSize: 10,
+            background: 'transparent',
+            color: 'var(--text-muted)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 3,
+            cursor: 'pointer',
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Action-specific fields */}
+      {action.type === 'delay' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <label style={{ fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0 }}>
+            대기 시간 (ms)
+          </label>
+          <input
+            type="number"
+            min={0}
+            step={100}
+            value={action.duration}
+            onChange={e => onUpdate({ ...action, duration: Math.max(0, Number(e.target.value)) })}
+            style={{
+              flex: 1,
+              padding: '2px 4px',
+              fontSize: 11,
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 3,
+            }}
+          />
+        </div>
+      )}
+
+      {action.type === 'toggle_layer' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <select
+            value={action.layerId}
+            onChange={e => onUpdate({ ...action, layerId: e.target.value })}
+            style={{
+              padding: '2px 4px',
+              fontSize: 11,
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 3,
+            }}
+          >
+            <option value="">-- 레이어 선택 --</option>
+            {scene.layers.map(l => (
+              <option key={l.id} value={l.id}>{l.id}</option>
+            ))}
+          </select>
+          <select
+            value={action.visible === undefined ? 'toggle' : action.visible ? 'show' : 'hide'}
+            onChange={e => {
+              const val = e.target.value;
+              onUpdate({ ...action, visible: val === 'toggle' ? undefined : val === 'show' });
+            }}
+            style={{
+              padding: '2px 4px',
+              fontSize: 11,
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 3,
+            }}
+          >
+            <option value="toggle">토글</option>
+            <option value="show">표시</option>
+            <option value="hide">숨김</option>
+          </select>
+        </div>
+      )}
+
+      {action.type === 'play_sound' && (
+        <input
+          type="text"
+          value={action.assetRef}
+          onChange={e => onUpdate({ ...action, assetRef: e.target.value })}
+          placeholder="asset_audio_..."
+          style={{
+            width: '100%',
+            padding: '2px 4px',
+            fontSize: 11,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 3,
+            boxSizing: 'border-box',
+          }}
+        />
+      )}
+
+      {action.type === 'navigate' && (
+        <input
+          type="text"
+          value={action.targetSceneId}
+          onChange={e => onUpdate({ ...action, targetSceneId: e.target.value })}
+          placeholder="씬 ID 입력..."
+          style={{
+            width: '100%',
+            padding: '2px 4px',
+            fontSize: 11,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 3,
+            boxSizing: 'border-box',
+          }}
+        />
+      )}
+
+      {action.type === 'word_reveal' && (
+        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          wordIds: {JSON.stringify((action as { type: 'word_reveal'; wordIds: string[] }).wordIds)}
+          <br />
+          <span style={{ fontSize: 10 }}>(단어 ID를 쉼표로 구분하여 입력)</span>
+          <input
+            type="text"
+            value={(action as { type: 'word_reveal'; wordIds: string[] }).wordIds.join(', ')}
+            onChange={e => {
+              const wordIds = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+              onUpdate({ ...action, wordIds });
+            }}
+            placeholder="word_id_1, word_id_2"
+            style={{
+              width: '100%',
+              padding: '2px 4px',
+              fontSize: 11,
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 3,
+              boxSizing: 'border-box',
+              marginTop: 4,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
