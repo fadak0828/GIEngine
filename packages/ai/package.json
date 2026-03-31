@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "@gi-engine/core": "*",
     "@google/generative-ai": "^0.21.0"

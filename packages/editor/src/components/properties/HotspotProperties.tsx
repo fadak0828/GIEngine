@@ -20,6 +20,7 @@ function makeDefaultAction(type: HotspotAction['type']): HotspotAction {
     case 'toggle_layer': return { type: 'toggle_layer', layerId: '' };
     case 'composite': return { type: 'composite', actions: [] };
     case 'play_sound': return { type: 'play_sound', assetRef: '' };
+    default: throw new Error(`Unknown action type: ${type as never}`);
   }
 }
 
@@ -260,6 +261,8 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
           (상세 편집은 차후 업데이트)
         </div>
       );
+    default:
+      throw new Error(`Unknown action type: ${(action as never)}`);
   }
 }
 

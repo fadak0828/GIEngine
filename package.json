@@ -11,8 +11,9 @@
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
-    "lint": "eslint packages/*/src/**/*.ts",
+    "lint": "eslint \"packages/*/src/**/*.{ts,tsx}\" \"packages/*/tests/**/*.ts\"",
     "typecheck": "tsc --build",
+    "ci:check": "npm run lint && npm run typecheck && npm test && npm run build",
     "prd:index": "npx tsx scripts/prd-indexer.ts",
     "prd:query": "npx tsx scripts/prd-query.ts",
     "prd:test": "npx vitest run --config scripts/vitest.config.ts"
