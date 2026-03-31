@@ -56,6 +56,7 @@ export class Renderer {
   private subPuzzleRenderer: SubPuzzleRenderer;
   private wordBankPanelRenderer: WordBankPanelRenderer;
   private puzzleOverlayEl: HTMLElement | null = null;
+  private currentOverlayPuzzleState: PuzzleState | null = null;
 
   constructor(opts: RendererOptions) {
     this.container = opts.container;
@@ -571,6 +572,8 @@ export class Renderer {
     const puzzleState = caseState.puzzleStates[puzzleId];
     if (!puzzleState) return;
 
+    this.currentOverlayPuzzleState = puzzleState;
+
     // Collect words
     const caseWords = this.collectWordsForCase(def, state.caseId, caseState);
     const assignedWordIds = new Set<string>();
@@ -582,6 +585,12 @@ export class Renderer {
     if (!this.puzzleOverlayEl) {
       const overlay = document.createElement('div');
       overlay.className = 'gi-puzzle-overlay';
+
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+          this.handleBackdropClick();
+        }
+      });
 
       const closeBtn = document.createElement('button');
       closeBtn.className = 'gi-puzzle-overlay-close';
@@ -643,6 +652,24 @@ export class Renderer {
     if (this.puzzleOverlayEl) {
       this.puzzleOverlayEl.remove();
       this.puzzleOverlayEl = null;
+    }
+    this.currentOverlayPuzzleState = null;
+  }
+
+  private handleBackdropClick(): void {
+    const puzzleState = this.currentOverlayPuzzleState;
+    const hasPartialAnswers =
+      puzzleState !== null &&
+      !puzzleState.solved &&
+      Object.values(puzzleState.slotAssignments).some(v => v !== null);
+
+    if (hasPartialAnswers) {
+      const message = this.i18n.resolveKey('ui.close_puzzle_confirm');
+      if (window.confirm(message)) {
+        this.dispatch({ type: 'CLOSE_PUZZLE_OVERLAY' });
+      }
+    } else {
+      this.dispatch({ type: 'CLOSE_PUZZLE_OVERLAY' });
     }
   }
 

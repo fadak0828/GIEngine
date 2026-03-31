@@ -32,6 +32,7 @@ const ENGINE_TEXTS: Record<string, LocalizedText> = {
   'ui.puzzle_tab_relationship': { ko: '관계', en: 'Relations' },
   'ui.puzzle_tab_scenario': { ko: '시나리오', en: 'Scenario' },
   'ui.close_overlay': { ko: '닫기', en: 'Close' },
+  'ui.close_puzzle_confirm': { ko: '풀이 중인 내용이 있습니다. 정말 닫으시겠습니까?', en: 'You have unsaved progress. Close anyway?' },
 };
 
 export class I18nManager {
