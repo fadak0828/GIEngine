@@ -265,29 +265,76 @@ export class SubPuzzleRenderer {
     const container = document.createElement('div');
     container.className = 'gi-relationship';
 
+    // --- Node cards section ---
+    const nodeSection = document.createElement('div');
+    nodeSection.className = 'gi-relationship-nodes';
+
+    for (const node of puzzle.nodes) {
+      const card = document.createElement('div');
+      card.className = 'gi-relationship-node-card';
+      card.dataset.nodeId = node.id;
+
+      // Portrait (optional)
+      if (node.portrait) {
+        const portraitEl = document.createElement('div');
+        portraitEl.className = 'gi-relationship-node-portrait';
+        const src = this.resolveAssetSrc(node.portrait);
+        if (src) {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = '';
+          img.draggable = false;
+          portraitEl.appendChild(img);
+        }
+        card.appendChild(portraitEl);
+      } else {
+        // Fallback icon placeholder
+        const icon = document.createElement('div');
+        icon.className = 'gi-relationship-node-icon';
+        icon.textContent = node.label.ko.charAt(0).toUpperCase();
+        card.appendChild(icon);
+      }
+
+      // Node label
+      const label = document.createElement('div');
+      label.className = 'gi-relationship-node-label';
+      label.textContent = this.i18n.resolveText(node.label);
+      card.appendChild(label);
+
+      nodeSection.appendChild(card);
+    }
+
+    container.appendChild(nodeSection);
+
+    // --- Edge rows section ---
+    const edgeSection = document.createElement('div');
+    edgeSection.className = 'gi-relationship-edges';
+
     for (const edge of puzzle.edges) {
       const row = document.createElement('div');
       row.className = 'gi-relationship-edge';
 
-      // From node
+      // From node chip
       const fromNode = puzzle.nodes.find(n => n.id === edge.fromNodeId);
-      const fromLabel = document.createElement('span');
-      fromLabel.className = 'gi-relationship-node';
-      fromLabel.textContent = fromNode ? this.i18n.resolveText(fromNode.label) : edge.fromNodeId;
-      row.appendChild(fromLabel);
+      const fromChip = document.createElement('span');
+      fromChip.className = 'gi-relationship-edge-node gi-relationship-edge-node--from';
+      fromChip.textContent = fromNode ? this.i18n.resolveText(fromNode.label) : edge.fromNodeId;
+      row.appendChild(fromChip);
 
-      // Arrow
+      // Arrow connector
       const arrow = document.createElement('span');
       arrow.className = 'gi-relationship-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
       arrow.textContent = '\u2192';
       row.appendChild(arrow);
 
-      // Slot
+      // Relationship slot
       const slot = document.createElement('span');
-      slot.className = 'gi-slot gi-slot--empty';
+      slot.className = 'gi-slot gi-slot--empty gi-relationship-slot';
       slot.dataset.slotId = edge.slotId;
       slot.dataset.placeholder = '___';
       slot.setAttribute('role', 'button');
+      slot.setAttribute('aria-label', `${fromChip.textContent} → ? → ${puzzle.nodes.find(n => n.id === edge.toNodeId) ? this.i18n.resolveText(puzzle.nodes.find(n => n.id === edge.toNodeId)!.label) : edge.toNodeId}`);
       slot.tabIndex = 0;
 
       const assigned = state.slotAssignments[edge.slotId];
@@ -310,21 +357,24 @@ export class SubPuzzleRenderer {
       this.slotElements.set(edge.slotId, slot);
       row.appendChild(slot);
 
-      // Arrow
+      // Arrow connector to-side
       const arrow2 = document.createElement('span');
       arrow2.className = 'gi-relationship-arrow';
+      arrow2.setAttribute('aria-hidden', 'true');
       arrow2.textContent = '\u2192';
       row.appendChild(arrow2);
 
-      // To node
+      // To node chip
       const toNode = puzzle.nodes.find(n => n.id === edge.toNodeId);
-      const toLabel = document.createElement('span');
-      toLabel.className = 'gi-relationship-node';
-      toLabel.textContent = toNode ? this.i18n.resolveText(toNode.label) : edge.toNodeId;
-      row.appendChild(toLabel);
+      const toChip = document.createElement('span');
+      toChip.className = 'gi-relationship-edge-node gi-relationship-edge-node--to';
+      toChip.textContent = toNode ? this.i18n.resolveText(toNode.label) : edge.toNodeId;
+      row.appendChild(toChip);
 
-      container.appendChild(row);
+      edgeSection.appendChild(row);
     }
+
+    container.appendChild(edgeSection);
 
     return container;
   }

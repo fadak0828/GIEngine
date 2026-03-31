@@ -228,9 +228,14 @@ export class GIEngine {
       this.saveState.savedAt = new Date().toISOString();
     }
 
-    // Execute side effects
-    for (const effect of result.effects) {
-      this.executeSideEffect(effect);
+    // Execute side effects (delay SideEffect handled via scheduleDelayedEffects)
+    const hasDelay = result.effects.some(e => e.type === 'delay');
+    if (hasDelay) {
+      this.scheduleDelayedEffects(result.effects);
+    } else {
+      for (const effect of result.effects) {
+        this.executeSideEffect(effect);
+      }
     }
 
     // Re-render
@@ -379,9 +384,41 @@ export class GIEngine {
           console.log('[GIEngine] Case unlocked:', effect.caseId);
         }
         break;
+      case 'play_bgm':
+        this.audioManager.playBgm(effect.assetRef, effect.fadeDuration ?? 1.0);
+        break;
+      case 'stop_bgm':
+        this.audioManager.stopBgm(effect.fadeDuration ?? 0.5);
+        break;
       case 'word_collected_in_popup':
         this.renderer.handleWordCollectedInPopup(effect.wordId, this.definition);
         break;
+      case 'delay':
+        // v0.1: delay type is supported in ActionSequence; runtime defers
+        // subsequent scheduled effects via setTimeout when processing onEnter.
+        // No synchronous action needed here — see scheduleDelayedEffects().
+        break;
+    }
+  }
+
+  /**
+   * 지연이 포함된 효과 목록을 순서대로 실행.
+   * delay SideEffect가 있으면 이후 효과들을 해당 시간(ms) 후에 처리.
+   */
+  scheduleDelayedEffects(effects: SideEffect[]): void {
+    let accumulated = 0;
+    for (const effect of effects) {
+      if (effect.type === 'delay') {
+        accumulated += effect.duration;
+      } else {
+        const delay = accumulated;
+        const eff = effect;
+        if (delay > 0) {
+          setTimeout(() => this.executeSideEffect(eff), delay);
+        } else {
+          this.executeSideEffect(eff);
+        }
+      }
     }
   }
 

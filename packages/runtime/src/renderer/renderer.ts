@@ -47,6 +47,10 @@ export class Renderer {
   private currentView: string = '';
   private lastSlotAssignments: Record<string, string | null> = {};
   private lastCollectedWordIds: string[] = [];
+  // Tracks the sub-state reference currently shown in the popup.
+  // Used to avoid destroying and recreating the popup on incremental
+  // updates (e.g. word collection while the popup is already open).
+  private lastExaminingSubState: object | null = null;
   private puzzleBarRenderer: PuzzleBarRenderer;
   private subPuzzleRenderer: SubPuzzleRenderer;
   private puzzleOverlayEl: HTMLElement | null = null;
@@ -166,6 +170,7 @@ export class Renderer {
     this.removeLoading();
     this.lastSlotAssignments = {};       // Reset diff state when view changes
     this.lastCollectedWordIds = [];      // Reset word tracking
+    this.lastExaminingSubState = null;  // Reset popup sub-state tracking
   }
 
   // --- Loading ---
@@ -249,32 +254,57 @@ export class Renderer {
       this.puzzleBarRenderer.render(caseData2.puzzles, caseState);
     }
 
+    // Close puzzle overlay when not in puzzle_overlay sub-state
+    if (state.sub.type !== 'puzzle_overlay') {
+      this.closePuzzleOverlay();
+    }
+
     // Handle sub-states
     switch (state.sub.type) {
       case 'idle':
         this.popupRenderer.dismiss();
+        this.lastExaminingSubState = null;
         break;
       case 'examining_text':
-        this.popupRenderer.showTextPopup(
-          state.sub.content,
-          state.sub.title,
-          state.sub.highlightedWords,
-          state.sub.collectibleWords,
-          caseState.collectedWordIds,
-          (wordId: string) => {
-            this.dispatch({ type: 'COLLECT_WORD_IN_POPUP', wordId });
+        if (this.popupRenderer.isOpen() && this.lastExaminingSubState === state.sub) {
+          // Same popup already open (e.g. after collecting a word in-popup).
+          // Do incremental word-mark update instead of destroy+recreate to avoid flicker.
+          for (const wordId of caseState.collectedWordIds) {
+            if (!this.lastCollectedWordIds.includes(wordId)) {
+              this.popupRenderer.markWordCollected(wordId);
+            }
           }
-        );
+          this.lastCollectedWordIds = [...caseState.collectedWordIds];
+        } else {
+          this.lastExaminingSubState = state.sub;
+          this.lastCollectedWordIds = [...caseState.collectedWordIds];
+          this.popupRenderer.showTextPopup(
+            state.sub.content,
+            state.sub.title,
+            state.sub.highlightedWords,
+            state.sub.collectibleWords,
+            caseState.collectedWordIds,
+            (wordId: string) => {
+              this.dispatch({ type: 'COLLECT_WORD_IN_POPUP', wordId });
+            }
+          );
+        }
         break;
       case 'examining_image':
-        this.popupRenderer.showImagePopup(
-          state.sub.image,
-          state.sub.caption,
-          state.sub.innerHotspots,
-          (hotspotId: string) => {
-            this.dispatch({ type: 'INNER_HOTSPOT_CLICK', hotspotId });
-          }
-        );
+        if (this.popupRenderer.isOpen() && this.lastExaminingSubState === state.sub) {
+          // Same image popup already open — no content change needed.
+          // (word collection in image popups is handled via markWordCollected side-effect)
+        } else {
+          this.lastExaminingSubState = state.sub;
+          this.popupRenderer.showImagePopup(
+            state.sub.image,
+            state.sub.caption,
+            state.sub.innerHotspots,
+            (hotspotId: string) => {
+              this.dispatch({ type: 'INNER_HOTSPOT_CLICK', hotspotId });
+            }
+          );
+        }
         break;
       case 'word_collected': {
         this.popupRenderer.dismiss();
@@ -567,6 +597,18 @@ export class Renderer {
         dispatch: this.dispatch,
       });
       tempDeduction.render(puzzle as Puzzle, puzzleState, caseWords, assignedWordIds);
+
+      // 방금 정답을 맞힌 경우 축하 오버레이 표시
+      if (state.sub.type === 'puzzle_overlay' && state.sub.solved) {
+        const allCorrectResults: ValidationResult = { allCorrect: true, slotResults: {} };
+        for (const slotId of Object.keys(puzzleState.slotAssignments)) {
+          allCorrectResults.slotResults[slotId] = 'correct';
+        }
+        tempDeduction.showValidationResults(allCorrectResults);
+        tempDeduction.showSolvedCelebration(() => {
+          this.dispatch({ type: 'CLOSE_PUZZLE_OVERLAY' });
+        });
+      }
     } else {
       content.innerHTML = '';
       this.subPuzzleRenderer = new SubPuzzleRenderer({

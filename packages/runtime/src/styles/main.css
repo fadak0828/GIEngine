@@ -1204,8 +1204,79 @@
 .gi-relationship {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   margin-bottom: 1rem;
+}
+
+/* Node cards row */
+.gi-relationship-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gi-border);
+}
+
+.gi-relationship-node-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--gi-surface);
+  border: 1px solid var(--gi-border);
+  border-radius: var(--gi-radius);
+  min-width: 72px;
+  max-width: 96px;
+}
+
+.gi-relationship-node-portrait {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--gi-surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gi-relationship-node-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gi-relationship-node-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--gi-accent, #5a4a2a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gi-text-bright);
+}
+
+.gi-relationship-node-label {
+  font-family: var(--gi-font-body);
+  font-size: 0.8rem;
+  color: var(--gi-text-bright);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 88px;
+}
+
+/* Edge rows */
+.gi-relationship-edges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .gi-relationship-edge {
@@ -1215,6 +1286,31 @@
   flex-wrap: wrap;
 }
 
+.gi-relationship-edge-node {
+  font-family: var(--gi-font-body);
+  font-size: 0.9rem;
+  color: var(--gi-text-bright);
+  padding: 0.2rem 0.5rem;
+  background: var(--gi-surface);
+  border: 1px solid var(--gi-border);
+  border-radius: var(--gi-radius);
+  white-space: nowrap;
+}
+
+.gi-relationship-edge-node--from {
+  border-color: var(--gi-slot-border, #6b5a2a);
+}
+
+.gi-relationship-edge-node--to {
+  border-color: var(--gi-slot-border, #6b5a2a);
+}
+
+.gi-relationship-slot {
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Legacy class kept for backwards compatibility */
 .gi-relationship-node {
   font-family: var(--gi-font-body);
   font-size: 0.95rem;
