@@ -12,6 +12,7 @@ import type {
   PuzzleTemplate,
   AnswerDefinition,
   AssetDefinition,
+  AssetCategory,
   Word,
   GameSettings,
   Locale,
@@ -33,6 +34,7 @@ export type {
   PuzzleTemplate,
   AnswerDefinition,
   AssetDefinition,
+  AssetCategory,
   Word,
   GameSettings,
   Locale,
@@ -56,9 +58,13 @@ export interface SelectionState {
   puzzleId: string | null;
   layerId: string | null;
   subPuzzleId: string | null;
+  assetId: string | null;
 }
 
 export type ActivePanel = 'scene' | 'puzzle' | 'assets' | 'words' | 'settings' | 'subPuzzle' | 'validation';
+
+export type AssetViewMode = 'grid' | 'list';
+export type AssetTypeFilter = 'all' | 'image' | 'audio' | 'font';
 
 export interface UIState {
   activePanel: ActivePanel;
@@ -73,6 +79,9 @@ export interface UIState {
   autoSaveEnabled: boolean;
   autoSaveIntervalMs: number;
   notification: { message: string; type: 'success' | 'error' } | null;
+  assetViewMode: AssetViewMode;
+  assetTypeFilter: AssetTypeFilter;
+  assetSearch: string;
 }
 
 // ── History ───────────────────────────────────────────────────────
@@ -164,6 +173,12 @@ export interface EditorStore {
   updateAsset: (assetId: string, patch: Partial<AssetDefinition>) => void;
   deleteAsset: (assetId: string) => void;
 
+  // Asset UI state
+  setSelectedAsset: (assetId: string | null) => void;
+  setAssetViewMode: (mode: AssetViewMode) => void;
+  setAssetTypeFilter: (filter: AssetTypeFilter) => void;
+  setAssetSearch: (query: string) => void;
+
   // Word CRUD
   addWord: (word: Word) => void;
   updateWord: (wordId: string, patch: Partial<Word>) => void;
@@ -184,4 +199,16 @@ export interface EditorStore {
   // Convenience: set selected scene / sub-puzzle
   setSelectedScene: (sceneId: string | null) => void;
   setSelectedSubPuzzle: (subPuzzleId: string | null) => void;
+
+  // Asset selectors
+  getAssetUsages: (assetId: string) => AssetUsage[];
+}
+
+export interface AssetUsage {
+  kind: 'scene_background' | 'layer_image' | 'hotspot_action' | 'scene_bgm' | 'scene_sfx';
+  caseId: string;
+  caseName: string;
+  sceneId: string;
+  sceneName: string;
+  detail?: string;
 }

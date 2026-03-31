@@ -19,7 +19,12 @@ export function MainAreaTabBar(): React.ReactElement {
     return 0;
   });
 
-  const isSceneActive = activePanel === 'scene' || activePanel === 'assets' || activePanel === 'settings';
+  const assetCount = useEditorStore(s =>
+    s.project ? Object.keys(s.project.assets.items).length : 0
+  );
+
+  const isSceneActive = activePanel === 'scene' || activePanel === 'settings';
+  const isAssetsActive = activePanel === 'assets';
   const isWordsActive = activePanel === 'words';
   const isPuzzleActive = activePanel === 'puzzle';
   const isSubPuzzleActive = activePanel === 'subPuzzle';
@@ -79,6 +84,13 @@ export function MainAreaTabBar(): React.ReactElement {
         onClick={() => setActivePanel('scene')}
       >
         씬 편집
+      </button>
+      <button
+        style={isAssetsActive ? tabActiveStyle : tabBaseStyle}
+        onClick={() => setActivePanel('assets')}
+      >
+        에셋 관리
+        <span style={badgeStyle}>{assetCount}</span>
       </button>
       <button
         style={isWordsActive ? tabActiveStyle : tabBaseStyle}

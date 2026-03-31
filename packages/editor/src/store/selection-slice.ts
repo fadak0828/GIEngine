@@ -1,8 +1,8 @@
 import type { StateCreator } from 'zustand';
 import type { Locale } from '@gi-engine/core';
-import type { EditorStore, SelectionState, UIState, ActivePanel } from './types.js';
+import type { EditorStore, SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter } from './types.js';
 
-export type { SelectionState, UIState, ActivePanel };
+export type { SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter };
 
 // ── Default state ────────────────────────────────────────────────
 
@@ -14,6 +14,7 @@ export const defaultSelection: SelectionState = {
   puzzleId: null,
   layerId: null,
   subPuzzleId: null,
+  assetId: null,
 };
 
 export const defaultUI: UIState = {
@@ -29,6 +30,9 @@ export const defaultUI: UIState = {
   autoSaveEnabled: true,
   autoSaveIntervalMs: 60000,
   notification: null,
+  assetViewMode: 'grid',
+  assetTypeFilter: 'all',
+  assetSearch: '',
 };
 
 // ── Slice type ───────────────────────────────────────────────────
@@ -52,6 +56,10 @@ export type SelectionSlice = {
   setAutoSave: (enabled: boolean, intervalMs?: number) => void;
   showNotification: (message: string, type: 'success' | 'error', durationMs?: number) => void;
   clearNotification: () => void;
+  setSelectedAsset: (assetId: string | null) => void;
+  setAssetViewMode: (mode: AssetViewMode) => void;
+  setAssetTypeFilter: (filter: AssetTypeFilter) => void;
+  setAssetSearch: (query: string) => void;
 };
 
 // ── Slice creator ────────────────────────────────────────────────
@@ -142,5 +150,21 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   clearNotification: () => {
     set(state => ({ ui: { ...state.ui, notification: null } }));
+  },
+
+  setSelectedAsset: (assetId) => {
+    set(state => ({ selection: { ...state.selection, assetId } }));
+  },
+
+  setAssetViewMode: (mode) => {
+    set(state => ({ ui: { ...state.ui, assetViewMode: mode } }));
+  },
+
+  setAssetTypeFilter: (filter) => {
+    set(state => ({ ui: { ...state.ui, assetTypeFilter: filter } }));
+  },
+
+  setAssetSearch: (query) => {
+    set(state => ({ ui: { ...state.ui, assetSearch: query } }));
   },
 });

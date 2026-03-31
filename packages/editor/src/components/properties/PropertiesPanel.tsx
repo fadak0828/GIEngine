@@ -4,10 +4,12 @@ import { HotspotProperties } from './HotspotProperties';
 import { SceneProperties } from './SceneProperties';
 import { CaseProperties } from './CaseProperties';
 import { LayerProperties } from '@/components/layers/LayerProperties';
+import { AssetProperties } from '@/components/assets/AssetProperties';
 
 export function PropertiesPanel(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const selection = useEditorStore(s => s.selection);
+  const activePanel = useEditorStore(s => s.ui.activePanel);
 
   // Find selected scene, hotspot, layer, and case
   let selectedScene = null;
@@ -54,7 +56,14 @@ export function PropertiesPanel(): React.ReactElement {
         속성 패널
       </div>
 
-      {selectedHotspot && selectedScene ? (
+      {activePanel === 'assets' && selection.assetId ? (
+        <AssetProperties />
+      ) : activePanel === 'assets' ? (
+        <div style={{ padding: 16, color: 'var(--text-muted)', fontSize: 12, textAlign: 'center' }}>
+          <div style={{ marginBottom: 6 }}>에셋을 선택하면</div>
+          <div>속성이 여기에 표시됩니다</div>
+        </div>
+      ) : selectedHotspot && selectedScene ? (
         <HotspotProperties hotspot={selectedHotspot} scene={selectedScene} />
       ) : selectedLayer && selectedScene && selectedCaseId ? (
         <LayerProperties layer={selectedLayer} caseId={selectedCaseId} sceneId={selectedScene.id} />

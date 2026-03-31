@@ -283,6 +283,15 @@ export interface AnswerDefinition {
 
 // --- Assets ---
 
+export type AssetCategory =
+  | 'background'
+  | 'character'
+  | 'object'
+  | 'ui'
+  | 'audio_bgm'
+  | 'audio_sfx'
+  | 'font';
+
 export interface AssetManifest {
   items: Record<string, AssetDefinition>;
 }
@@ -297,6 +306,13 @@ export interface AssetDefinition {
   mimeType: string;
   size?: number;
   alt?: LocalizedText;
+  // Extended metadata
+  tags?: string[];
+  folder?: string;
+  category?: AssetCategory;
+  dimensions?: { width: number; height: number };
+  duration?: number;
+  fileSize?: number;
 }
 
 // --- Save State ---
