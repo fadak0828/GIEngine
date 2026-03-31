@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useEditorStore } from '@/store/editor-store';
+import { useEditorStore, useCanUndo, useCanRedo } from '@/store/editor-store';
 import { ExportModal } from '@/components/export/ExportModal';
 import { AISettingsModal } from '@/components/ai/AISettings';
 
@@ -7,7 +7,9 @@ export function Toolbar(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const meta = useEditorStore(s => s.meta);
   const ui = useEditorStore(s => s.ui);
-  const { newProject, saveProject, setEditorLocale } = useEditorStore();
+  const { newProject, saveProject, setEditorLocale, undo, redo } = useEditorStore();
+  const canUndo = useCanUndo();
+  const canRedo = useCanRedo();
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
@@ -59,7 +61,7 @@ export function Toolbar(): React.ReactElement {
       <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
 
       {/* Actions */}
-      <button onClick={newProject} style={btnStyle} title="새 프로젝트">
+      <button onClick={newProject} style={btnStyle} title="새 프로젝트 (Ctrl+N)">
         ＋ 새 프로젝트
       </button>
       <button onClick={handleOpen} style={btnStyle} title="열기">
@@ -69,7 +71,7 @@ export function Toolbar(): React.ReactElement {
         onClick={() => saveProject()}
         disabled={!project}
         style={{ ...btnStyle, color: meta.isDirty ? 'var(--accent)' : undefined }}
-        title="저장"
+        title="저장 (Ctrl+S)"
       >
         💾 저장{meta.isDirty ? ' *' : ''}
       </button>
@@ -80,6 +82,26 @@ export function Toolbar(): React.ReactElement {
         title="HTML 파일로 익스포트"
       >
         📤 익스포트
+      </button>
+
+      <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
+
+      {/* Undo/Redo */}
+      <button
+        onClick={undo}
+        disabled={!canUndo}
+        style={{ ...btnStyle, opacity: canUndo ? 1 : 0.4 }}
+        title="실행 취소 (Ctrl+Z)"
+      >
+        ↩ 취소
+      </button>
+      <button
+        onClick={redo}
+        disabled={!canRedo}
+        style={{ ...btnStyle, opacity: canRedo ? 1 : 0.4 }}
+        title="다시 실행 (Ctrl+Y)"
+      >
+        ↪ 복구
       </button>
 
       <div style={{ flex: 1 }} />
@@ -129,6 +151,27 @@ export function Toolbar(): React.ReactElement {
       {/* Modals */}
       <ExportModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
       <AISettingsModal open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
+
+      {/* Notification toast */}
+      {ui.notification && (
+        <div style={{
+          position: 'fixed',
+          bottom: 24,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '8px 18px',
+          borderRadius: 6,
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#000',
+          background: ui.notification.type === 'success' ? '#4ade80' : '#ef4444',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          zIndex: 9999,
+          pointerEvents: 'none',
+        }}>
+          {ui.notification.message}
+        </div>
+      )}
     </header>
   );
 }

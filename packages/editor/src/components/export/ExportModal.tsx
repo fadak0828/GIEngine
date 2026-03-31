@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useEditorStore } from '@/store/editor-store';
+import { validateProjectDefinition } from '@gi-engine/core';
 
 // Inline type to avoid compile-time dependency on @gi-engine/exporter
 interface BrowserExportResult {
@@ -30,6 +31,11 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
   const [mode, setMode] = useState<'development' | 'production'>('production');
   const [result, setResult] = useState<BrowserExportResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const validation = useMemo(() => {
+    if (!project) return null;
+    return validateProjectDefinition(project, words);
+  }, [project, words]);
 
   if (!open) return null;
 
@@ -152,6 +158,35 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
             {fileName}
           </div>
         </div>
+
+        {/* Validation summary */}
+        {validation && !validation.isValid && (
+          <div style={{
+            marginBottom: 12,
+            padding: '8px 10px',
+            background: 'rgba(239,68,68,0.1)',
+            border: '1px solid rgba(239,68,68,0.3)',
+            borderRadius: 3,
+            fontSize: 12,
+            color: '#ef4444',
+          }}>
+            ⚠ 프로젝트에 오류 {validation.errorCount}개가 있습니다.
+            익스포트 전 검증 탭에서 확인하세요.
+          </div>
+        )}
+        {validation && validation.isValid && validation.warningCount > 0 && (
+          <div style={{
+            marginBottom: 12,
+            padding: '8px 10px',
+            background: 'rgba(251,191,36,0.1)',
+            border: '1px solid rgba(251,191,36,0.3)',
+            borderRadius: 3,
+            fontSize: 12,
+            color: '#fbbf24',
+          }}>
+            ⚠ 경고 {validation.warningCount}개가 있습니다. 확인 후 익스포트하세요.
+          </div>
+        )}
 
         {/* Mode selector */}
         <div style={{ marginBottom: 16 }}>

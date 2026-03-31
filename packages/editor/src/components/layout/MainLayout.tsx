@@ -8,6 +8,7 @@ import { PreviewPane } from '@/components/preview/PreviewPane';
 import { PuzzleEditorPanel } from '@/components/puzzle/PuzzleEditorPanel';
 import { SubPuzzlePanel } from '@/components/puzzle/SubPuzzlePanel';
 import { WordManagerPanel } from '@/components/words/WordManagerPanel';
+import { ValidationPanel } from '@/components/validation/ValidationPanel';
 import { useEditorStore } from '@/store/editor-store';
 
 export function MainLayout(): React.ReactElement {
@@ -17,6 +18,7 @@ export function MainLayout(): React.ReactElement {
     if (ui.activePanel === 'puzzle') return <PuzzleEditorPanel />;
     if (ui.activePanel === 'subPuzzle') return <SubPuzzlePanel />;
     if (ui.activePanel === 'words') return <WordManagerPanel />;
+    if (ui.activePanel === 'validation') return <ValidationPanel />;
     return <SceneCanvas />;
   };
 

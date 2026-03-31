@@ -23,6 +23,7 @@ export function MainAreaTabBar(): React.ReactElement {
   const isWordsActive = activePanel === 'words';
   const isPuzzleActive = activePanel === 'puzzle';
   const isSubPuzzleActive = activePanel === 'subPuzzle';
+  const isValidationActive = activePanel === 'validation';
 
   const containerStyle: React.CSSProperties = {
     height: 36,
@@ -98,6 +99,12 @@ export function MainAreaTabBar(): React.ReactElement {
       >
         서브 퍼즐
         <span style={badgeStyle}>{subPuzzleCount}</span>
+      </button>
+      <button
+        style={isValidationActive ? tabActiveStyle : tabBaseStyle}
+        onClick={() => setActivePanel('validation')}
+      >
+        검증
       </button>
     </div>
   );
