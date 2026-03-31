@@ -1,0 +1,528 @@
+{
+  "id": "mystery-demo",
+  "version": "0.1.0",
+  "title": {
+    "ko": "연구실의 의혹",
+    "en": "The Laboratory Suspicion"
+  },
+  "description": {
+    "ko": "저명한 생물학자 박 박사가 자신의 연구실에서 독살된 채 발견되었다. 세 명의 용의자 중 진범을 찾아라.",
+    "en": "Renowned biologist Dr. Park was found poisoned in his laboratory. Identify the true culprit among three suspects."
+  },
+  "supportedLocales": ["ko", "en"],
+  "settings": {
+    "validationFeedbackDuration": 2500,
+    "autoSaveInterval": 30000,
+    "debug": false,
+    "unlockMode": "sequential",
+    "cssPrefix": "gi-"
+  },
+  "acts": [
+    {
+      "id": "act-1",
+      "title": {
+        "ko": "제1막: 연구실의 진실",
+        "en": "Act 1: Truth in the Laboratory"
+      },
+      "cases": [
+        {
+          "id": "case-lab-mystery",
+          "title": {
+            "ko": "박 박사 독살 사건",
+            "en": "The Poisoning of Dr. Park"
+          },
+          "description": {
+            "ko": "박 박사는 어젯밤 연구실에서 독약을 마신 채 발견되었다. 이인턴, 김이사, 최조교 — 세 명이 용의자로 지목되었다. 연구실과 회의실을 조사하여 진실을 밝혀라.",
+            "en": "Dr. Park was found having ingested poison in his laboratory last night. Three suspects have been identified: Intern Lee, Director Kim, and Assistant Choi. Investigate the laboratory and the meeting room to uncover the truth."
+          },
+          "prerequisites": [],
+          "thumbnail": "thumb-lab",
+          "scenes": [
+            {
+              "id": "scene-laboratory",
+              "name": {
+                "ko": "연구실",
+                "en": "Laboratory"
+              },
+              "background": "bg-laboratory",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-safe-open",
+                  "image": "img-safe-open",
+                  "position": { "x": 1400, "y": 400 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "onEnter": [
+                {
+                  "type": "play_sound",
+                  "assetRef": "sfx-lab-ambient"
+                },
+                {
+                  "type": "delay",
+                  "duration": 800
+                },
+                {
+                  "type": "play_sound",
+                  "assetRef": "sfx-notification"
+                }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-examine-body",
+                  "area": { "type": "circle", "cx": 960, "cy": 600, "radius": 80 },
+                  "action": {
+                    "type": "examine",
+                    "title": { "ko": "박 박사의 시신", "en": "Dr. Park's Body" },
+                    "content": {
+                      "ko": "박 박사는 책상 앞에 쓰러져 있다. 입술 주변에 특유의 보라색 흔적이 남아 있다 — 독약의 흔적이다. 손에는 구겨진 메모지가 쥐어져 있다.",
+                      "en": "Dr. Park collapsed in front of his desk. There is a characteristic purple residue around his lips — a sign of poison. He clutches a crumpled note in his hand."
+                    },
+                    "highlightedWords": ["word-poison", "word-dr-park"]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "시신 조사", "en": "Examine body" }
+                },
+                {
+                  "id": "hs-collect-poison",
+                  "area": { "type": "rect", "x": 800, "y": 300, "width": 120, "height": 100 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-poison"],
+                    "feedback": {
+                      "ko": "독약 증거를 확보했다.",
+                      "en": "Secured poison evidence."
+                    }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "시약병 조사", "en": "Examine vial" }
+                },
+                {
+                  "id": "hs-collect-lab-key",
+                  "area": { "type": "rect", "x": 200, "y": 450, "width": 100, "height": 80 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-lab-key"],
+                    "feedback": {
+                      "ko": "연구실 보조 열쇠를 발견했다. 누군가 복사해 둔 것이다.",
+                      "en": "Found a duplicate lab key. Someone had a copy made."
+                    }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "열쇠 조사", "en": "Examine key" }
+                },
+                {
+                  "id": "hs-examine-note",
+                  "area": { "type": "rect", "x": 1000, "y": 550, "width": 180, "height": 120 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-research-data"],
+                        "feedback": {
+                          "ko": "연구 데이터 단어를 획득했다.",
+                          "en": "Acquired 'research data' clue."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "메모지", "en": "Note" },
+                        "content": {
+                          "ko": "구겨진 메모에는 이렇게 적혀 있다: '내 연구 데이터가 유출되고 있다. 누군가 실험실에 몰래 들어오고 있어.' 박 박사가 마지막으로 쓴 글이다.",
+                          "en": "The crumpled note reads: 'My research data is being leaked. Someone is sneaking into the lab.' Dr. Park's last written words."
+                        },
+                        "highlightedWords": ["word-research-data"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "메모지 조사", "en": "Examine note" }
+                },
+                {
+                  "id": "hs-safe-toggle",
+                  "area": { "type": "rect", "x": 1400, "y": 350, "width": 160, "height": 140 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-safe-open",
+                    "visible": true
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "금고 열기", "en": "Open safe" }
+                },
+                {
+                  "id": "hs-collect-intern-clue",
+                  "area": { "type": "rect", "x": 1430, "y": 380, "width": 100, "height": 80 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-intern-lee", "word-motive-jealousy"],
+                    "feedback": {
+                      "ko": "금고 안에서 이인턴의 메일 출력본을 발견했다. '박 박사가 내 아이디어를 가로챘다.'는 내용이 담겨 있다.",
+                      "en": "Found a printed email from Intern Lee in the safe. It says 'Dr. Park stole my idea.'"
+                    }
+                  },
+                  "cursor": "pointer",
+                  "condition": { "type": "layer_visible", "layerId": "layer-safe-open" },
+                  "ariaLabel": { "ko": "금고 내부 조사", "en": "Examine safe contents" }
+                },
+                {
+                  "id": "hs-navigate-meeting",
+                  "area": { "type": "rect", "x": 1700, "y": 400, "width": 180, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-meeting-room",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "회의실로 이동", "en": "Go to meeting room" }
+                }
+              ],
+              "audio": "sfx-lab-ambient"
+            },
+            {
+              "id": "scene-meeting-room",
+              "name": {
+                "ko": "회의실",
+                "en": "Meeting Room"
+              },
+              "background": "bg-meeting-room",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "onEnter": [
+                {
+                  "type": "play_sound",
+                  "assetRef": "sfx-door"
+                }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-director-clue",
+                  "area": { "type": "rect", "x": 300, "y": 300, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-director-kim", "word-motive-money"],
+                        "feedback": {
+                          "ko": "회의 자료에서 김이사와 경쟁사 간의 비밀 거래 내역을 발견했다.",
+                          "en": "Found evidence of secret dealings between Director Kim and a competitor in the meeting materials."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "회의 자료", "en": "Meeting Documents" },
+                        "content": {
+                          "ko": "김이사가 박 박사의 연구 데이터를 경쟁사에 팔려 했다는 정황이 담긴 계약서 초안이다. 박 박사가 이를 막으려 했을 것이다.",
+                          "en": "A draft contract showing Director Kim attempted to sell Dr. Park's research data to a competitor. Dr. Park must have tried to stop him."
+                        },
+                        "highlightedWords": ["word-director-kim", "word-motive-money"]
+                      }
+                    ]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "회의 자료 조사", "en": "Examine meeting documents" }
+                },
+                {
+                  "id": "hs-collect-assistant-clue",
+                  "area": { "type": "circle", "cx": 1200, "cy": 400, "radius": 70 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-asst-choi", "word-motive-revenge"],
+                        "feedback": {
+                          "ko": "최조교의 개인 사물함에서 박 박사에게 해고 통보를 받은 편지를 발견했다.",
+                          "en": "Found a termination notice from Dr. Park in Assistant Choi's personal locker."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "해고 통보서", "en": "Termination Notice" },
+                        "content": {
+                          "ko": "박 박사가 최조교에게 보낸 해고 통보서다. '실험 데이터 조작 사실이 확인됨. 즉시 해고함.' 최조교는 복수심을 품을 충분한 이유가 있었다.",
+                          "en": "A termination notice Dr. Park sent to Assistant Choi. 'Confirmed data manipulation. Immediate termination.' Choi had ample reason for revenge."
+                        },
+                        "highlightedWords": ["word-asst-choi", "word-motive-revenge"]
+                      }
+                    ]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "사물함 조사", "en": "Examine locker" }
+                },
+                {
+                  "id": "hs-examine-cctv",
+                  "area": { "type": "rect", "x": 1600, "y": 150, "width": 120, "height": 100 },
+                  "action": {
+                    "type": "examine",
+                    "title": { "ko": "CCTV 기록", "en": "CCTV Footage" },
+                    "content": {
+                      "ko": "어젯밤 오후 11시, CCTV에 연구실에 들어가는 인물이 포착되었다. 체형으로 보아 이인턴으로 추정된다. 이인턴은 독약 제조에 필요한 화학 지식을 갖고 있다.",
+                      "en": "At 11 PM last night, CCTV captured someone entering the laboratory. Based on body type, it appears to be Intern Lee, who has the chemistry knowledge to produce the poison."
+                    },
+                    "highlightedWords": ["word-intern-lee", "word-poison"]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "CCTV 화면 조사", "en": "Examine CCTV screen" }
+                },
+                {
+                  "id": "hs-navigate-lab",
+                  "area": { "type": "rect", "x": 50, "y": 400, "width": 160, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-laboratory",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "연구실로 돌아가기", "en": "Return to laboratory" }
+                }
+              ]
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-main-culprit",
+              "title": {
+                "ko": "사건의 진실",
+                "en": "The Truth of the Case"
+              },
+              "description": {
+                "ko": "수집한 단서를 바탕으로 사건의 진실을 완성하라.",
+                "en": "Complete the truth of the case based on collected clues."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "text", "text": { "ko": "범인은 ", "en": "The culprit is " } },
+                  { "type": "slot", "slotId": "slot-culprit" },
+                  { "type": "text", "text": { "ko": "이며, 동기는 ", "en": ", whose motive was " } },
+                  { "type": "slot", "slotId": "slot-motive" },
+                  { "type": "text", "text": { "ko": "이다. 범행 도구는 ", "en": ". The weapon used was " } },
+                  { "type": "slot", "slotId": "slot-weapon" },
+                  { "type": "text", "text": { "ko": "이다.", "en": "." } }
+                ]
+              },
+              "answers": {
+                "answer-culprit": {
+                  "slotId": "slot-culprit",
+                  "correctWordId": "word-intern-lee",
+                  "partialWordIds": ["word-director-kim", "word-asst-choi"]
+                },
+                "answer-motive": {
+                  "slotId": "slot-motive",
+                  "correctWordId": "word-motive-jealousy",
+                  "partialWordIds": ["word-motive-money", "word-motive-revenge"]
+                },
+                "answer-weapon": {
+                  "slotId": "slot-weapon",
+                  "correctWordId": "word-poison",
+                  "partialWordIds": []
+                }
+              }
+            },
+            "sub": [
+              {
+                "id": "puzzle-sub-relationships",
+                "title": {
+                  "ko": "용의자 관계도",
+                  "en": "Suspect Relationship Map"
+                },
+                "type": "relationship",
+                "nodes": [
+                  {
+                    "id": "node-dr-park",
+                    "label": { "ko": "박 박사", "en": "Dr. Park" },
+                    "portrait": "portrait-dr-park"
+                  },
+                  {
+                    "id": "node-intern-lee",
+                    "label": { "ko": "이인턴", "en": "Intern Lee" },
+                    "portrait": "portrait-intern-lee"
+                  },
+                  {
+                    "id": "node-director-kim",
+                    "label": { "ko": "김이사", "en": "Director Kim" },
+                    "portrait": "portrait-director-kim"
+                  },
+                  {
+                    "id": "node-asst-choi",
+                    "label": { "ko": "최조교", "en": "Asst. Choi" },
+                    "portrait": "portrait-asst-choi"
+                  }
+                ],
+                "edges": [
+                  {
+                    "fromNodeId": "node-intern-lee",
+                    "toNodeId": "node-dr-park",
+                    "slotId": "slot-rel-intern",
+                    "answerId": "word-motive-jealousy"
+                  },
+                  {
+                    "fromNodeId": "node-director-kim",
+                    "toNodeId": "node-dr-park",
+                    "slotId": "slot-rel-director",
+                    "answerId": "word-motive-money"
+                  },
+                  {
+                    "fromNodeId": "node-asst-choi",
+                    "toNodeId": "node-dr-park",
+                    "slotId": "slot-rel-choi",
+                    "answerId": "word-motive-revenge"
+                  }
+                ]
+              },
+              {
+                "id": "puzzle-sub-timeline",
+                "title": {
+                  "ko": "사건 타임라인",
+                  "en": "Event Timeline"
+                },
+                "type": "timeline",
+                "slots": [
+                  {
+                    "slotId": "slot-timeline-1",
+                    "label": { "ko": "오후 10시: 연구실에서의 마지막 목격", "en": "10 PM: Last sighting in the lab" },
+                    "answerId": "word-dr-park"
+                  },
+                  {
+                    "slotId": "slot-timeline-2",
+                    "label": { "ko": "오후 11시: CCTV에 포착된 침입자", "en": "11 PM: Intruder caught on CCTV" },
+                    "answerId": "word-intern-lee"
+                  },
+                  {
+                    "slotId": "slot-timeline-3",
+                    "label": { "ko": "오전 7시: 시신 발견", "en": "7 AM: Body discovered" },
+                    "answerId": "word-lab-key"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "basePath": "./assets",
+    "items": {
+      "bg-laboratory": {
+        "id": "bg-laboratory",
+        "src": "backgrounds/laboratory.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-meeting-room": {
+        "id": "bg-meeting-room",
+        "src": "backgrounds/meeting-room.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "thumb-lab": {
+        "id": "thumb-lab",
+        "src": "thumbnails/lab-thumb.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "img-safe-open": {
+        "id": "img-safe-open",
+        "src": "scenes/safe-open.png",
+        "mimeType": "image/png"
+      },
+      "portrait-dr-park": {
+        "id": "portrait-dr-park",
+        "src": "portraits/dr-park.png",
+        "mimeType": "image/png"
+      },
+      "portrait-intern-lee": {
+        "id": "portrait-intern-lee",
+        "src": "portraits/intern-lee.png",
+        "mimeType": "image/png"
+      },
+      "portrait-director-kim": {
+        "id": "portrait-director-kim",
+        "src": "portraits/director-kim.png",
+        "mimeType": "image/png"
+      },
+      "portrait-asst-choi": {
+        "id": "portrait-asst-choi",
+        "src": "portraits/asst-choi.png",
+        "mimeType": "image/png"
+      },
+      "sfx-lab-ambient": {
+        "id": "sfx-lab-ambient",
+        "src": "audio/lab-ambient.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-notification": {
+        "id": "sfx-notification",
+        "src": "audio/notification.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-door": {
+        "id": "sfx-door",
+        "src": "audio/door.mp3",
+        "mimeType": "audio/mpeg"
+      }
+    }
+  },
+  "words": {
+    "word-dr-park": {
+      "id": "word-dr-park",
+      "display": { "ko": "박 박사", "en": "Dr. Park" },
+      "category": "person"
+    },
+    "word-intern-lee": {
+      "id": "word-intern-lee",
+      "display": { "ko": "이인턴", "en": "Intern Lee" },
+      "category": "person",
+      "hint": { "ko": "연구실에 몰래 들어온 인물", "en": "The one who sneaked into the lab" }
+    },
+    "word-director-kim": {
+      "id": "word-director-kim",
+      "display": { "ko": "김이사", "en": "Director Kim" },
+      "category": "person",
+      "hint": { "ko": "연구 데이터를 팔려 한 인물", "en": "The one who tried to sell the research data" }
+    },
+    "word-asst-choi": {
+      "id": "word-asst-choi",
+      "display": { "ko": "최조교", "en": "Asst. Choi" },
+      "category": "person",
+      "hint": { "ko": "해고된 연구 조교", "en": "The fired research assistant" }
+    },
+    "word-poison": {
+      "id": "word-poison",
+      "display": { "ko": "독약", "en": "Poison" },
+      "category": "evidence",
+      "hint": { "ko": "범행에 사용된 물질", "en": "Substance used in the crime" }
+    },
+    "word-lab-key": {
+      "id": "word-lab-key",
+      "display": { "ko": "연구실 열쇠", "en": "Lab Key" },
+      "category": "evidence",
+      "hint": { "ko": "복사된 비밀 열쇠", "en": "A duplicated secret key" }
+    },
+    "word-research-data": {
+      "id": "word-research-data",
+      "display": { "ko": "연구 데이터", "en": "Research Data" },
+      "category": "evidence"
+    },
+    "word-motive-jealousy": {
+      "id": "word-motive-jealousy",
+      "display": { "ko": "질투심", "en": "Jealousy" },
+      "category": "motive",
+      "hint": { "ko": "아이디어를 빼앗긴 분노", "en": "Rage at having ideas stolen" }
+    },
+    "word-motive-money": {
+      "id": "word-motive-money",
+      "display": { "ko": "금전적 이익", "en": "Financial Gain" },
+      "category": "motive"
+    },
+    "word-motive-revenge": {
+      "id": "word-motive-revenge",
+      "display": { "ko": "복수심", "en": "Revenge" },
+      "category": "motive",
+      "hint": { "ko": "부당한 해고에 대한 분노", "en": "Anger over unfair termination" }
+    }
+  }
+}
