@@ -3,14 +3,16 @@ import { useEditorStore } from '@/store/editor-store';
 import { HotspotProperties } from './HotspotProperties';
 import { SceneProperties } from './SceneProperties';
 import { CaseProperties } from './CaseProperties';
+import { LayerProperties } from '@/components/layers/LayerProperties';
 
 export function PropertiesPanel(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const selection = useEditorStore(s => s.selection);
 
-  // Find selected scene, hotspot, and case
+  // Find selected scene, hotspot, layer, and case
   let selectedScene = null;
   let selectedHotspot = null;
+  let selectedLayer = null;
   let selectedCaseId: string | null = null;
   let selectedCase = null;
 
@@ -24,6 +26,9 @@ export function PropertiesPanel(): React.ReactElement {
           selectedScene = c.scenes.find(s => s.id === selection.sceneId) ?? null;
           if (selectedScene && selection.hotspotId) {
             selectedHotspot = selectedScene.hotspots.find(h => h.id === selection.hotspotId) ?? null;
+          }
+          if (selectedScene && selection.layerId) {
+            selectedLayer = selectedScene.layers.find(l => l.id === selection.layerId) ?? null;
           }
         }
         break;
@@ -51,6 +56,8 @@ export function PropertiesPanel(): React.ReactElement {
 
       {selectedHotspot && selectedScene ? (
         <HotspotProperties hotspot={selectedHotspot} scene={selectedScene} />
+      ) : selectedLayer && selectedScene && selectedCaseId ? (
+        <LayerProperties layer={selectedLayer} caseId={selectedCaseId} sceneId={selectedScene.id} />
       ) : selectedScene && selectedCaseId ? (
         <SceneProperties scene={selectedScene} caseId={selectedCaseId} />
       ) : selectedCase && !selectedScene ? (

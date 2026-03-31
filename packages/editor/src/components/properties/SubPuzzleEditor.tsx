@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Case, SubPuzzle } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
-import { SUB_PUZZLE_TYPE_LABELS } from './SubPuzzleModal';
+import { SUB_PUZZLE_TYPE_LABELS } from '@/components/puzzle/sub-puzzle-fields/constants';
 
 // ── Styles ───────────────────────────────────────────────────────
 

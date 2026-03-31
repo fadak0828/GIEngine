@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import type { Case, SubPuzzle } from '@gi-engine/core';
+import React from 'react';
+import type { Case } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
-import { SubPuzzleEditor } from './SubPuzzleEditor';
-import { SubPuzzleModal } from './SubPuzzleModal';
 
 interface CasePropertiesProps {
   caseData: Case;
@@ -10,27 +8,10 @@ interface CasePropertiesProps {
 
 export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactElement {
   const ui = useEditorStore(s => s.ui);
-  const { updateCase, setActivePanel, addSubPuzzle } = useEditorStore();
-
-  const [editingPuzzleId, setEditingPuzzleId] = useState<string | null>(null);
+  const { updateCase, setActivePanel, setSelectedSubPuzzle } = useEditorStore();
 
   const locale = ui.editorLocale;
-
-  // Live puzzle from store for the modal
-  const editingPuzzle = editingPuzzleId
-    ? caseData.puzzles.sub.find(p => p.id === editingPuzzleId) ?? null
-    : null;
-
-  const handleAddAndEdit = (type: SubPuzzle['type']) => {
-    addSubPuzzle(caseData.id, type);
-    // Zustand updates are synchronous — grab the fresh state
-    const fresh = useEditorStore.getState();
-    const freshCase = fresh.project?.acts
-      .flatMap(a => a.cases)
-      .find(c => c.id === caseData.id);
-    const newPuzzle = freshCase?.puzzles.sub.at(-1);
-    if (newPuzzle) setEditingPuzzleId(newPuzzle.id);
-  };
+  const subCount = caseData.puzzles.sub.length;
 
   return (
     <div style={{ padding: 12 }}>
@@ -235,7 +216,7 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
         </div>
       </div>
 
-      {/* Word manager nav button */}
+      {/* Navigation buttons */}
       <button
         onClick={() => setActivePanel('words')}
         style={{
@@ -254,7 +235,6 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
         → 단어 관리 열기
       </button>
 
-      {/* Puzzle editor button */}
       <button
         onClick={() => setActivePanel('puzzle')}
         style={{
@@ -267,26 +247,28 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
           border: 'none',
           borderRadius: 3,
           cursor: 'pointer',
+          marginBottom: 8,
         }}
       >
         퍼즐 편집 열기
       </button>
 
-      {/* Sub-puzzle editor (compact list) */}
-      <SubPuzzleEditor
-        caseData={caseData}
-        onEdit={puzzle => setEditingPuzzleId(puzzle.id)}
-        onAddAndEdit={handleAddAndEdit}
-      />
-
-      {/* Sub-puzzle modal */}
-      {editingPuzzle && (
-        <SubPuzzleModal
-          caseId={caseData.id}
-          puzzle={editingPuzzle}
-          onClose={() => setEditingPuzzleId(null)}
-        />
-      )}
+      <button
+        onClick={() => setActivePanel('subPuzzle')}
+        style={{
+          width: '100%',
+          padding: '7px 12px',
+          fontSize: 12,
+          fontWeight: 600,
+          background: 'transparent',
+          color: 'var(--accent)',
+          border: '1px solid var(--accent)',
+          borderRadius: 3,
+          cursor: 'pointer',
+        }}
+      >
+        → 서브 퍼즐 편집 열기 ({subCount})
+      </button>
     </div>
   );
 }

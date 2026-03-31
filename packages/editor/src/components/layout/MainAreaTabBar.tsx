@@ -9,9 +9,20 @@ export function MainAreaTabBar(): React.ReactElement {
   });
   const { setActivePanel } = useEditorStore();
 
+  const subPuzzleCount = useEditorStore(s => {
+    const caseId = s.selection.caseId;
+    if (!caseId || !s.project) return 0;
+    for (const act of s.project.acts) {
+      const c = act.cases.find(cs => cs.id === caseId);
+      if (c) return c.puzzles.sub.length;
+    }
+    return 0;
+  });
+
   const isSceneActive = activePanel === 'scene' || activePanel === 'assets' || activePanel === 'settings';
   const isWordsActive = activePanel === 'words';
   const isPuzzleActive = activePanel === 'puzzle';
+  const isSubPuzzleActive = activePanel === 'subPuzzle';
 
   const containerStyle: React.CSSProperties = {
     height: 36,
@@ -80,6 +91,13 @@ export function MainAreaTabBar(): React.ReactElement {
         onClick={() => setActivePanel('puzzle')}
       >
         퍼즐 편집
+      </button>
+      <button
+        style={isSubPuzzleActive ? tabActiveStyle : tabBaseStyle}
+        onClick={() => setActivePanel('subPuzzle')}
+      >
+        서브 퍼즐
+        <span style={badgeStyle}>{subPuzzleCount}</span>
       </button>
     </div>
   );

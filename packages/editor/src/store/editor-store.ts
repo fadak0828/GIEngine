@@ -43,9 +43,10 @@ interface SelectionState {
   hotspotId: string | null;
   puzzleId: string | null;
   layerId: string | null;
+  subPuzzleId: string | null;
 }
 
-export type ActivePanel = 'scene' | 'puzzle' | 'assets' | 'words' | 'settings';
+export type ActivePanel = 'scene' | 'puzzle' | 'assets' | 'words' | 'settings' | 'subPuzzle';
 
 interface UIState {
   activePanel: ActivePanel;
@@ -205,8 +206,9 @@ interface EditorStore {
   setSceneTool: (tool: UIState['sceneTool']) => void;
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
 
-  // Convenience: set selected scene
+  // Convenience: set selected scene / sub-puzzle
   setSelectedScene: (sceneId: string | null) => void;
+  setSelectedSubPuzzle: (subPuzzleId: string | null) => void;
 }
 
 // ── Helper: find scene in draft ───────────────────────────────────
@@ -242,6 +244,7 @@ const defaultSelection: SelectionState = {
   hotspotId: null,
   puzzleId: null,
   layerId: null,
+  subPuzzleId: null,
 };
 
 const defaultUI: UIState = {
@@ -751,6 +754,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
           if (c) c.puzzles.sub = c.puzzles.sub.filter(p => p.id !== puzzleId);
         }),
         meta: { ...state.meta, isDirty: true },
+        selection: state.selection.subPuzzleId === puzzleId
+          ? { ...state.selection, subPuzzleId: null }
+          : state.selection,
       };
     });
   },
@@ -818,7 +824,14 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   // ── UI actions ──────────────────────────────────────────────────
   setSelection: (patch) => {
-    set(state => ({ selection: { ...state.selection, ...patch } }));
+    set(state => {
+      const next = { ...state.selection, ...patch };
+      // Reset subPuzzleId when case changes
+      if (patch.caseId !== undefined && patch.caseId !== state.selection.caseId) {
+        next.subPuzzleId = patch.subPuzzleId ?? null;
+      }
+      return { selection: next };
+    });
   },
 
   clearSelection: () => {
@@ -864,6 +877,12 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setSelectedScene: (sceneId) => {
     set(state => ({
       selection: { ...state.selection, sceneId, hotspotId: null },
+    }));
+  },
+
+  setSelectedSubPuzzle: (subPuzzleId) => {
+    set(state => ({
+      selection: { ...state.selection, subPuzzleId },
     }));
   },
 }));

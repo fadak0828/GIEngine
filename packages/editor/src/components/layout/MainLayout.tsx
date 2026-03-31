@@ -6,6 +6,7 @@ import { SceneCanvas } from '@/components/canvas/SceneCanvas';
 import { PropertiesPanel } from '@/components/properties/PropertiesPanel';
 import { PreviewPane } from '@/components/preview/PreviewPane';
 import { PuzzleEditorPanel } from '@/components/puzzle/PuzzleEditorPanel';
+import { SubPuzzlePanel } from '@/components/puzzle/SubPuzzlePanel';
 import { WordManagerPanel } from '@/components/words/WordManagerPanel';
 import { useEditorStore } from '@/store/editor-store';
 
@@ -14,6 +15,7 @@ export function MainLayout(): React.ReactElement {
 
   const renderCenterContent = () => {
     if (ui.activePanel === 'puzzle') return <PuzzleEditorPanel />;
+    if (ui.activePanel === 'subPuzzle') return <SubPuzzlePanel />;
     if (ui.activePanel === 'words') return <WordManagerPanel />;
     return <SceneCanvas />;
   };
