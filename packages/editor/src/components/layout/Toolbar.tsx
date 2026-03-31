@@ -50,9 +50,9 @@ export function Toolbar(): React.ReactElement {
       {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8 }}>
         <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="6" fill="#1a1a2e"/>
-          <rect x="4" y="4" width="10" height="10" rx="2" fill="#f59e0b"/>
-          <rect x="18" y="18" width="10" height="10" rx="2" fill="#f59e0b"/>
+          <rect width="32" height="32" rx="6" fill="var(--bg-card)"/>
+          <rect x="4" y="4" width="10" height="10" rx="2" fill="var(--accent)"/>
+          <rect x="18" y="18" width="10" height="10" rx="2" fill="var(--accent)"/>
         </svg>
         <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--accent)', letterSpacing: '0.02em' }}>GIEngine</span>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Editor</span>
@@ -163,8 +163,8 @@ export function Toolbar(): React.ReactElement {
           borderRadius: 6,
           fontSize: 13,
           fontWeight: 600,
-          color: '#000',
-          background: ui.notification.type === 'success' ? '#4ade80' : '#ef4444',
+          color: '#fff',
+          background: ui.notification.type === 'success' ? 'var(--success)' : 'var(--danger)',
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           zIndex: 9999,
           pointerEvents: 'none',

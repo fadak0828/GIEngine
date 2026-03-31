@@ -257,7 +257,7 @@ export function LayerPanel({
                           flexShrink: 0,
                           border: '1px dashed var(--border-color)',
                           background:
-                            'repeating-conic-gradient(#2a2a3a 0% 25%, #1e1e2e 0% 50%) 0 0 / 8px 8px',
+                            'repeating-conic-gradient(var(--bg-card) 0% 25%, var(--bg-panel) 0% 50%) 0 0 / 8px 8px',
                         }}
                       />
                     )}
@@ -332,7 +332,7 @@ export function LayerPanel({
                         flexShrink: 0,
                       }}
                       onMouseEnter={e =>
-                        (e.currentTarget.style.color = '#ef4444')
+                        (e.currentTarget.style.color = 'var(--danger)')
                       }
                       onMouseLeave={e =>
                         (e.currentTarget.style.color = 'var(--text-muted)')
