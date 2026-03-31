@@ -116,11 +116,79 @@ export class SubPuzzleRenderer {
   getWordElements(): Map<string, HTMLElement> { return this.wordElements; }
 
   showValidationResults(results: ValidationResult): void {
+    if (this.rootEl) {
+      const existing = this.rootEl.querySelector('.gi-validation-banner');
+      if (existing) existing.remove();
+    }
+
     for (const [slotId, result] of Object.entries(results.slotResults)) {
       const slotEl = this.slotElements.get(slotId);
       if (!slotEl) continue;
-      slotEl.classList.remove('gi-slot--correct', 'gi-slot--partial', 'gi-slot--incorrect');
+      slotEl.classList.remove('gi-slot--correct', 'gi-slot--partial', 'gi-slot--incorrect', 'gi-slot--animate');
       slotEl.classList.add(`gi-slot--${result}`);
+      if (result === 'incorrect') {
+        slotEl.classList.add('gi-slot--animate');
+      }
+    }
+
+    if (this.rootEl) {
+      const banner = document.createElement('div');
+      banner.className = `gi-validation-banner gi-validation-banner--${results.allCorrect ? 'success' : 'failure'}`;
+      banner.textContent = results.allCorrect
+        ? this.i18n.resolveKey('ui.all_correct')
+        : this.i18n.resolveKey('ui.try_again');
+      this.rootEl.appendChild(banner);
+    }
+  }
+
+  showSolvedCelebration(onContinue: () => void): void {
+    if (!this.rootEl) return;
+    if (this.rootEl.querySelector('.gi-solved-overlay')) return;
+
+    this.spawnConfetti(this.rootEl);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'gi-solved-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'gi-solved-content';
+
+    const icon = document.createElement('span');
+    icon.className = 'gi-solved-icon';
+    icon.textContent = '\u2728';
+    content.appendChild(icon);
+
+    const title = document.createElement('h2');
+    title.className = 'gi-solved-title';
+    title.textContent = this.i18n.resolveKey('ui.case_solved_msg');
+    content.appendChild(title);
+
+    const btn = document.createElement('button');
+    btn.className = 'gi-btn gi-btn--primary gi-solved-btn';
+    btn.textContent = this.i18n.resolveKey('ui.continue');
+    btn.addEventListener('click', onContinue);
+    content.appendChild(btn);
+
+    overlay.appendChild(content);
+    this.rootEl.appendChild(overlay);
+  }
+
+  private spawnConfetti(container: HTMLElement): void {
+    const colors = ['#e8c874', '#7cd694', '#d47070', '#74b4d4', '#c874e8', '#74e8c8'];
+    const count = 24;
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'gi-confetti-particle';
+      const color = colors[i % colors.length];
+      particle.style.backgroundColor = color;
+      particle.style.left = `${10 + Math.random() * 80}%`;
+      particle.style.top = `${5 + Math.random() * 30}%`;
+      const dx = (Math.random() - 0.5) * 80;
+      particle.style.setProperty('--gi-cx', `${dx}px`);
+      particle.style.animationDelay = `${Math.random() * 0.4}s`;
+      particle.style.animationDuration = `${1.2 + Math.random() * 0.8}s`;
+      container.appendChild(particle);
+      setTimeout(() => particle.remove(), 2500);
     }
   }
 

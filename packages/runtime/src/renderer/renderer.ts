@@ -644,6 +644,27 @@ export class Renderer {
         dispatch: this.dispatch,
       });
       this.subPuzzleRenderer.render(puzzle as SubPuzzle, puzzleState, caseWords, assignedWordIds);
+
+      // Show validation results if a previous attempt exists and puzzle is not yet solved
+      if (!puzzleState.solved && puzzleState.lastValidation && Object.keys(puzzleState.lastValidation).length > 0) {
+        const lastResults: ValidationResult = {
+          allCorrect: false,
+          slotResults: puzzleState.lastValidation as Record<string, 'correct' | 'partial' | 'incorrect'>,
+        };
+        this.subPuzzleRenderer.showValidationResults(lastResults);
+      }
+
+      // Show celebration if just solved
+      if (state.sub.type === 'puzzle_overlay' && state.sub.solved) {
+        const allCorrectResults: ValidationResult = { allCorrect: true, slotResults: {} };
+        for (const slotId of Object.keys(puzzleState.slotAssignments)) {
+          allCorrectResults.slotResults[slotId] = 'correct';
+        }
+        this.subPuzzleRenderer.showValidationResults(allCorrectResults);
+        this.subPuzzleRenderer.showSolvedCelebration(() => {
+          this.dispatch({ type: 'CLOSE_PUZZLE_OVERLAY' });
+        });
+      }
     }
   }
 

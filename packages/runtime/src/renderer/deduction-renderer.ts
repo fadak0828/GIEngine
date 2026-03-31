@@ -171,14 +171,20 @@ export class DeductionRenderer {
 
   showSolvedCelebration(onContinue: () => void): void {
     if (!this.rootEl) return;
-    // Prevent duplicate overlays
     if (this.rootEl.querySelector('.gi-solved-overlay')) return;
+
+    this.spawnConfetti(this.rootEl);
 
     const overlay = document.createElement('div');
     overlay.className = 'gi-solved-overlay';
 
     const content = document.createElement('div');
     content.className = 'gi-solved-content';
+
+    const icon = document.createElement('span');
+    icon.className = 'gi-solved-icon';
+    icon.textContent = '\u2728';
+    content.appendChild(icon);
 
     const title = document.createElement('h2');
     title.className = 'gi-solved-title';
@@ -193,6 +199,25 @@ export class DeductionRenderer {
 
     overlay.appendChild(content);
     this.rootEl.appendChild(overlay);
+  }
+
+  private spawnConfetti(container: HTMLElement): void {
+    const colors = ['#e8c874', '#7cd694', '#d47070', '#74b4d4', '#c874e8', '#74e8c8'];
+    const count = 28;
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'gi-confetti-particle';
+      const color = colors[i % colors.length];
+      particle.style.backgroundColor = color;
+      particle.style.left = `${10 + Math.random() * 80}%`;
+      particle.style.top = `${5 + Math.random() * 30}%`;
+      const dx = (Math.random() - 0.5) * 100;
+      particle.style.setProperty('--gi-cx', `${dx}px`);
+      particle.style.animationDelay = `${Math.random() * 0.5}s`;
+      particle.style.animationDuration = `${1.3 + Math.random() * 0.8}s`;
+      container.appendChild(particle);
+      setTimeout(() => particle.remove(), 3000);
+    }
   }
 
   destroy(): void {

@@ -273,11 +273,17 @@
   box-shadow: 0 0 12px rgba(232, 200, 116, 0.25);
 }
 
+@keyframes gi-glow-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(74, 140, 92, 0.2); }
+  50%       { box-shadow: 0 0 14px 2px rgba(74, 140, 92, 0.55); }
+}
+
 .gi-slot--correct {
   border-color: var(--gi-correct);
   border-style: solid;
   background: var(--gi-correct-bg);
   color: #7cd694;
+  animation: gi-glow-pulse 1.8s ease-in-out infinite;
 }
 
 .gi-slot--partial {
@@ -297,14 +303,21 @@
 /* validation shake */
 @keyframes gi-shake {
   0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-3px); }
-  80% { transform: translateX(3px); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes gi-flash-red {
+  0%   { background: var(--gi-incorrect-bg); }
+  25%  { background: rgba(180, 50, 50, 0.45); }
+  60%  { background: rgba(160, 40, 40, 0.3); }
+  100% { background: var(--gi-incorrect-bg); }
 }
 
 .gi-slot--incorrect.gi-slot--animate {
-  animation: gi-shake 0.4s ease;
+  animation: gi-shake 0.45s ease, gi-flash-red 0.5s ease;
 }
 
 /* --- Word Bank --- */
@@ -943,6 +956,27 @@
   color: #d47070;
 }
 
+/* --- Confetti Particles --- */
+@keyframes gi-confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  80%  { opacity: 0.9; }
+  100% { transform: translateY(160px) rotate(720deg) scale(0.4); opacity: 0; }
+}
+
+@keyframes gi-confetti-side {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(140px) translateX(var(--gi-cx, 20px)) rotate(540deg); opacity: 0; }
+}
+
+.gi-confetti-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: gi-confetti-side 1.6s ease-out forwards;
+}
+
 /* --- Solved Celebration Overlay --- */
 .gi-solved-overlay {
   position: absolute;
@@ -950,28 +984,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 8, 5, 0.85);
+  background: rgba(10, 8, 5, 0.88);
   z-index: 60;
-  animation: gi-fade-in 0.4s ease;
+  animation: gi-fade-in 0.35s ease;
+  overflow: hidden;
 }
 
 .gi-solved-content {
   text-align: center;
-  animation: gi-solved-pop 0.5s ease;
+  animation: gi-solved-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes gi-solved-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.gi-solved-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  animation: gi-solved-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
 
 .gi-solved-title {
@@ -981,7 +1017,7 @@
   color: var(--gi-text-accent);
   margin: 0 0 1.5rem;
   letter-spacing: 0.06em;
-  text-shadow: 0 0 30px rgba(232, 200, 116, 0.4);
+  text-shadow: 0 0 40px rgba(232, 200, 116, 0.6), 0 0 12px rgba(232, 200, 116, 0.3);
 }
 
 .gi-solved-btn {
@@ -1124,6 +1160,8 @@
   border-radius: var(--gi-radius-lg);
   padding: 1.5rem;
   box-shadow: 0 8px 32px var(--gi-shadow);
+  position: relative;
+  overflow: hidden;
 }
 
 .gi-sub-puzzle-header h3 {
