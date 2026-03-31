@@ -569,4 +569,3 @@ describe('NAVIGATE_SCENE — onEnter 및 BGM 처리', () => {
     expect(hasSfx).toBe(true);
   });
 });
-});

@@ -219,4 +219,103 @@ describe('Puzzle overlay in exploring state (Task 5)', () => {
     // State stays in exploring with puzzle_overlay
     expect(result.nextState.type).toBe('exploring');
   });
+
+  it('VALIDATE_PUZZLE correct answer sets solved flag in sub-state (celebration trigger)', () => {
+    const save = makeSave();
+    save.caseStates['case-1'].puzzleStates['sub-puzzle-1'].slotAssignments = {
+      'sub-slot-a': 'word-x',
+      'sub-slot-b': 'word-y',
+    };
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'sub-puzzle-1' },
+    };
+    const result = transition(overlayState, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    // Sub-state should have solved=true to trigger celebration in renderer
+    if (result.nextState.type === 'exploring' && result.nextState.sub.type === 'puzzle_overlay') {
+      expect(result.nextState.sub.solved).toBe(true);
+    } else {
+      throw new Error('Expected exploring/puzzle_overlay state');
+    }
+  });
+
+  it('VALIDATE_PUZZLE incorrect answer does not set solved flag', () => {
+    const save = makeSave();
+    save.caseStates['case-1'].puzzleStates['sub-puzzle-1'].slotAssignments = {
+      'sub-slot-a': 'word-wrong',
+      'sub-slot-b': 'word-y',
+    };
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'sub-puzzle-1' },
+    };
+    const result = transition(overlayState, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    if (result.nextState.type === 'exploring' && result.nextState.sub.type === 'puzzle_overlay') {
+      expect(result.nextState.sub.solved).toBeUndefined();
+    } else {
+      throw new Error('Expected exploring/puzzle_overlay state');
+    }
+  });
+
+  it('VALIDATE_PUZZLE correct on main puzzle marks case as completed', () => {
+    const save = makeSave();
+    save.caseStates['case-1'].puzzleStates['puzzle-main'] = {
+      solved: false,
+      slotAssignments: { 'slot-1': 'word-answer' },
+      attemptCount: 0,
+    };
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'puzzle-main' },
+    };
+    const result = transition(overlayState, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case-1']?.status).toBe('completed');
+  });
+
+  it('CLOSE_PUZZLE_OVERLAY after solving main puzzle (single case) transitions to game_completed', () => {
+    // With only one case in testDef and it being completed → game_completed
+    const save = makeSave();
+    save.caseStates['case-1'].puzzleStates['puzzle-main'] = {
+      solved: true,
+      slotAssignments: { 'slot-1': 'word-answer' },
+      attemptCount: 1,
+    };
+    save.caseStates['case-1'].status = 'completed';
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'puzzle-main', solved: true },
+    };
+    const result = transition(overlayState, save, { type: 'CLOSE_PUZZLE_OVERLAY' }, testDef);
+    // Single-case game → all cases completed → game_completed
+    expect(result.nextState.type).toBe('game_completed');
+  });
+
+  it('CLOSE_PUZZLE_OVERLAY after solving non-main puzzle returns to idle', () => {
+    const save = makeSave();
+    save.caseStates['case-1'].puzzleStates['sub-puzzle-1'] = {
+      solved: true,
+      slotAssignments: { 'sub-slot-a': 'word-x', 'sub-slot-b': 'word-y' },
+      attemptCount: 1,
+    };
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'sub-puzzle-1', solved: true },
+    };
+    const result = transition(overlayState, save, { type: 'CLOSE_PUZZLE_OVERLAY' }, testDef);
+    // Non-main puzzle → back to idle
+    expect(result.nextState.type).toBe('exploring');
+    if (result.nextState.type === 'exploring') {
+      expect(result.nextState.sub.type).toBe('idle');
+    }
+  });
 });

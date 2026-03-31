@@ -115,6 +115,45 @@ function handleCaseSelect(
   return noTransition(state);
 }
 
+// --- Exploring helpers ---
+
+/**
+ * puzzle_overlay 닫기 공통 로직.
+ * CLOSE_PUZZLE_OVERLAY와 CLOSE_PUZZLE(puzzle_overlay 컨텍스트) 양쪽에서 사용.
+ */
+function closePuzzleOverlayResult(
+  state: GameState & { type: 'exploring' },
+  save: SaveState,
+  caseData: ReturnType<typeof findCase>,
+  caseState: CaseState,
+  def: GameDefinition
+): StateTransitionResult {
+  if (!caseData) return { nextState: state, effects: [] };
+
+  // 메인 퍼즐이 방금 풀렸다면 → case_completed 또는 game_completed
+  if (state.sub.type === 'puzzle_overlay' && state.sub.puzzleId === caseData.puzzles.main.id) {
+    const closedPuzzleState = caseState.puzzleStates[state.sub.puzzleId];
+    if (closedPuzzleState?.solved) {
+      const allCases = getAllCases(def);
+      const allCompleted = allCases.every(c => {
+        const cs = save.caseStates[c.id];
+        return cs && cs.status === 'completed';
+      });
+
+      if (allCompleted) {
+        return { nextState: { type: 'game_completed' }, effects: [] };
+      }
+
+      return { nextState: { type: 'case_completed', caseId: state.caseId }, effects: [] };
+    }
+  }
+
+  return {
+    nextState: { ...state, sub: { type: 'idle' } },
+    effects: [],
+  };
+}
+
 // --- Exploring ---
 
 function handleExploring(
@@ -132,6 +171,25 @@ function handleExploring(
     case 'NAVIGATE_SCENE': {
       const targetScene = findScene(caseData, event.sceneId);
       if (!targetScene) return noTransition(state);
+
+      const navEffects: SideEffect[] = [];
+
+      // BGM 처리
+      if (targetScene.bgmStop) {
+        navEffects.push({ type: 'stop_bgm' });
+      } else if (targetScene.bgm) {
+        navEffects.push({ type: 'play_bgm', assetRef: targetScene.bgm, loop: true });
+      }
+
+      // onEnter 액션 처리
+      if (targetScene.onEnter) {
+        for (const action of targetScene.onEnter) {
+          const onEnterEffects = hotspotActionToEffects(action);
+          navEffects.push(...onEnterEffects);
+        }
+      }
+
+      navEffects.push({ type: 'save_game' });
 
       return {
         nextState: {
@@ -152,7 +210,7 @@ function handleExploring(
             },
           },
         },
-        effects: [{ type: 'save_game' }],
+        effects: navEffects,
       };
     }
 
@@ -257,6 +315,14 @@ function handleExploring(
       };
     }
 
+    case 'CLOSE_PUZZLE': {
+      // DeductionRenderer의 돌아가기 버튼은 CLOSE_PUZZLE을 dispatch한다.
+      // 퍼즐이 puzzle_overlay 서브스테이트로 열린 경우에도 이 이벤트가 올 수 있으므로
+      // puzzle_overlay 상태일 때는 CLOSE_PUZZLE_OVERLAY와 동일하게 처리한다.
+      if (state.sub.type !== 'puzzle_overlay') return noTransition(state);
+      return closePuzzleOverlayResult(state, save, caseData, caseState, def);
+    }
+
     case 'CLOSE_POPUP': {
       return {
         nextState: { ...state, sub: { type: 'idle' } },
@@ -337,10 +403,7 @@ function handleExploring(
     }
 
     case 'CLOSE_PUZZLE_OVERLAY': {
-      return {
-        nextState: { ...state, sub: { type: 'idle' } },
-        effects: [],
-      };
+      return closePuzzleOverlayResult(state, save, caseData, caseState, def);
     }
 
     // Task 5: Puzzle word operations in puzzle_overlay sub-state
@@ -467,12 +530,55 @@ function handleExploring(
         },
       };
 
+      const valEffects: SideEffect[] = [];
+
+      // 메인 퍼즐 완료 → 사건 완료 + 다음 사건 해금
+      if (valResult.allCorrect && state.sub.puzzleId === caseData.puzzles.main.id) {
+        updatedValCaseState.status = 'completed';
+
+        if (def.settings.unlockMode === 'sequential') {
+          const allCases = getAllCases(def);
+          const currentIdx = allCases.findIndex(c => c.id === state.caseId);
+          if (currentIdx >= 0 && currentIdx < allCases.length - 1) {
+            const nextCase = allCases[currentIdx + 1];
+            const nextCaseState = save.caseStates[nextCase.id];
+            if (nextCaseState && nextCaseState.status === 'locked') {
+              updatedValCaseState;
+              const updatedSaveCases = {
+                ...save.caseStates,
+                [state.caseId]: updatedValCaseState,
+                [nextCase.id]: { ...nextCaseState, status: 'unlocked' as const },
+              };
+              valEffects.push({ type: 'unlock_case', caseId: nextCase.id });
+              valEffects.push({ type: 'save_game' });
+              return {
+                nextState: {
+                  ...state,
+                  sub: valResult.allCorrect
+                    ? { type: 'puzzle_overlay' as const, puzzleId: state.sub.puzzleId, solved: true }
+                    : state.sub,
+                },
+                saveState: { caseStates: updatedSaveCases },
+                effects: valEffects,
+              };
+            }
+          }
+        }
+      }
+
+      valEffects.push({ type: 'save_game' });
+
       return {
-        nextState: state,
+        nextState: {
+          ...state,
+          sub: valResult.allCorrect
+            ? { type: 'puzzle_overlay' as const, puzzleId: state.sub.puzzleId, solved: true }
+            : state.sub,
+        },
         saveState: {
           caseStates: { ...save.caseStates, [state.caseId]: updatedValCaseState },
         },
-        effects: [{ type: 'save_game' }],
+        effects: valEffects,
       };
     }
 
@@ -578,6 +684,13 @@ function handleHotspotAction(
           },
         },
         effects: [],
+      };
+    }
+
+    case 'play_sound': {
+      return {
+        nextState: state,
+        effects: [{ type: 'play_sound', assetRef: action.assetRef }],
       };
     }
 
@@ -854,6 +967,23 @@ function handleThinking(
 
     default:
       return noTransition(state);
+  }
+}
+
+/**
+ * onEnter 액션을 SideEffect로 변환.
+ * UI 인터랙션이 필요한 액션(examine, navigate 등)은 onEnter에서 무시.
+ */
+function hotspotActionToEffects(action: HotspotAction): SideEffect[] {
+  switch (action.type) {
+    case 'play_sound':
+      return [{ type: 'play_sound', assetRef: action.assetRef }];
+    case 'delay':
+      return [{ type: 'delay', duration: action.duration }];
+    case 'composite':
+      return action.actions.flatMap(a => hotspotActionToEffects(a));
+    default:
+      return [];
   }
 }
 

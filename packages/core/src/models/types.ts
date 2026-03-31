@@ -62,6 +62,8 @@ export interface Scene {
   layers: SceneLayer[];
   onEnter?: ActionSequence;
   audio?: AssetRef;
+  bgm?: AssetRef;       // 씬 진입 시 자동 재생할 BGM
+  bgmStop?: boolean;    // true면 씬 진입 시 BGM 정지
 }
 
 export interface SceneLayer {
@@ -105,7 +107,9 @@ export type HotspotAction =
   | WordRevealAction
   | NavigateAction
   | ToggleLayerAction
-  | CompositeAction;
+  | CompositeAction
+  | PlaySoundAction
+  | DelayAction;
 
 export interface ExamineAction {
   type: 'examine';
@@ -144,6 +148,21 @@ export interface CompositeAction {
   type: 'composite';
   actions: HotspotAction[];
   delayBetween?: number;
+}
+
+export interface PlaySoundAction {
+  type: 'play_sound';
+  assetRef: AssetRef;
+}
+
+/**
+ * 씬 전환 시퀀스 내에서 일시 중지를 삽입하는 딜레이 액션.
+ * onEnter ActionSequence 및 CompositeAction 내에서 사용.
+ */
+export interface DelayAction {
+  type: 'delay';
+  /** 대기 시간 (밀리초) */
+  duration: number;
 }
 
 export type ActionSequence = HotspotAction[];
@@ -321,7 +340,7 @@ export type ExploringSubState =
   | { type: 'examining_image'; image: AssetRef; caption?: LocalizedText; innerHotspots?: Hotspot[] }
   | { type: 'word_collected'; wordIds: string[] }
   | { type: 'transitioning'; targetSceneId: string }
-  | { type: 'puzzle_overlay'; puzzleId: string };
+  | { type: 'puzzle_overlay'; puzzleId: string; solved?: boolean };
 
 export type ThinkingSubState =
   | { type: 'editing' }
@@ -364,12 +383,16 @@ export interface StateTransitionResult {
 
 export type SideEffect =
   | { type: 'play_sound'; assetRef: AssetRef }
+  | { type: 'play_bgm'; assetRef: AssetRef; loop?: boolean; fadeDuration?: number }
+  | { type: 'stop_bgm'; fadeDuration?: number }
   | { type: 'save_game' }
   | { type: 'show_popup'; content: PopupContent }
   | { type: 'close_popup' }
   | { type: 'animation'; target: string; animation: string }
   | { type: 'unlock_case'; caseId: string }
-  | { type: 'word_collected_in_popup'; wordId: string };
+  | { type: 'word_collected_in_popup'; wordId: string }
+  /** 씬 전환 시퀀스에서 지정 시간(ms)만큼 대기 */
+  | { type: 'delay'; duration: number };
 
 export interface PopupContent {
   title?: LocalizedText;
