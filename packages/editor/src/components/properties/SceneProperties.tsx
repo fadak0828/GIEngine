@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { Scene, HotspotAction } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
 import { LayerPanel } from '@/components/layers/LayerPanel';
+import { AudioAssetPicker } from '@/components/shared/AudioAssetPicker';
 
 interface ScenePropertiesProps {
   scene: Scene;
@@ -695,21 +696,9 @@ function OnEnterActionRow({
       )}
 
       {action.type === 'play_sound' && (
-        <input
-          type="text"
-          value={action.assetRef}
-          onChange={e => onUpdate({ ...action, assetRef: e.target.value })}
-          placeholder="asset_audio_..."
-          style={{
-            width: '100%',
-            padding: '2px 4px',
-            fontSize: 11,
-            background: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 3,
-            boxSizing: 'border-box',
-          }}
+        <AudioAssetPicker
+          assetId={action.assetRef}
+          onChange={assetRef => onUpdate({ ...action, assetRef })}
         />
       )}
 

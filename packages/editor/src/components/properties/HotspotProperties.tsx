@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { LocalizedTextInput } from '@/components/shared/LocalizedTextInput';
 import { WordDropdown } from '@/components/words/WordDropdown';
+import { AudioAssetPicker } from '@/components/shared/AudioAssetPicker';
 import { CollectibleWordsEditor } from './CollectibleWordsEditor';
 import { InnerHotspotEditor } from './InnerHotspotEditor';
 import type { Hotspot, HotspotAction, Scene } from '@gi-engine/core';
@@ -242,13 +243,10 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
     case 'play_sound':
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Field label="오디오 에셋 ID">
-            <input
-              type="text"
-              value={action.assetRef}
-              onChange={e => onChange({ ...action, assetRef: e.target.value })}
-              placeholder="asset_audio_..."
-              style={{ width: '100%' }}
+          <Field label="오디오 에셋">
+            <AudioAssetPicker
+              assetId={action.assetRef}
+              onChange={assetRef => onChange({ ...action, assetRef })}
             />
           </Field>
         </div>
