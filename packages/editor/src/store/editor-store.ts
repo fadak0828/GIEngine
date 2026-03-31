@@ -173,6 +173,7 @@ interface EditorStore {
   addLayer: (caseId: string, sceneId: string) => void;
   updateLayer: (caseId: string, sceneId: string, layerId: string, patch: Partial<SceneLayer>) => void;
   deleteLayer: (caseId: string, sceneId: string, layerId: string) => void;
+  reorderLayers: (caseId: string, sceneId: string, fromIndex: number, toIndex: number) => void;
 
   // Puzzle CRUD
   updateMainPuzzle: (caseId: string, patch: Partial<Puzzle>) => void;
@@ -632,6 +633,29 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
         project: produce(state.project, draft => {
           const scene = findSceneInDraft(draft, caseId, sceneId);
           if (scene) scene.layers = scene.layers.filter(l => l.id !== layerId);
+        }),
+        meta: { ...state.meta, isDirty: true },
+      };
+    });
+  },
+
+  reorderLayers: (caseId, sceneId, fromIndex, toIndex) => {
+    set(state => {
+      if (!state.project) return state;
+      return {
+        project: produce(state.project, draft => {
+          const scene = findSceneInDraft(draft, caseId, sceneId);
+          if (!scene) return;
+          // Work in sorted order (highest zIndex first = top of list)
+          const sorted = [...scene.layers].sort((a, b) => b.zIndex - a.zIndex);
+          const [removed] = sorted.splice(fromIndex, 1);
+          sorted.splice(toIndex, 0, removed);
+          // Reassign zIndex so position in list matches rendering order
+          const maxZ = sorted.length;
+          sorted.forEach((layer, i) => {
+            const target = scene.layers.find(l => l.id === layer.id);
+            if (target) target.zIndex = maxZ - i;
+          });
         }),
         meta: { ...state.meta, isDirty: true },
       };

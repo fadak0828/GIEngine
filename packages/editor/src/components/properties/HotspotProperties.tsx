@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { LocalizedTextInput } from '@/components/shared/LocalizedTextInput';
 import { WordDropdown } from '@/components/words/WordDropdown';
@@ -19,12 +19,23 @@ function makeDefaultAction(type: HotspotAction['type']): HotspotAction {
     case 'navigate': return { type: 'navigate', targetSceneId: '' };
     case 'toggle_layer': return { type: 'toggle_layer', layerId: '' };
     case 'composite': return { type: 'composite', actions: [] };
+    case 'play_sound': return { type: 'play_sound', assetRef: '' };
   }
 }
 
 export function HotspotProperties({ hotspot, scene }: HotspotPropertiesProps): React.ReactElement {
   const selection = useEditorStore(s => s.selection);
-  const { updateHotspot, updateHotspotAction } = useEditorStore();
+  const { updateHotspot, updateHotspotAction, setPanelWidth } = useEditorStore();
+
+  // Auto-expand panel for complex action types
+  useEffect(() => {
+    const actionType = hotspot.action.type;
+    if (actionType === 'examine_image' || actionType === 'composite') {
+      setPanelWidth('right', 360);
+    } else {
+      setPanelWidth('right', 300);
+    }
+  }, [hotspot.action.type, setPanelWidth]);
 
   if (!selection.caseId || !selection.sceneId) return <div />;
 
@@ -102,6 +113,7 @@ export function HotspotProperties({ hotspot, scene }: HotspotPropertiesProps): R
           <option value="word_reveal">단어 획득</option>
           <option value="navigate">씬 이동</option>
           <option value="toggle_layer">레이어 토글</option>
+          <option value="play_sound">효과음 재생</option>
           <option value="composite">복합 액션</option>
         </select>
       </Field>
@@ -222,6 +234,21 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
               <option value="show">표시</option>
               <option value="hide">숨김</option>
             </select>
+          </Field>
+        </div>
+      );
+
+    case 'play_sound':
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Field label="오디오 에셋 ID">
+            <input
+              type="text"
+              value={action.assetRef}
+              onChange={e => onChange({ ...action, assetRef: e.target.value })}
+              placeholder="asset_audio_..."
+              style={{ width: '100%' }}
+            />
           </Field>
         </div>
       );

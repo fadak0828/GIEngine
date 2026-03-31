@@ -1,20 +1,55 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { Scene } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
+import { LayerPanel } from '@/components/layers/LayerPanel';
 
 interface ScenePropertiesProps {
   scene: Scene;
   caseId: string;
 }
 
-export function SceneProperties({ scene, caseId }: ScenePropertiesProps): React.ReactElement {
+export function SceneProperties({
+  scene,
+  caseId,
+}: ScenePropertiesProps): React.ReactElement {
   const ui = useEditorStore(s => s.ui);
   const project = useEditorStore(s => s.project);
   const { addAsset, updateScene } = useEditorStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bgmFileInputRef = useRef<HTMLInputElement>(null);
 
-  const bgAsset = scene.background ? project?.assets.items[scene.background] : null;
+  // ── Section collapse state ─────────────────────────────────────
+  const [bgOpen, setBgOpen] = useState(true);
+  const [bgmOpen, setBgmOpen] = useState(true);
+
+  // ── BGM preview state ─────────────────────────────────────────
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+  const [bgmPlaying, setBgmPlaying] = useState(false);
+  const [bgmLoading, setBgmLoading] = useState(false);
+
+  // Cleanup audio on unmount or scene change
+  useEffect(() => {
+    return () => {
+      audioEl?.pause();
+    };
+  }, [audioEl]);
+
+  // Stop playback when scene changes
+  useEffect(() => {
+    if (audioEl) {
+      audioEl.pause();
+      setAudioEl(null);
+      setBgmPlaying(false);
+      setBgmLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scene.id]);
+
+  const bgAsset = scene.background
+    ? project?.assets.items[scene.background]
+    : null;
+  const bgmAsset = scene.bgm ? project?.assets.items[scene.bgm] : null;
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -22,6 +57,94 @@ export function SceneProperties({ scene, caseId }: ScenePropertiesProps): React.
 
   const handleRemoveBackground = () => {
     updateScene(caseId, scene.id, { background: '' });
+  };
+
+  const handleBgmUploadClick = () => {
+    bgmFileInputRef.current?.click();
+  };
+
+  const handleRemoveBgm = () => {
+    if (audioEl) {
+      audioEl.pause();
+      setAudioEl(null);
+      setBgmPlaying(false);
+    }
+    updateScene(caseId, scene.id, { bgm: undefined });
+  };
+
+  const handleBgmPlay = () => {
+    if (!bgmAsset) return;
+
+    if (bgmPlaying && audioEl) {
+      audioEl.pause();
+      audioEl.currentTime = 0;
+      setAudioEl(null);
+      setBgmPlaying(false);
+      setBgmLoading(false);
+      return;
+    }
+
+    const src = bgmAsset.inline
+      ? `data:${bgmAsset.mimeType};base64,${bgmAsset.inline}`
+      : bgmAsset.src;
+
+    if (!src) return;
+
+    setBgmLoading(true);
+    const el = new Audio(src);
+    el.loop = false;
+
+    el.oncanplaythrough = () => {
+      setBgmLoading(false);
+    };
+
+    el.onended = () => {
+      setBgmPlaying(false);
+      setAudioEl(null);
+    };
+
+    el.onerror = () => {
+      setBgmLoading(false);
+      setBgmPlaying(false);
+      setAudioEl(null);
+    };
+
+    setAudioEl(el);
+    el.play().then(() => {
+      setBgmPlaying(true);
+      setBgmLoading(false);
+    }).catch(() => {
+      setBgmLoading(false);
+    });
+  };
+
+  const handleBgmFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onerror = () => {
+      console.error('오디오 파일을 읽는 중 오류가 발생했습니다.');
+    };
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const [header, base64Data] = dataUrl.split(',');
+      const mimeType = header.replace('data:', '').replace(';base64', '');
+
+      const assetId = `asset_bgm_${Date.now()}`;
+      addAsset({
+        id: assetId,
+        type: 'audio',
+        src: '',
+        inline: base64Data,
+        mimeType,
+        size: file.size,
+        alt: { ko: file.name, en: file.name },
+      });
+      updateScene(caseId, scene.id, { bgm: assetId });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +157,6 @@ export function SceneProperties({ scene, caseId }: ScenePropertiesProps): React.
     };
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      // dataUrl format: data:<mimeType>;base64,<data>
       const [header, base64Data] = dataUrl.split(',');
       const mimeType = header.replace('data:', '').replace(';base64', '');
 
@@ -51,108 +173,328 @@ export function SceneProperties({ scene, caseId }: ScenePropertiesProps): React.
       updateScene(caseId, scene.id, { background: assetId });
     };
     reader.readAsDataURL(file);
-
-    // Reset file input so the same file can be re-selected
     e.target.value = '';
   };
 
   return (
     <div style={{ padding: 12 }}>
       {/* Scene name */}
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: 'var(--text-primary)',
+          marginBottom: 8,
+        }}
+      >
         🎬 {scene.name[ui.editorLocale]}
       </div>
 
       {/* Scene metadata */}
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
+      <div
+        style={{
+          fontSize: 12,
+          color: 'var(--text-secondary)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          marginBottom: 12,
+        }}
+      >
         <span>ID: {scene.id}</span>
-        <span>해상도: {scene.dimensions.width} × {scene.dimensions.height}</span>
+        <span>
+          해상도: {scene.dimensions.width} × {scene.dimensions.height}
+        </span>
         <span>핫스팟: {scene.hotspots.length}개</span>
       </div>
 
-      {/* Background section */}
+      {/* ── Background section ── */}
       <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 12 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-          배경 이미지
-        </div>
+        <SectionHeader
+          label="배경 이미지"
+          open={bgOpen}
+          onToggle={() => setBgOpen(o => !o)}
+        />
 
-        {/* Thumbnail */}
-        <div
-          style={{
-            width: '100%',
-            aspectRatio: `${scene.dimensions.width} / ${scene.dimensions.height}`,
-            marginBottom: 8,
-            borderRadius: 4,
-            border: '1px solid var(--border-color)',
-            overflow: 'hidden',
-            background: bgAsset
-              ? undefined
-              : 'repeating-conic-gradient(#2a2a3a 0% 25%, #1e1e2e 0% 50%) 0 0 / 16px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {bgAsset ? (
-            <img
-              src={bgAsset.inline ? `data:${bgAsset.mimeType};base64,${bgAsset.inline}` : bgAsset.src}
-              alt={bgAsset.alt?.ko ?? ''}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-            />
-          ) : (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>배경 없음</span>
-          )}
-        </div>
-
-        {/* Upload / Remove buttons */}
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            onClick={handleUploadClick}
-            style={{
-              flex: 1,
-              padding: '5px 8px',
-              fontSize: 11,
-              background: 'var(--accent)',
-              color: '#000',
-              border: 'none',
-              borderRadius: 3,
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
-            이미지 업로드
-          </button>
-          {bgAsset && (
-            <button
-              onClick={handleRemoveBackground}
+        {bgOpen && (
+          <>
+            {/* Thumbnail */}
+            <div
               style={{
-                padding: '5px 8px',
+                width: '100%',
+                aspectRatio: `${scene.dimensions.width} / ${scene.dimensions.height}`,
+                marginBottom: 8,
+                borderRadius: 4,
+                border: '1px solid var(--border-color)',
+                overflow: 'hidden',
+                background: bgAsset
+                  ? undefined
+                  : 'repeating-conic-gradient(#2a2a3a 0% 25%, #1e1e2e 0% 50%) 0 0 / 16px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {bgAsset ? (
+                <img
+                  src={
+                    bgAsset.inline
+                      ? `data:${bgAsset.mimeType};base64,${bgAsset.inline}`
+                      : bgAsset.src
+                  }
+                  alt={bgAsset.alt?.ko ?? ''}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  배경 없음
+                </span>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                onClick={handleUploadClick}
+                style={{
+                  flex: 1,
+                  padding: '5px 8px',
+                  fontSize: 11,
+                  background: 'var(--accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: 3,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+              >
+                이미지 업로드
+              </button>
+              {bgAsset && (
+                <button
+                  onClick={handleRemoveBackground}
+                  style={{
+                    padding: '5px 8px',
+                    fontSize: 11,
+                    background: 'transparent',
+                    color: '#ef4444',
+                    border: '1px solid #ef4444',
+                    borderRadius: 3,
+                    cursor: 'pointer',
+                  }}
+                >
+                  제거
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </>
+        )}
+      </div>
+
+      {/* ── BGM section ── */}
+      <div
+        style={{
+          borderTop: '1px solid var(--border-color)',
+          paddingTop: 12,
+          marginTop: 12,
+        }}
+      >
+        <SectionHeader
+          label="BGM (배경음악)"
+          open={bgmOpen}
+          onToggle={() => setBgmOpen(o => !o)}
+        />
+
+        {bgmOpen && (
+          <>
+            {bgmAsset ? (
+              <div
+                style={{
+                  marginBottom: 8,
+                  padding: '6px 8px',
+                  background: 'var(--bg-card)',
+                  borderRadius: 4,
+                  border: '1px solid var(--border-color)',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--text-primary)',
+                    fontWeight: 500,
+                    marginBottom: 2,
+                  }}
+                >
+                  🎵 {bgmAsset.alt?.ko ?? scene.bgm}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                  {bgmAsset.size ? `${Math.round(bgmAsset.size / 1024)}KB` : ''}{' '}
+                  · {bgmAsset.mimeType}
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginBottom: 8, fontSize: 11, color: 'var(--text-muted)' }}>
+                BGM 없음
+              </div>
+            )}
+
+            {/* Play / Stop + Upload / Remove */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+              {bgmAsset && (
+                <button
+                  onClick={handleBgmPlay}
+                  disabled={bgmLoading}
+                  style={{
+                    padding: '5px 8px',
+                    fontSize: 11,
+                    background: bgmPlaying ? 'var(--bg-secondary)' : 'var(--bg-card)',
+                    color: bgmPlaying ? 'var(--accent)' : 'var(--text-primary)',
+                    border: `1px solid ${bgmPlaying ? 'var(--accent)' : 'var(--border-color)'}`,
+                    borderRadius: 3,
+                    cursor: bgmLoading ? 'default' : 'pointer',
+                    fontWeight: 600,
+                    minWidth: 56,
+                    opacity: bgmLoading ? 0.6 : 1,
+                  }}
+                >
+                  {bgmLoading ? '로딩...' : bgmPlaying ? '■ 정지' : '▶ 재생'}
+                </button>
+              )}
+              <button
+                onClick={handleBgmUploadClick}
+                style={{
+                  flex: 1,
+                  padding: '5px 8px',
+                  fontSize: 11,
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 3,
+                  cursor: 'pointer',
+                }}
+              >
+                오디오 업로드
+              </button>
+              {bgmAsset && (
+                <button
+                  onClick={handleRemoveBgm}
+                  style={{
+                    padding: '5px 8px',
+                    fontSize: 11,
+                    background: 'transparent',
+                    color: '#ef4444',
+                    border: '1px solid #ef4444',
+                    borderRadius: 3,
+                    cursor: 'pointer',
+                  }}
+                >
+                  제거
+                </button>
+              )}
+            </div>
+
+            {/* BGM stop option */}
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
                 fontSize: 11,
-                background: 'transparent',
-                color: '#ef4444',
-                border: '1px solid #ef4444',
-                borderRadius: 3,
+                color: 'var(--text-secondary)',
                 cursor: 'pointer',
               }}
             >
-              제거
-            </button>
-          )}
-        </div>
+              <input
+                type="checkbox"
+                checked={scene.bgmStop ?? false}
+                onChange={e =>
+                  updateScene(caseId, scene.id, { bgmStop: e.target.checked })
+                }
+              />
+              씬 진입 시 BGM 정지
+            </label>
 
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
+            <input
+              ref={bgmFileInputRef}
+              type="file"
+              accept="audio/mpeg,audio/ogg,audio/wav,audio/aac,audio/*"
+              style={{ display: 'none' }}
+              onChange={handleBgmFileChange}
+            />
+          </>
+        )}
       </div>
+
+      {/* ── Layers section (LayerPanel manages its own collapse) ── */}
+      <LayerPanel layers={scene.layers} caseId={caseId} sceneId={scene.id} />
 
       <div style={{ marginTop: 12, color: 'var(--text-muted)', fontSize: 12 }}>
-        핫스팟을 클릭하면 속성을 편집할 수 있습니다.
+        핫스팟 또는 레이어를 클릭하면 속성을 편집할 수 있습니다.
       </div>
     </div>
+  );
+}
+
+// ── SectionHeader helper ──────────────────────────────────────────
+
+function SectionHeader({
+  label,
+  open,
+  onToggle,
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+}): React.ReactElement {
+  return (
+    <button
+      onClick={onToggle}
+      style={{
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+        marginBottom: open ? 8 : 0,
+        width: '100%',
+      }}
+    >
+      <span
+        style={{
+          fontSize: 10,
+          color: 'var(--text-muted)',
+          transform: open ? 'rotate(90deg)' : 'none',
+          transition: 'transform 0.15s',
+          display: 'inline-block',
+        }}
+      >
+        &#9654;
+      </span>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}
+      >
+        {label}
+      </span>
+    </button>
   );
 }
