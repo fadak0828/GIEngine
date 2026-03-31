@@ -112,11 +112,55 @@ export class PopupRenderer {
 
     popup.appendChild(this.createCloseButton());
 
+    // Zoom state
+    let zoom = 1;
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 3;
+    let panX = 0;
+    let panY = 0;
+
+    // Image wrapper: clips the zoomed image
+    const imgWrapper = document.createElement('div');
+    imgWrapper.className = 'gi-popup-image-wrapper';
+    imgWrapper.style.overflow = 'hidden';
+    imgWrapper.style.position = 'relative';
+    imgWrapper.style.cursor = 'zoom-in';
+
+    // Zoom level indicator
+    const zoomIndicator = document.createElement('div');
+    zoomIndicator.className = 'gi-popup-zoom-indicator';
+    zoomIndicator.style.cssText = [
+      'position:absolute',
+      'bottom:8px',
+      'right:8px',
+      'background:rgba(0,0,0,0.55)',
+      'color:#fff',
+      'font-size:11px',
+      'padding:2px 6px',
+      'border-radius:3px',
+      'pointer-events:none',
+      'opacity:0',
+      'transition:opacity 0.2s',
+      'z-index:10',
+    ].join(';');
+    imgWrapper.appendChild(zoomIndicator);
+
+    let indicatorTimer: ReturnType<typeof setTimeout> | null = null;
+    const showIndicator = () => {
+      zoomIndicator.textContent = `${Math.round(zoom * 100)}%`;
+      zoomIndicator.style.opacity = '1';
+      if (indicatorTimer) clearTimeout(indicatorTimer);
+      indicatorTimer = setTimeout(() => {
+        zoomIndicator.style.opacity = '0';
+      }, 1200);
+    };
+
     // Image container (relative for inner hotspot positioning)
     const imgContainer = document.createElement('div');
     imgContainer.className = 'gi-popup-image-container';
     imgContainer.style.position = 'relative';
     imgContainer.style.display = 'inline-block';
+    imgContainer.style.transformOrigin = '0 0';
 
     const src = this.resolveAssetSrc(image);
     const img = document.createElement('img');
@@ -134,7 +178,98 @@ export class PopupRenderer {
       }
     }
 
-    popup.appendChild(imgContainer);
+    imgWrapper.appendChild(imgContainer);
+
+    // Apply current zoom + pan transform
+    const applyTransform = () => {
+      imgContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+      imgWrapper.style.cursor = zoom > 1 ? 'grab' : 'zoom-in';
+    };
+
+    // Clamp pan so the image never shows empty space when zoomed
+    const clampPan = () => {
+      const wrapperW = imgWrapper.clientWidth;
+      const wrapperH = imgWrapper.clientHeight;
+      const imgW = imgContainer.clientWidth;
+      const imgH = imgContainer.clientHeight;
+      const scaledW = imgW * zoom;
+      const scaledH = imgH * zoom;
+      const maxPanX = 0;
+      const minPanX = Math.min(0, wrapperW - scaledW);
+      const maxPanY = 0;
+      const minPanY = Math.min(0, wrapperH - scaledH);
+      panX = Math.max(minPanX, Math.min(maxPanX, panX));
+      panY = Math.max(minPanY, Math.min(maxPanY, panY));
+    };
+
+    // Wheel: zoom around cursor position
+    imgWrapper.addEventListener('wheel', (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = imgWrapper.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const delta = e.deltaY < 0 ? 0.2 : -0.2;
+      const prevZoom = zoom;
+      zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom + delta));
+
+      if (zoom !== prevZoom) {
+        // Adjust pan so zoom is centered around mouse cursor
+        const ratio = zoom / prevZoom;
+        panX = mouseX - ratio * (mouseX - panX);
+        panY = mouseY - ratio * (mouseY - panY);
+        clampPan();
+        applyTransform();
+        showIndicator();
+      }
+    }, { passive: false });
+
+    // Double-click: reset to 1x
+    imgWrapper.addEventListener('dblclick', () => {
+      zoom = 1;
+      panX = 0;
+      panY = 0;
+      applyTransform();
+      showIndicator();
+    });
+
+    // Drag panning (only active when zoomed)
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let panStartX = 0;
+    let panStartY = 0;
+
+    imgWrapper.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (zoom <= 1) return;
+      e.preventDefault();
+      isDragging = true;
+      imgWrapper.setPointerCapture(e.pointerId);
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      panStartX = panX;
+      panStartY = panY;
+      imgWrapper.style.cursor = 'grabbing';
+    });
+
+    imgWrapper.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!isDragging) return;
+      panX = panStartX + (e.clientX - dragStartX);
+      panY = panStartY + (e.clientY - dragStartY);
+      clampPan();
+      applyTransform();
+    });
+
+    const stopDrag = (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      imgWrapper.releasePointerCapture(e.pointerId);
+      imgWrapper.style.cursor = zoom > 1 ? 'grab' : 'zoom-in';
+    };
+    imgWrapper.addEventListener('pointerup', stopDrag);
+    imgWrapper.addEventListener('pointercancel', stopDrag);
+
+    popup.appendChild(imgWrapper);
 
     if (caption) {
       const cap = document.createElement('p');

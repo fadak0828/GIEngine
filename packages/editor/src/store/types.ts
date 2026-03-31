@@ -69,7 +69,7 @@ export interface UIState {
   previewHeight: number;
   leftPanelWidth: number;
   rightPanelWidth: number;
-  sceneTool: 'select' | 'draw_rect' | 'delete';
+  sceneTool: 'select' | 'draw_rect' | 'draw_polygon' | 'delete';
   autoSaveEnabled: boolean;
   autoSaveIntervalMs: number;
   notification: { message: string; type: 'success' | 'error' } | null;

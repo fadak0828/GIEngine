@@ -16,23 +16,23 @@ export function SceneCanvas(): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRectRef = useRef<CanvasRect | null>(null);
 
-  // Live scale derived from canvasRectRef (updated via getBoundingClientRect)
   const [liveScale, setLiveScale] = useState({ scaleX: 1, scaleY: 1 });
-
-  // Draw-rect tool state
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null);
   const [drawRect, setDrawRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
-  // Drag preview state: which hotspot is being dragged and what its new area looks like
+  // draw_polygon tool state
+  const [polyVertices, setPolyVertices] = useState<[number, number][]>([]);
+  const [polyCursor, setPolyCursor] = useState<{ x: number; y: number } | null>(null);
+
   const [dragPreview, setDragPreview] = useState<{ hotspotId: string; area: HotspotArea } | null>(null);
 
-  // AI background modal state
-  const [aiModalOpen, setAiModalOpen] = useState(false);
+  // polygon vertex drag state
+  const [polyVertexDrag, setPolyVertexDrag] = useState<{ hotspotId: string; vertexIndex: number } | null>(null);
+  const polyVertexStartRef = useRef<{ clientX: number; clientY: number; origPoints: [number, number][] } | null>(null);
 
-  // ID of the hotspot that initiated the current drag (stored in a ref to avoid stale closure)
+  const [aiModalOpen, setAiModalOpen] = useState(false);
   const dragHotspotIdRef = useRef<string | null>(null);
 
-  // Find selected scene
   let scene = null;
   if (project && selection.caseId && selection.sceneId) {
     for (const act of project.acts) {
@@ -40,8 +40,6 @@ export function SceneCanvas(): React.ReactElement {
       if (c) { scene = c.scenes.find(s => s.id === selection.sceneId) ?? null; break; }
     }
   }
-
-  // ── Update canvas rect ──────────────────────────────────────────
 
   const updateCanvasRect = useCallback(() => {
     if (!containerRef.current) return;
@@ -59,8 +57,6 @@ export function SceneCanvas(): React.ReactElement {
     if (containerRef.current) observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [updateCanvasRect]);
-
-  // ── Drag / Resize wiring via useCanvasDrag ──────────────────────
 
   const { startDrag } = useCanvasDrag({
     canvasRectRef,
@@ -92,8 +88,6 @@ export function SceneCanvas(): React.ReactElement {
     }, [scene, selection, updateHotspotArea]),
   });
 
-  // ── Hotspot pointer handlers ────────────────────────────────────
-
   const handleHotspotPointerDown = useCallback((
     e: React.PointerEvent<SVGRectElement>,
     hotspotId: string,
@@ -114,7 +108,65 @@ export function SceneCanvas(): React.ReactElement {
     startDrag(e, mode);
   }, [updateCanvasRect, startDrag]);
 
-  // ── Draw-rect canvas handlers ───────────────────────────────────
+  // Polygon vertex drag handlers
+  const handlePolygonVertexPointerDown = useCallback((
+    e: React.PointerEvent<SVGCircleElement>,
+    hotspotId: string,
+    vertexIndex: number,
+  ) => {
+    if (!scene) return;
+    e.stopPropagation();
+    const hotspot = scene.hotspots.find(h => h.id === hotspotId);
+    if (!hotspot || hotspot.area.type !== 'polygon') return;
+    setPolyVertexDrag({ hotspotId, vertexIndex });
+    polyVertexStartRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      origPoints: hotspot.area.points.map(p => [p[0], p[1]] as [number, number]),
+    };
+    (e.currentTarget as SVGCircleElement).setPointerCapture(e.pointerId);
+  }, [scene]);
+
+  const handleSVGPointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (!polyVertexDrag || !polyVertexStartRef.current || !scene || !selection.caseId || !selection.sceneId) return;
+    const rect = canvasRectRef.current;
+    if (!rect) return;
+    const scale = computeScale(rect, scene.dimensions);
+    const dx = (e.clientX - polyVertexStartRef.current.clientX) / scale.scaleX;
+    const dy = (e.clientY - polyVertexStartRef.current.clientY) / scale.scaleY;
+    const newPoints: [number, number][] = polyVertexStartRef.current.origPoints.map((pt, i) => {
+      if (i === polyVertexDrag.vertexIndex) {
+        return [
+          Math.max(0, Math.min(scene.dimensions.width, pt[0] + dx)),
+          Math.max(0, Math.min(scene.dimensions.height, pt[1] + dy)),
+        ];
+      }
+      return pt;
+    });
+    setDragPreview({ hotspotId: polyVertexDrag.hotspotId, area: { type: 'polygon', points: newPoints } });
+  }, [polyVertexDrag, scene, selection]);
+
+  const handleSVGPointerUp = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (!polyVertexDrag || !polyVertexStartRef.current || !scene || !selection.caseId || !selection.sceneId) {
+      setPolyVertexDrag(null); polyVertexStartRef.current = null; setDragPreview(null); return;
+    }
+    const rect = canvasRectRef.current;
+    if (!rect) { setPolyVertexDrag(null); polyVertexStartRef.current = null; setDragPreview(null); return; }
+    const scale = computeScale(rect, scene.dimensions);
+    const dx = (e.clientX - polyVertexStartRef.current.clientX) / scale.scaleX;
+    const dy = (e.clientY - polyVertexStartRef.current.clientY) / scale.scaleY;
+    const newPoints: [number, number][] = polyVertexStartRef.current.origPoints.map((pt, i) => {
+      if (i === polyVertexDrag.vertexIndex) {
+        return [
+          Math.max(0, Math.min(scene.dimensions.width, pt[0] + dx)),
+          Math.max(0, Math.min(scene.dimensions.height, pt[1] + dy)),
+        ];
+      }
+      return pt;
+    });
+    updateHotspotArea(selection.caseId, selection.sceneId, polyVertexDrag.hotspotId, { type: 'polygon', points: newPoints });
+    setPolyVertexDrag(null); polyVertexStartRef.current = null; setDragPreview(null);
+  }, [polyVertexDrag, scene, selection, updateHotspotArea]);
 
   const getCanvasRect = useCallback(() => {
     if (!containerRef.current) return null;
@@ -126,7 +178,6 @@ export function SceneCanvas(): React.ReactElement {
     if (!scene || !selection.caseId || !selection.sceneId) return;
     const rect = getCanvasRect();
     if (!rect) return;
-
     if (ui.sceneTool === 'draw_rect') {
       e.currentTarget.setPointerCapture(e.pointerId);
       const clientX = e.clientX - rect.left;
@@ -135,54 +186,77 @@ export function SceneCanvas(): React.ReactElement {
       setDrawStart({ x, y });
       setDrawRect({ x, y, width: 0, height: 0 });
     } else if (ui.sceneTool === 'select') {
-      // Click on empty space deselects hotspot
       setSelection({ hotspotId: null });
     }
   }, [scene, selection, ui.sceneTool, getCanvasRect, setSelection]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!drawStart || !scene) return;
+    if (!scene) return;
     const rect = getCanvasRect();
     if (!rect) return;
-    const clientX = e.clientX - rect.left;
-    const clientY = e.clientY - rect.top;
-    const { x: curX, y: curY } = canvasToScene(clientX, clientY, rect, scene.dimensions);
-    setDrawRect({
-      x: Math.min(drawStart.x, curX),
-      y: Math.min(drawStart.y, curY),
-      width: Math.abs(curX - drawStart.x),
-      height: Math.abs(curY - drawStart.y),
-    });
-  }, [drawStart, scene, getCanvasRect]);
+    if (drawStart) {
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+      const { x: curX, y: curY } = canvasToScene(clientX, clientY, rect, scene.dimensions);
+      setDrawRect({
+        x: Math.min(drawStart.x, curX), y: Math.min(drawStart.y, curY),
+        width: Math.abs(curX - drawStart.x), height: Math.abs(curY - drawStart.y),
+      });
+    }
+    if (ui.sceneTool === 'draw_polygon' && polyVertices.length > 0) {
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+      const { x, y } = canvasToScene(clientX, clientY, rect, scene.dimensions);
+      setPolyCursor({ x, y });
+    }
+  }, [drawStart, scene, ui.sceneTool, polyVertices.length, getCanvasRect]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!drawStart || !drawRect || !scene || !selection.caseId || !selection.sceneId) {
-      setDrawStart(null);
-      setDrawRect(null);
-      return;
+      setDrawStart(null); setDrawRect(null); return;
     }
     e.currentTarget.releasePointerCapture(e.pointerId);
     if (drawRect.width > 10 && drawRect.height > 10) {
       const area: HotspotArea = {
         type: 'rect',
-        x: Math.round(drawRect.x),
-        y: Math.round(drawRect.y),
-        width: Math.round(drawRect.width),
-        height: Math.round(drawRect.height),
+        x: Math.round(drawRect.x), y: Math.round(drawRect.y),
+        width: Math.round(drawRect.width), height: Math.round(drawRect.height),
       };
       addHotspot(selection.caseId, selection.sceneId, area);
     }
-    setDrawStart(null);
-    setDrawRect(null);
+    setDrawStart(null); setDrawRect(null);
   }, [drawStart, drawRect, scene, selection, addHotspot]);
 
-  // ── Effective hotspots (replace dragged hotspot with live preview) ──
+  const lastClickTimeRef = useRef(0);
+
+  const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (ui.sceneTool !== 'draw_polygon' || !scene || !selection.caseId || !selection.sceneId) return;
+    const rect = getCanvasRect();
+    if (!rect) return;
+    const now = Date.now();
+    const isDoubleClick = now - lastClickTimeRef.current < 350;
+    lastClickTimeRef.current = now;
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+    const { x, y } = canvasToScene(clientX, clientY, rect, scene.dimensions);
+    if (isDoubleClick && polyVertices.length >= 2) {
+      const vertices = polyVertices.slice(0, -1);
+      if (vertices.length >= 3) {
+        const area: HotspotArea = {
+          type: 'polygon',
+          points: vertices.map(([vx, vy]) => [Math.round(vx), Math.round(vy)] as [number, number]),
+        };
+        addHotspot(selection.caseId, selection.sceneId, area);
+      }
+      setPolyVertices([]); setPolyCursor(null);
+    } else {
+      setPolyVertices(prev => [...prev, [x, y] as [number, number]]);
+    }
+  }, [ui.sceneTool, scene, selection, polyVertices, getCanvasRect, addHotspot]);
 
   const effectiveHotspots = scene
     ? scene.hotspots.map(h =>
-        dragPreview && h.id === dragPreview.hotspotId
-          ? { ...h, area: dragPreview.area }
-          : h
+        dragPreview && h.id === dragPreview.hotspotId ? { ...h, area: dragPreview.area } : h
       )
     : [];
 
@@ -192,14 +266,8 @@ export function SceneCanvas(): React.ReactElement {
   if (!scene) {
     return (
       <div style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg-primary)',
-        color: 'var(--text-muted)',
-        flexDirection: 'column',
-        gap: 8,
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg-primary)', color: 'var(--text-muted)', flexDirection: 'column', gap: 8,
       }}>
         <div style={{ fontSize: 40 }}>🎬</div>
         <div style={{ fontSize: 14 }}>씬을 선택하거나 사건에서 씬을 추가하세요</div>
@@ -208,54 +276,54 @@ export function SceneCanvas(): React.ReactElement {
     );
   }
 
+  const polyInProgress = polyVertices.length > 0;
+  const polyPreviewPoints: [number, number][] = polyCursor
+    ? [...polyVertices, [polyCursor.x, polyCursor.y]]
+    : polyVertices;
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-primary)' }}>
       {/* Toolbar */}
       <div style={{
-        height: 36,
-        background: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 8px',
-        gap: 8,
-        flexShrink: 0,
+        height: 36, background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)',
+        display: 'flex', alignItems: 'center', padding: '0 8px', gap: 8, flexShrink: 0,
       }}>
         <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>도구:</span>
-        {(['select', 'draw_rect', 'delete'] as const).map(tool => (
+        {(['select', 'draw_rect', 'draw_polygon', 'delete'] as const).map(tool => (
           <button
             key={tool}
-            onClick={() => useEditorStore.getState().setSceneTool(tool)}
+            onClick={() => {
+              useEditorStore.getState().setSceneTool(tool);
+              if (tool !== 'draw_polygon') { setPolyVertices([]); setPolyCursor(null); }
+            }}
             style={{
-              padding: '3px 8px',
-              fontSize: 11,
+              padding: '3px 8px', fontSize: 11,
               background: ui.sceneTool === tool ? 'var(--accent)' : 'transparent',
               color: ui.sceneTool === tool ? '#000' : 'var(--text-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 3,
-              cursor: 'pointer',
+              border: '1px solid var(--border-color)', borderRadius: 3, cursor: 'pointer',
             }}
           >
-            {tool === 'select' ? '선택' : tool === 'draw_rect' ? '핫스팟 그리기' : '삭제'}
+            {tool === 'select' ? '선택' : tool === 'draw_rect' ? '사각 핫스팟' : tool === 'draw_polygon' ? '다각형 핫스팟' : '삭제'}
           </button>
         ))}
         <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 4px' }} />
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           {scene.name[ui.editorLocale]} · {scene.hotspots.length}개 핫스팟
         </span>
+        {polyInProgress && (
+          <span style={{ fontSize: 11, color: '#10b981' }}>
+            다각형 그리기 중 ({polyVertices.length}개 꼭짓점) — 더블클릭으로 완성
+          </span>
+        )}
         <div style={{ flex: 1 }} />
         <button
           onClick={() => setAiModalOpen(true)}
           style={{
-            padding: '3px 10px',
-            fontSize: 11,
-            background: 'transparent',
-            color: 'var(--text-secondary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 3,
-            cursor: 'pointer',
+            padding: '3px 10px', fontSize: 11, background: 'transparent',
+            color: 'var(--text-secondary)', border: '1px solid var(--border-color)',
+            borderRadius: 3, cursor: 'pointer',
           }}
-          title="Gemini AI로 배경 이미지 생성"
+          title='Gemini AI로 배경 이미지 생성'
         >
           ✨ AI 배경 생성
         </button>
@@ -268,17 +336,15 @@ export function SceneCanvas(): React.ReactElement {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onClick={handleCanvasClick}
           style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: 900,
+            position: 'relative', width: '100%', maxWidth: 900,
             aspectRatio: `${scene.dimensions.width} / ${scene.dimensions.height}`,
             background: bgAsset ? undefined : '#1a2035',
             backgroundImage: !bgAsset ? 'repeating-conic-gradient(#1e2a4a 0% 25%, #16213e 0% 50%) 0 0 / 20px 20px' : undefined,
-            cursor: ui.sceneTool === 'draw_rect' ? 'crosshair' : ui.sceneTool === 'delete' ? 'not-allowed' : 'default',
-            userSelect: 'none',
-            border: '1px solid var(--border-color)',
-            boxSizing: 'border-box',
+            cursor: ui.sceneTool === 'draw_rect' || ui.sceneTool === 'draw_polygon' ? 'crosshair'
+              : ui.sceneTool === 'delete' ? 'not-allowed' : 'default',
+            userSelect: 'none', border: '1px solid var(--border-color)', boxSizing: 'border-box',
           }}
         >
           {bgAsset && (
@@ -306,22 +372,50 @@ export function SceneCanvas(): React.ReactElement {
             }}
             onHotspotPointerDown={handleHotspotPointerDown}
             onResizeHandlePointerDown={handleResizeHandlePointerDown}
+            onPolygonVertexPointerDown={handlePolygonVertexPointerDown}
           />
 
-          {/* Drawing preview rect */}
           {drawRect && (
-            <div
-              style={{
-                position: 'absolute',
-                left: drawRect.x * scaleX,
-                top: drawRect.y * scaleY,
-                width: drawRect.width * scaleX,
-                height: drawRect.height * scaleY,
-                border: '2px dashed #f59e0b',
-                background: 'rgba(245,158,11,0.15)',
-                pointerEvents: 'none',
-                boxSizing: 'border-box',
-              }}
+            <div style={{
+              position: 'absolute',
+              left: drawRect.x * scaleX, top: drawRect.y * scaleY,
+              width: drawRect.width * scaleX, height: drawRect.height * scaleY,
+              border: '2px dashed #f59e0b', background: 'rgba(245,158,11,0.15)',
+              pointerEvents: 'none', boxSizing: 'border-box',
+            }} />
+          )}
+
+          {/* Polygon in-progress SVG */}
+          {polyInProgress && (
+            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
+              {polyPreviewPoints.length >= 2 && (
+                <polyline
+                  points={polyPreviewPoints.map(([px, py]) => `${px * scaleX},${py * scaleY}`).join(' ')}
+                  fill='none' stroke='#10b981' strokeWidth={1.5} strokeDasharray='4 2' strokeLinejoin='round'
+                />
+              )}
+              {polyPreviewPoints.length >= 3 && polyCursor && (
+                <line
+                  x1={polyPreviewPoints[polyPreviewPoints.length - 1][0] * scaleX}
+                  y1={polyPreviewPoints[polyPreviewPoints.length - 1][1] * scaleY}
+                  x2={polyPreviewPoints[0][0] * scaleX}
+                  y2={polyPreviewPoints[0][1] * scaleY}
+                  stroke='#10b981' strokeWidth={1} strokeDasharray='2 4' opacity={0.5}
+                />
+              )}
+              {polyVertices.map(([px, py], i) => (
+                <circle key={i} cx={px * scaleX} cy={py * scaleY} r={4}
+                  fill={i === 0 ? '#10b981' : 'white'} stroke='#10b981' strokeWidth={1.5} />
+              ))}
+            </svg>
+          )}
+
+          {/* Polygon vertex drag overlay */}
+          {polyVertexDrag && (
+            <svg
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'all', overflow: 'visible' }}
+              onPointerMove={handleSVGPointerMove}
+              onPointerUp={handleSVGPointerUp}
             />
           )}
         </div>
