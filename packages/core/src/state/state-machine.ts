@@ -980,6 +980,8 @@ function hotspotActionToEffects(action: HotspotAction): SideEffect[] {
       return [{ type: 'play_sound', assetRef: action.assetRef }];
     case 'delay':
       return [{ type: 'delay', duration: action.duration }];
+    case 'toggle_layer':
+      return [{ type: 'toggle_layer', layerId: action.layerId, visible: action.visible }];
     case 'composite':
       return action.actions.flatMap(a => hotspotActionToEffects(a));
     default:

@@ -391,6 +391,8 @@ export type SideEffect =
   | { type: 'animation'; target: string; animation: string }
   | { type: 'unlock_case'; caseId: string }
   | { type: 'word_collected_in_popup'; wordId: string }
+  /** onEnter 시퀀스에서 레이어 가시성 변경 */
+  | { type: 'toggle_layer'; layerId: string; visible?: boolean }
   /** 씬 전환 시퀀스에서 지정 시간(ms)만큼 대기 */
   | { type: 'delay'; duration: number };
 

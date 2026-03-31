@@ -393,6 +393,29 @@ export class GIEngine {
       case 'word_collected_in_popup':
         this.renderer.handleWordCollectedInPopup(effect.wordId, this.definition);
         break;
+      case 'toggle_layer': {
+        const gs = this.gameState;
+        if (gs.type !== 'exploring' && gs.type !== 'thinking') break;
+        const caseState = this.saveState.caseStates[gs.caseId];
+        if (!caseState) break;
+        const current = caseState.layerVisibility[effect.layerId] ?? false;
+        const newVisible = effect.visible ?? !current;
+        this.saveState = {
+          ...this.saveState,
+          caseStates: {
+            ...this.saveState.caseStates,
+            [gs.caseId]: {
+              ...caseState,
+              layerVisibility: {
+                ...caseState.layerVisibility,
+                [effect.layerId]: newVisible,
+              },
+            },
+          },
+        };
+        this.render();
+        break;
+      }
       case 'delay':
         // v0.1: delay type is supported in ActionSequence; runtime defers
         // subsequent scheduled effects via setTimeout when processing onEnter.
