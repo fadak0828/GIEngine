@@ -486,6 +486,56 @@ describe('EditorStore — additional coverage', () => {
     });
   });
 
+  // ── reorderLayers ───────────────────────────────────────────────
+
+  describe('reorderLayers', () => {
+    it('moves a layer from index 0 to index 2 (top to bottom)', () => {
+      const { caseId } = setupActAndCase();
+      const sceneId = useEditorStore.getState().project!.acts[0].cases[0].scenes[0].id;
+      // Add 3 layers (A, B, C) — zIndex assigned as 1, 2, 3
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      const before = [...useEditorStore.getState().project!.acts[0].cases[0].scenes[0].layers]
+        .sort((a, b) => b.zIndex - a.zIndex);
+      const topLayerId = before[0].id;
+      // Move top layer (index 0) to bottom (index 2)
+      useEditorStore.getState().reorderLayers(caseId, sceneId, 0, 2);
+      const after = [...useEditorStore.getState().project!.acts[0].cases[0].scenes[0].layers]
+        .sort((a, b) => b.zIndex - a.zIndex);
+      expect(after[2].id).toBe(topLayerId);
+      expect(useEditorStore.getState().meta.isDirty).toBe(true);
+    });
+
+    it('moves a layer from index 2 to index 0 (bottom to top)', () => {
+      const { caseId } = setupActAndCase();
+      const sceneId = useEditorStore.getState().project!.acts[0].cases[0].scenes[0].id;
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      const before = [...useEditorStore.getState().project!.acts[0].cases[0].scenes[0].layers]
+        .sort((a, b) => b.zIndex - a.zIndex);
+      const bottomLayerId = before[2].id;
+      // Move bottom layer (index 2) to top (index 0)
+      useEditorStore.getState().reorderLayers(caseId, sceneId, 2, 0);
+      const after = [...useEditorStore.getState().project!.acts[0].cases[0].scenes[0].layers]
+        .sort((a, b) => b.zIndex - a.zIndex);
+      expect(after[0].id).toBe(bottomLayerId);
+    });
+
+    it('zIndex values are contiguous after reorder', () => {
+      const { caseId } = setupActAndCase();
+      const sceneId = useEditorStore.getState().project!.acts[0].cases[0].scenes[0].id;
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().addLayer(caseId, sceneId);
+      useEditorStore.getState().reorderLayers(caseId, sceneId, 0, 2);
+      const layers = useEditorStore.getState().project!.acts[0].cases[0].scenes[0].layers;
+      const zValues = layers.map(l => l.zIndex).sort((a, b) => a - b);
+      expect(zValues).toEqual([1, 2, 3]);
+    });
+  });
+
   // ── deleteCase selection clean-up ───────────────────────────────
 
   describe('deleteCase — selection cleanup', () => {
