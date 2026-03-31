@@ -319,3 +319,55 @@ describe('Puzzle overlay in exploring state (Task 5)', () => {
     }
   });
 });
+
+// ─── CLOSE_PUZZLE in puzzle_overlay context (regression test for back-button bug) ─
+
+describe('CLOSE_PUZZLE dispatched from DeductionRenderer in puzzle_overlay context', () => {
+  it('CLOSE_PUZZLE in puzzle_overlay → returns to idle (same as CLOSE_PUZZLE_OVERLAY)', () => {
+    // DeductionRenderer의 돌아가기 버튼은 CLOSE_PUZZLE을 dispatch하는데,
+    // 메인 퍼즐이 puzzle_overlay로 열린 경우 state는 exploring이므로
+    // CLOSE_PUZZLE이 처리되지 않아 버튼이 동작하지 않는 버그 재현.
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'puzzle-main' },
+    };
+    const result = transition(overlayState, makeSave(), { type: 'CLOSE_PUZZLE' }, testDef);
+    expect(result.nextState.type).toBe('exploring');
+    if (result.nextState.type === 'exploring') {
+      expect(result.nextState.sub.type).toBe('idle');
+    }
+  });
+
+  it('CLOSE_PUZZLE in puzzle_overlay with solved main puzzle → case_completed', () => {
+    const save = makeSave();
+    save.caseStates['case-1'].status = 'completed';
+    save.caseStates['case-1'].puzzleStates['puzzle-main'] = {
+      solved: true,
+      slotAssignments: { 'slot-1': 'word-answer' },
+      attemptCount: 1,
+    };
+    const overlayState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'puzzle_overlay', puzzleId: 'puzzle-main', solved: true },
+    };
+    const result = transition(overlayState, save, { type: 'CLOSE_PUZZLE' }, testDef);
+    // Single-case game → all cases completed → game_completed
+    expect(result.nextState.type).toBe('game_completed');
+  });
+
+  it('CLOSE_PUZZLE outside puzzle_overlay → no transition', () => {
+    // puzzle_overlay 서브스테이트가 아닐 때는 CLOSE_PUZZLE을 무시해야 함
+    const idleState: GameState = {
+      type: 'exploring',
+      caseId: 'case-1',
+      sceneId: 'scene-1',
+      sub: { type: 'idle' },
+    };
+    const result = transition(idleState, makeSave(), { type: 'CLOSE_PUZZLE' }, testDef);
+    expect(result.nextState).toEqual(idleState);
+  });
+});
