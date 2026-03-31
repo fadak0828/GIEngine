@@ -5,3 +5,8 @@ coverage/
 .vite/
 *.html
 !packages/exporter/templates/*.html
+.gstack/
+.omc
+.agents/
+.claude/
+.vscode/
