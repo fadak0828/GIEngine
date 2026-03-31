@@ -439,6 +439,38 @@ export function SceneProperties({
         )}
       </div>
 
+      {/* ── Scrollable section ── */}
+      <div
+        style={{
+          borderTop: '1px solid var(--border-color)',
+          paddingTop: 12,
+          marginTop: 12,
+        }}
+      >
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 11,
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={scene.scrollable ?? false}
+            onChange={e =>
+              updateScene(caseId, scene.id, { scrollable: e.target.checked || undefined })
+            }
+          />
+          씬 패닝/스크롤 허용
+        </label>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, paddingLeft: 18 }}>
+          씬 크기가 뷰포트보다 클 때 드래그로 탐색 가능
+        </div>
+      </div>
+
       {/* ── onEnter section ── */}
       <div
         style={{

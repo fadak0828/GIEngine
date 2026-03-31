@@ -64,6 +64,8 @@ export interface Scene {
   audio?: AssetRef;
   bgm?: AssetRef;       // 씬 진입 시 자동 재생할 BGM
   bgmStop?: boolean;    // true면 씬 진입 시 BGM 정지
+  /** true면 씬 크기가 뷰포트보다 클 때 드래그 패닝 허용 */
+  scrollable?: boolean;
 }
 
 export interface SceneLayer {

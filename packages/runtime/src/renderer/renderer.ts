@@ -21,6 +21,7 @@ import { CaseSelectRenderer } from './case-select-renderer.js';
 import { PopupRenderer } from './popup-renderer.js';
 import { PuzzleBarRenderer } from './puzzle-bar-renderer.js';
 import { SubPuzzleRenderer } from './sub-puzzle-renderer.js';
+import { WordBankPanelRenderer } from './word-bank-panel-renderer.js';
 
 export interface RendererOptions {
   container: HTMLElement;
@@ -53,6 +54,7 @@ export class Renderer {
   private lastExaminingSubState: object | null = null;
   private puzzleBarRenderer: PuzzleBarRenderer;
   private subPuzzleRenderer: SubPuzzleRenderer;
+  private wordBankPanelRenderer: WordBankPanelRenderer;
   private puzzleOverlayEl: HTMLElement | null = null;
 
   constructor(opts: RendererOptions) {
@@ -101,6 +103,11 @@ export class Renderer {
       i18n: this.i18n,
       assets: this.assets,
       dispatch: this.dispatch,
+    });
+
+    this.wordBankPanelRenderer = new WordBankPanelRenderer({
+      container: this.container,
+      i18n: this.i18n,
     });
   }
 
@@ -153,6 +160,7 @@ export class Renderer {
     this.popupRenderer.dismiss();
     this.puzzleBarRenderer.destroy();
     this.subPuzzleRenderer.destroy();
+    this.wordBankPanelRenderer.destroy();
     this.closePuzzleOverlay();
     this.removeControls();
     this.removeToast();
@@ -165,6 +173,7 @@ export class Renderer {
     if (!except.includes('caseSelect')) this.caseSelectRenderer.destroy();
     if (!except.includes('popup')) this.popupRenderer.dismiss();
     if (!except.includes('puzzleBar')) this.puzzleBarRenderer.destroy();
+    if (!except.includes('wordBank')) this.wordBankPanelRenderer.destroy();
     if (!except.includes('puzzleOverlay')) this.closePuzzleOverlay();
     this.removeCompletion();
     this.removeLoading();
@@ -238,14 +247,22 @@ export class Renderer {
     const caseState = save.caseStates[state.caseId];
     if (!caseState) return;
 
+    // Compute collected words and assigned IDs for word bank panel.
+    const caseWords = this.collectWordsForCase(def, state.caseId, caseState);
+    const assignedWordIds = this.collectAssignedWordIds(caseState);
+
     if (this.currentView !== `exploring:${state.sceneId}`) {
       this.clearView([]);
       this.currentView = `exploring:${state.sceneId}`;
       this.sceneRenderer.render(scene, caseState);
       this.renderControls(scene, state, def);
+      // Full render of word bank panel on scene change.
+      this.wordBankPanelRenderer.render(caseWords, assignedWordIds);
     } else {
       // Update layers in place
       this.sceneRenderer.updateLayerVisibility(caseState);
+      // Incremental update — preserves expanded/collapsed state.
+      this.wordBankPanelRenderer.updateWords(caseWords, assignedWordIds);
     }
 
     // Render puzzle bar at bottom (always visible during exploring)
@@ -747,6 +764,20 @@ export class Renderer {
     }
 
     return results;
+  }
+
+  /**
+   * Collect the set of word IDs that are currently assigned to any puzzle
+   * slot in this case.  Used by the word-bank panel to grey out used words.
+   */
+  private collectAssignedWordIds(caseState: CaseState): Set<string> {
+    const ids = new Set<string>();
+    for (const puzzleState of Object.values(caseState.puzzleStates)) {
+      for (const wordId of Object.values(puzzleState.slotAssignments)) {
+        if (wordId) ids.add(wordId);
+      }
+    }
+    return ids;
   }
 
   private extractWordsFromAction(

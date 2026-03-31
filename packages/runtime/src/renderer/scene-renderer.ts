@@ -22,8 +22,23 @@ export class SceneRenderer {
   private i18n: I18nManager;
   private assets: AssetManifest;
   private onHotspotClick: (hotspotId: string) => void;
+  /** The scene content element (background + layers + hotspots). */
   private sceneEl: HTMLElement | null = null;
+  /**
+   * When scrollable, a viewport wrapper div that clips the scene content
+   * and receives the drag/pan pointer events.
+   */
+  private viewportEl: HTMLElement | null = null;
   private currentScene: Scene | null = null;
+  /** Current pan offset in pixels (only used in scrollable mode). */
+  private panOffset = { x: 0, y: 0 };
+  /** Cleanup function for pan pointer-event listeners. */
+  private panHandlerCleanup: (() => void) | null = null;
+  /**
+   * Set to true during a drag-pan gesture so that the subsequent click
+   * event on a hotspot button is suppressed.
+   */
+  private didPanDrag = false;
 
   constructor(opts: SceneRendererOptions) {
     this.container = opts.container;
@@ -33,18 +48,77 @@ export class SceneRenderer {
   }
 
   render(scene: Scene, caseState: CaseState): void {
+    this.destroy();
     this.currentScene = scene;
-
-    // Remove previous scene
-    if (this.sceneEl) {
-      this.sceneEl.remove();
-    }
 
     const el = document.createElement('div');
     el.className = 'gi-scene';
     el.setAttribute('role', 'region');
     el.setAttribute('aria-label', this.i18n.resolveText(scene.name));
 
+    this.buildSceneContent(el, scene, caseState);
+    this.sceneEl = el;
+
+    if (scene.scrollable) {
+      // Panning mode: fixed-size scene content inside a clipping viewport.
+      el.style.position = 'absolute';
+      el.style.width = `${scene.dimensions.width}px`;
+      el.style.height = `${scene.dimensions.height}px`;
+      el.style.transform = 'translate(0px, 0px)';
+      el.classList.add('gi-scene--scrollable');
+
+      const viewport = document.createElement('div');
+      viewport.className = 'gi-scene-viewport';
+      viewport.appendChild(el);
+      this.viewportEl = viewport;
+      this.container.appendChild(viewport);
+      this.setupPanHandlers(viewport, el, scene);
+    } else {
+      this.container.appendChild(el);
+    }
+  }
+
+  applyTransition(type: 'fade' | 'slide_left' | 'slide_right' | 'instant'): void {
+    if (!this.sceneEl || type === 'instant') return;
+    const cls = `gi-scene--${type.replace('_', '-')}-enter`;
+    this.sceneEl.classList.add(cls);
+    this.sceneEl.addEventListener('animationend', () => {
+      this.sceneEl?.classList.remove(cls);
+    }, { once: true });
+  }
+
+  destroy(): void {
+    if (this.panHandlerCleanup) {
+      this.panHandlerCleanup();
+      this.panHandlerCleanup = null;
+    }
+    // Remove whichever top-level element we appended to the container.
+    const topEl = this.viewportEl ?? this.sceneEl;
+    if (topEl) {
+      topEl.remove();
+    }
+    this.viewportEl = null;
+    this.sceneEl = null;
+    this.currentScene = null;
+    this.panOffset = { x: 0, y: 0 };
+    this.didPanDrag = false;
+  }
+
+  updateLayerVisibility(caseState: CaseState): void {
+    if (!this.sceneEl || !this.currentScene) return;
+    const layers = this.sceneEl.querySelectorAll<HTMLElement>('[data-layer-id]');
+    for (const layerEl of layers) {
+      const layerId = layerEl.dataset.layerId!;
+      const layer = this.currentScene.layers.find(l => l.id === layerId);
+      if (!layer) continue;
+      const visible = caseState.layerVisibility[layerId] ?? layer.visible;
+      layerEl.classList.toggle('gi-layer--hidden', !visible);
+    }
+  }
+
+  // ── private: scene content ──────────────────────────────────────
+
+  private buildSceneContent(el: HTMLElement, scene: Scene, caseState: CaseState): void {
     // Background image
     const bgSrc = this.resolveAssetSrc(scene.background);
     if (bgSrc) {
@@ -70,39 +144,77 @@ export class SceneRenderer {
       const hsEl = this.createHotspot(hotspot, scene);
       el.appendChild(hsEl);
     }
-
-    this.sceneEl = el;
-    this.container.appendChild(el);
   }
 
-  applyTransition(type: 'fade' | 'slide_left' | 'slide_right' | 'instant'): void {
-    if (!this.sceneEl || type === 'instant') return;
-    const cls = `gi-scene--${type.replace('_', '-')}-enter`;
-    this.sceneEl.classList.add(cls);
-    this.sceneEl.addEventListener('animationend', () => {
-      this.sceneEl?.classList.remove(cls);
-    }, { once: true });
+  // ── private: panning ────────────────────────────────────────────
+
+  private setupPanHandlers(
+    viewport: HTMLElement,
+    content: HTMLElement,
+    scene: Scene
+  ): void {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startOffsetX = 0;
+    let startOffsetY = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      // Let hotspot buttons handle their own events.
+      if ((e.target as HTMLElement).closest('.gi-hotspot')) return;
+      isDragging = true;
+      this.didPanDrag = false;
+      startX = e.clientX;
+      startY = e.clientY;
+      startOffsetX = this.panOffset.x;
+      startOffsetY = this.panOffset.y;
+      viewport.setPointerCapture(e.pointerId);
+      viewport.style.cursor = 'grabbing';
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        this.didPanDrag = true;
+      }
+
+      // Clamp so the scene content never scrolls outside its bounds.
+      const vw = viewport.clientWidth;
+      const vh = viewport.clientHeight;
+      const sw = scene.dimensions.width;
+      const sh = scene.dimensions.height;
+      const minX = Math.min(0, vw - sw);
+      const minY = Math.min(0, vh - sh);
+
+      const newX = Math.max(minX, Math.min(0, startOffsetX + dx));
+      const newY = Math.max(minY, Math.min(0, startOffsetY + dy));
+      this.panOffset = { x: newX, y: newY };
+      content.style.transform = `translate(${newX}px, ${newY}px)`;
+    };
+
+    const onPointerUp = (_e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      viewport.releasePointerCapture(_e.pointerId);
+      viewport.style.cursor = 'grab';
+    };
+
+    viewport.addEventListener('pointerdown', onPointerDown);
+    viewport.addEventListener('pointermove', onPointerMove);
+    viewport.addEventListener('pointerup', onPointerUp);
+    viewport.style.cursor = 'grab';
+    viewport.style.overflow = 'hidden';
+
+    this.panHandlerCleanup = () => {
+      viewport.removeEventListener('pointerdown', onPointerDown);
+      viewport.removeEventListener('pointermove', onPointerMove);
+      viewport.removeEventListener('pointerup', onPointerUp);
+    };
   }
 
-  destroy(): void {
-    if (this.sceneEl) {
-      this.sceneEl.remove();
-      this.sceneEl = null;
-    }
-    this.currentScene = null;
-  }
-
-  updateLayerVisibility(caseState: CaseState): void {
-    if (!this.sceneEl || !this.currentScene) return;
-    const layers = this.sceneEl.querySelectorAll<HTMLElement>('[data-layer-id]');
-    for (const layerEl of layers) {
-      const layerId = layerEl.dataset.layerId!;
-      const layer = this.currentScene.layers.find(l => l.id === layerId);
-      if (!layer) continue;
-      const visible = caseState.layerVisibility[layerId] ?? layer.visible;
-      layerEl.classList.toggle('gi-layer--hidden', !visible);
-    }
-  }
+  // ── private: layer / hotspot creation ───────────────────────────
 
   private createLayer(layer: SceneLayer, caseState: CaseState): HTMLElement {
     const el = document.createElement('div');
@@ -141,6 +253,12 @@ export class SceneRenderer {
     this.applyHotspotArea(el, hotspot.area, scene.dimensions);
 
     el.addEventListener('click', (e) => {
+      // Suppress click if the user was dragging the scene (pan gesture).
+      if (this.didPanDrag) {
+        this.didPanDrag = false;
+        e.stopPropagation();
+        return;
+      }
       e.stopPropagation();
       this.onHotspotClick(hotspot.id);
     });
