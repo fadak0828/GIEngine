@@ -255,6 +255,15 @@
   opacity: 0.6;
 }
 
+/* Category-specific border colors for empty slots */
+.gi-slot--empty[data-accept-category="person"]   { border-color: #6aa3d4; }
+.gi-slot--empty[data-accept-category="place"]    { border-color: #6ad47a; }
+.gi-slot--empty[data-accept-category="object"]   { border-color: #d4a86a; }
+.gi-slot--empty[data-accept-category="action"]   { border-color: #d46a6a; }
+.gi-slot--empty[data-accept-category="time"]     { border-color: #9b6ad4; }
+.gi-slot--empty[data-accept-category="motive"]   { border-color: #d46aaa; }
+.gi-slot--empty[data-accept-category="evidence"] { border-color: #d4d06a; }
+
 .gi-slot--filled {
   border-style: solid;
   border-color: var(--gi-accent);

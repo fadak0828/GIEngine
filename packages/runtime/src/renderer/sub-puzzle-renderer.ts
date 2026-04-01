@@ -251,6 +251,11 @@ export class SubPuzzleRenderer {
       slot.setAttribute('role', 'button');
       slot.tabIndex = 0;
 
+      const answerWord = words.find(w => w.id === char.answerId);
+      if (answerWord?.category) {
+        slot.dataset.acceptCategory = answerWord.category;
+      }
+
       const assigned = state.slotAssignments[char.nameSlotId];
       if (assigned) {
         const word = words.find(w => w.id === assigned);
@@ -299,6 +304,11 @@ export class SubPuzzleRenderer {
       slot.dataset.placeholder = '___';
       slot.setAttribute('role', 'button');
       slot.tabIndex = 0;
+
+      const timeAnswerWord = words.find(w => w.id === timeSlot.answerId);
+      if (timeAnswerWord?.category) {
+        slot.dataset.acceptCategory = timeAnswerWord.category;
+      }
 
       const assigned = state.slotAssignments[timeSlot.slotId];
       if (assigned) {
@@ -405,6 +415,11 @@ export class SubPuzzleRenderer {
       slot.setAttribute('aria-label', `${fromChip.textContent} → ? → ${puzzle.nodes.find(n => n.id === edge.toNodeId) ? this.i18n.resolveText(puzzle.nodes.find(n => n.id === edge.toNodeId)!.label) : edge.toNodeId}`);
       slot.tabIndex = 0;
 
+      const relAnswerWord = words.find(w => w.id === edge.answerId);
+      if (relAnswerWord?.category) {
+        slot.dataset.acceptCategory = relAnswerWord.category;
+      }
+
       const assigned = state.slotAssignments[edge.slotId];
       if (assigned) {
         const word = words.find(w => w.id === assigned);
@@ -473,6 +488,10 @@ export class SubPuzzleRenderer {
             : '___';
           slot.setAttribute('role', 'button');
           slot.tabIndex = 0;
+
+          if (segment.acceptCategory) {
+            slot.dataset.acceptCategory = segment.acceptCategory;
+          }
 
           const assigned = state.slotAssignments[segment.slotId];
           if (assigned) {
