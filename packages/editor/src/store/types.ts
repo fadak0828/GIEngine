@@ -68,6 +68,8 @@ export type ActivePanel = 'scene' | 'puzzle' | 'assets' | 'words' | 'settings' |
 export type AssetViewMode = 'grid' | 'list';
 export type AssetTypeFilter = 'all' | 'image' | 'audio' | 'font';
 
+export type PreviewMode = 'scene' | 'case';
+
 export interface UIState {
   activePanel: ActivePanel;
   editorLocale: Locale;
@@ -75,6 +77,8 @@ export interface UIState {
   zoom: number;
   previewVisible: boolean;
   previewHeight: number;
+  previewMode: PreviewMode;
+  previewPlaying: boolean;
   leftPanelWidth: number;
   rightPanelWidth: number;
   sceneTool: 'select' | 'draw_rect' | 'draw_polygon' | 'delete';
@@ -196,6 +200,8 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice {
   setZoom: (zoom: number) => void;
   setPreviewVisible: (visible: boolean) => void;
   setPreviewHeight: (height: number) => void;
+  setPreviewMode: (mode: PreviewMode) => void;
+  setPreviewPlaying: (playing: boolean) => void;
   setSceneTool: (tool: UIState['sceneTool']) => void;
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
 

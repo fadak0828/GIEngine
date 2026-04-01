@@ -1,8 +1,8 @@
 import type { StateCreator } from 'zustand';
 import type { Locale } from '@gi-engine/core';
-import type { EditorStore, SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter } from './types.js';
+import type { EditorStore, SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter, PreviewMode } from './types.js';
 
-export type { SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter };
+export type { SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter, PreviewMode };
 
 // ── Default state ────────────────────────────────────────────────
 
@@ -24,6 +24,8 @@ export const defaultUI: UIState = {
   zoom: 1.0,
   previewVisible: false,
   previewHeight: 280,
+  previewMode: 'scene',
+  previewPlaying: false,
   leftPanelWidth: 260,
   rightPanelWidth: 320,
   sceneTool: 'select',
@@ -49,6 +51,8 @@ export type SelectionSlice = {
   setZoom: (zoom: number) => void;
   setPreviewVisible: (visible: boolean) => void;
   setPreviewHeight: (height: number) => void;
+  setPreviewMode: (mode: PreviewMode) => void;
+  setPreviewPlaying: (playing: boolean) => void;
   setSceneTool: (tool: UIState['sceneTool']) => void;
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
   setSelectedScene: (sceneId: string | null) => void;
@@ -105,6 +109,14 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   setPreviewHeight: (height) => {
     set(state => ({ ui: { ...state.ui, previewHeight: height } }));
+  },
+
+  setPreviewMode: (mode) => {
+    set(state => ({ ui: { ...state.ui, previewMode: mode, previewPlaying: false } }));
+  },
+
+  setPreviewPlaying: (playing) => {
+    set(state => ({ ui: { ...state.ui, previewPlaying: playing } }));
   },
 
   setSceneTool: (tool) => {

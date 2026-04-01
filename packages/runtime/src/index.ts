@@ -18,21 +18,37 @@ export { WordBankPanelRenderer } from './renderer/word-bank-panel-renderer.js';
 // Default export
 export { GIEngine as default } from './engine.js';
 
-// IIFE boot contract — called by exported HTML template
+// IIFE boot contract — called by exported HTML template or editor preview
 import type { GameDefinition } from '@gi-engine/core';
 import { GIEngine as _GIEngine } from './engine.js';
+
+export interface GIEngineBootOptions {
+  /** Start the game at a specific case/scene (skips case_select screen) */
+  startAt?: { caseId?: string; sceneId?: string };
+  /** Whether to load saved game state (default: true) */
+  loadSave?: boolean;
+}
 
 if (typeof window !== 'undefined') {
   (window as any).__giEngineBoot__ = async function(
     root: HTMLElement,
-    gameData: GameDefinition
+    gameData: GameDefinition,
+    options?: GIEngineBootOptions
   ): Promise<void> {
     root.innerHTML = '';
     const engine = new _GIEngine({
       container: root,
       definition: gameData,
-      loadSave: true,
+      loadSave: options?.loadSave !== false,
     });
     await engine.start();
+
+    // Navigate to explicit start position (used by editor preview)
+    if (options?.startAt?.caseId) {
+      engine.dispatch({ type: 'SELECT_CASE', caseId: options.startAt.caseId });
+      if (options.startAt.sceneId) {
+        engine.dispatch({ type: 'NAVIGATE_SCENE', sceneId: options.startAt.sceneId });
+      }
+    }
   };
 }

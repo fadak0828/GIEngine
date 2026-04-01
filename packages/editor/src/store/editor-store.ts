@@ -21,5 +21,5 @@ export const useEditorStore = create<EditorStore>((...a) => ({
 }));
 
 // Re-export types and selectors
-export type { ProjectMeta, SelectionState, UIState, LocalizedText, ActivePanel } from './types.js';
+export type { ProjectMeta, SelectionState, UIState, LocalizedText, ActivePanel, PreviewMode } from './types.js';
 export { useProject, useSelection, useUI, useWords, useCanUndo, useCanRedo } from './selectors.js';
