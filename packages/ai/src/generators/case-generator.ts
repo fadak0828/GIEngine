@@ -207,57 +207,65 @@ async function buildPuzzleSet(
       // 진범을 포함하되 진범이 없으면 첫 번째 캐릭터로 폴백
       const hasCulprit = names.some(n => n === culpritName);
       const candidateNames = hasCulprit ? names : [...names, culpritName].filter(Boolean);
-      const charObjects = candidateNames.map(name => ({
-        id: generateId(),
-        name: { ko: name, en: name },
-        description: { ko: '', en: '' },
-        isCulprit: name === culpritName,
-      }));
-      const culpritObj = charObjects.find(c => c.isCulprit);
+      const charSlots = candidateNames.map(name => {
+        const wordEntry = blueprint.words.find(w => w.display?.[locale] === name || w.display?.ko === name);
+        const answerId = wordEntry ? (wordIdMap.get(wordEntry.tempId) ?? wordEntry.tempId) : generateId();
+        return {
+          portrait: '' as string,
+          nameSlotId: generateId(),
+          answerId,
+        };
+      });
       return {
         id: generateId(),
         type: 'character_id' as const,
         title: { ko: '진범을 밝혀라', en: 'Identify the Culprit' },
-        characters: charObjects,
-        correctCharacterId: culpritObj?.id ?? (charObjects[0]?.id ?? ''),
+        characters: charSlots,
       };
     }
     if (sp.type === 'timeline') {
-      const events = (sp.events ?? []).map(e => ({
-        id: generateId(),
-        description: { ko: e, en: e },
-      }));
-      // correctOrder: 블루프린트에서 제시된 순서가 정답 순서로 가정
-      const correctOrder = events.map(e => e.id);
+      const slots = (sp.events ?? []).map(e => {
+        const wordEntry = blueprint.words.find(w => w.display?.[locale] === e || w.display?.ko === e);
+        const answerId = wordEntry ? (wordIdMap.get(wordEntry.tempId) ?? wordEntry.tempId) : generateId();
+        return {
+          slotId: generateId(),
+          label: { ko: e, en: e },
+          answerId,
+        };
+      });
       return {
         id: generateId(),
         type: 'timeline' as const,
         title: { ko: '사건 타임라인', en: 'Event Timeline' },
-        events,
-        correctOrder,
+        slots,
       };
     }
     if (sp.type === 'relationship') {
+      const nodes = (sp.characterNames ?? []).map(name => ({
+        id: generateId(),
+        label: { ko: name, en: name },
+      }));
       return {
         id: generateId(),
         type: 'relationship' as const,
         title: { ko: '인물 관계도', en: 'Relationship Map' },
-        characters: (sp.characterNames ?? []).map((name) => ({
-          id: generateId(),
-          name: { ko: name, en: name },
-        })),
-        connections: [],
-        correctConnections: [],
+        nodes,
+        edges: [],
       };
     }
     // scenario
+    const scenarioSlots = [{ slotId: 'slot_1', placeholder: { ko: '???', en: '???' } }];
+    const scenarioAnswers: Record<string, import('@gi-engine/core').AnswerDefinition> = {};
+    const wordEntry = blueprint.words[0];
+    if (wordEntry) {
+      scenarioAnswers['slot_1'] = { correctWordId: wordIdMap.get(wordEntry.tempId) ?? wordEntry.tempId };
+    }
     return {
       id: generateId(),
       type: 'scenario' as const,
       title: { ko: '상황 퍼즐', en: 'Scenario Puzzle' },
-      question: { ko: sp.description, en: sp.description },
-      choices: [],
-      correctChoiceIndex: 0,
+      template: { segments: [{ type: 'text' as const, content: { ko: sp.description, en: sp.description } }, ...scenarioSlots.map(s => ({ type: 'slot' as const, slotId: s.slotId, placeholder: s.placeholder }))] },
+      answers: scenarioAnswers,
     };
   });
 

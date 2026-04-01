@@ -136,10 +136,7 @@ export const createAssetSlice: StateCreator<EditorStore, [], [], AssetSlice> = (
               if (action.type === 'play_sound' && action.assetRef === assetId) {
                 usages.push({ kind: 'hotspot_action', caseId: c.id, caseName, sceneId: scene.id, sceneName, detail: '효과음 재생' });
               }
-              if ((action.type === 'play_bgm') && action.assetRef === assetId) {
-                usages.push({ kind: 'hotspot_action', caseId: c.id, caseName, sceneId: scene.id, sceneName, detail: 'BGM 재생' });
-              }
-              if (action.type === 'composite' && action.actions) {
+if (action.type === 'composite' && action.actions) {
                 scanActions(action.actions);
               }
             }

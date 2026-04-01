@@ -11,7 +11,7 @@ function resetStore() {
     project: null,
     words: [],
     meta: { filePath: null, isDirty: false, lastSavedAt: null },
-    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, puzzleId: null, subPuzzleId: null, layerId: null },
+    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, puzzleId: null, subPuzzleId: null, layerId: null, assetId: null },
   });
 }
 
@@ -33,7 +33,7 @@ describe('AssetSlice', () => {
       id: 'asset-1',
       type: 'image',
       src: 'images/bg.png',
-      label: { ko: '배경', en: 'Background' },
+      mimeType: 'image/png',
     };
 
     it('adds an asset to project.assets.items', () => {
@@ -48,7 +48,7 @@ describe('AssetSlice', () => {
     });
 
     it('adds multiple assets independently', () => {
-      const asset2: AssetDefinition = { id: 'asset-2', type: 'audio', src: 'sfx/click.mp3', label: { ko: '클릭', en: 'Click' } };
+      const asset2: AssetDefinition = { id: 'asset-2', type: 'audio', src: 'sfx/click.mp3', mimeType: 'audio/mpeg' };
       useEditorStore.getState().addAsset(asset);
       useEditorStore.getState().addAsset(asset2);
       const { project } = useEditorStore.getState();
@@ -59,7 +59,7 @@ describe('AssetSlice', () => {
   // ── updateAsset ─────────────────────────────────────────────────
 
   describe('updateAsset', () => {
-    const asset: AssetDefinition = { id: 'a1', type: 'image', src: 'old.png', label: { ko: '구버전', en: 'Old' } };
+    const asset: AssetDefinition = { id: 'a1', type: 'image', src: 'old.png', mimeType: 'image/png' };
 
     beforeEach(() => {
       useEditorStore.getState().addAsset(asset);
@@ -79,7 +79,7 @@ describe('AssetSlice', () => {
   // ── deleteAsset ─────────────────────────────────────────────────
 
   describe('deleteAsset', () => {
-    const asset: AssetDefinition = { id: 'del-a', type: 'image', src: 'del.png', label: { ko: '삭제', en: 'Delete' } };
+    const asset: AssetDefinition = { id: 'del-a', type: 'image', src: 'del.png', mimeType: 'image/png' };
 
     it('removes the asset from items', () => {
       useEditorStore.getState().addAsset(asset);
@@ -106,7 +106,8 @@ describe('Word CRUD (via AssetSlice)', () => {
 
   const word: Word = {
     id: 'w1',
-    text: { ko: '칼', en: 'Knife' },
+    display: { ko: '칼', en: 'Knife' },
+    caseId: 'case1',
     hint: { ko: '날카로운 도구', en: 'Sharp tool' },
   };
 
@@ -129,15 +130,15 @@ describe('Word CRUD (via AssetSlice)', () => {
     });
 
     it('updates word text', () => {
-      useEditorStore.getState().updateWord('w1', { text: { ko: '총', en: 'Gun' } });
-      expect(useEditorStore.getState().words[0].text.ko).toBe('총');
+      useEditorStore.getState().updateWord('w1', { display: { ko: '총', en: 'Gun' } });
+      expect(useEditorStore.getState().words[0].display.ko).toBe('총');
     });
 
     it('does not affect other words', () => {
-      const word2: Word = { id: 'w2', text: { ko: '포크', en: 'Fork' }, hint: { ko: '', en: '' } };
+      const word2: Word = { id: 'w2', display: { ko: '포크', en: 'Fork' }, caseId: 'case1', hint: { ko: '', en: '' } };
       useEditorStore.getState().addWord(word2);
-      useEditorStore.getState().updateWord('w1', { text: { ko: '총', en: 'Gun' } });
-      expect(useEditorStore.getState().words.find(w => w.id === 'w2')?.text.ko).toBe('포크');
+      useEditorStore.getState().updateWord('w1', { display: { ko: '총', en: 'Gun' } });
+      expect(useEditorStore.getState().words.find(w => w.id === 'w2')?.display.ko).toBe('포크');
     });
   });
 
@@ -149,7 +150,7 @@ describe('Word CRUD (via AssetSlice)', () => {
     });
 
     it('preserves other words', () => {
-      const word2: Word = { id: 'w2', text: { ko: '포크', en: 'Fork' }, hint: { ko: '', en: '' } };
+      const word2: Word = { id: 'w2', display: { ko: '포크', en: 'Fork' }, caseId: 'case1', hint: { ko: '', en: '' } };
       useEditorStore.getState().addWord(word);
       useEditorStore.getState().addWord(word2);
       useEditorStore.getState().deleteWord('w1');

@@ -9,6 +9,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useEditorStore } from '@/store/editor-store';
+import type { ChoiceSelection } from '@/store/quick-create-slice';
 
 // ── AI 모듈 타입 (동적 import용) ──────────────────────────────────
 
@@ -526,7 +527,7 @@ function Step2({
     puzzleStructure: { id: string; label: string; summary: string }[];
     atmosphere: { id: string; label: string; summary: string }[];
   };
-  selection: Record<string, string>;
+  selection: ChoiceSelection;
   onSelectionChange: (patch: Record<string, string>) => void;
 }): React.ReactElement {
   return (

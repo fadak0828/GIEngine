@@ -8,7 +8,7 @@ function resetStore() {
     project: null,
     words: [],
     meta: { filePath: null, isDirty: false, lastSavedAt: null },
-    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, puzzleId: null, subPuzzleId: null, layerId: null },
+    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, puzzleId: null, subPuzzleId: null, layerId: null, assetId: null },
     ui: {
       activePanel: 'scene',
       editorLocale: 'ko',
@@ -19,6 +19,12 @@ function resetStore() {
       leftPanelWidth: 260,
       rightPanelWidth: 320,
       sceneTool: 'select',
+      autoSaveEnabled: false,
+      autoSaveIntervalMs: 30000,
+      notification: null,
+      assetViewMode: 'grid',
+      assetTypeFilter: 'all',
+      assetSearch: '',
     },
   });
 }

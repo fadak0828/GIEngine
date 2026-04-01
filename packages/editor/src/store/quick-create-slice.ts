@@ -25,6 +25,7 @@ export interface SectionChoices {
 }
 
 export interface ChoiceSelection {
+  [key: string]: string | undefined;
   characters?: string;
   scenes?: string;
   puzzleStructure?: string;

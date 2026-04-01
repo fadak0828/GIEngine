@@ -271,7 +271,7 @@ export function AssetProperties(): React.ReactElement | null {
         <input
           type="text"
           value={asset.alt?.[editorLocale] ?? ''}
-          onChange={e => updateAsset(selectedAssetId, { alt: { ...(asset.alt ?? {}), [editorLocale]: e.target.value } })}
+          onChange={e => updateAsset(selectedAssetId, { alt: { ko: '', en: '', ...(asset.alt ?? {}), [editorLocale]: e.target.value } })}
           style={{
             padding: '4px 6px',
             fontSize: 12,
