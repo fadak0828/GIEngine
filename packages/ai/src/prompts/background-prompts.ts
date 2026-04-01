@@ -189,6 +189,13 @@ interface StructuredPrompt {
     style: string[];
     composition: string;
     environment: string;
+    character?: {
+      include: boolean;
+      description: string;
+      position_zone: string;
+      size: 'small' | 'medium' | 'large';
+      style_hint: string;
+    };
   };
   constraints: {
     negative_prompt: string[];
@@ -220,13 +227,30 @@ interface StructuredPrompt {
  *
  * The structured format gives the image model a precise, unambiguous understanding
  * of what to render and where.
+ *
+ * @param sceneDescription  Description of the scene to render
+ * @param gameContext        Full game/case/scene context for the prompt
+ * @param style              Visual style override (default: painterly)
+ * @param includeCharacter   Optional override:
+ *                             - true  = include a character figure
+ *                             - false = no characters (default, backwards-compatible)
+ *                             - null/undefined = AI decides based on scene description
  */
 export function buildRichBackgroundPrompt(
   sceneDescription: string,
   gameContext: GameContextForPrompt,
   style: BackgroundStyle = 'painterly',
+  includeCharacter?: boolean,
 ): string {
   const styleTokens = STYLE_DESCRIPTORS[style].split(', ');
+
+  // Determine character policy:
+  // - explicit true  → include character (use characterHint or generic)
+  // - explicit false → no characters
+  // - undefined      → let AI decide naturally (don't hard-code into negative_prompt)
+  const wantsCharacter = includeCharacter === true;
+  const noCharacters   = includeCharacter === false;
+  const characterHint   = gameContext.characterHint;
 
   const prompt: StructuredPrompt = {
     role: 'Generate a background image for a "Golden Idol"-style mystery/deduction game. The player explores scenes, examines objects, collects word-clues, and solves puzzles.',
@@ -242,10 +266,12 @@ export function buildRichBackgroundPrompt(
       environment: sceneDescription,
     },
     constraints: {
-      negative_prompt: [
-        'text', 'letters', 'words', 'readable writing', 'UI elements',
-        'human characters', 'human figures', 'people',
-      ],
+      negative_prompt: noCharacters
+        ? [
+            'text', 'letters', 'words', 'readable writing', 'UI elements',
+            'human characters', 'human figures', 'people',
+          ]
+        : ['text', 'letters', 'words', 'readable writing', 'UI elements'],
       global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment.',
     },
   };
@@ -287,6 +313,20 @@ export function buildRichBackgroundPrompt(
         visual_description: describeHotspotVisual(h),
       },
     }));
+  }
+
+  // Character element — only when explicitly requested
+  if (wantsCharacter) {
+    prompt.art_direction = {
+      ...prompt.art_direction,
+      character: {
+        include: true,
+        description: characterHint?.description ?? 'a mysterious figure, silhouette or shadow of a person, appropriate for a detective/mystery game',
+        position_zone: characterHint?.positionZone ?? 'background, non-intrusive',
+        size: characterHint?.size ?? 'medium',
+        style_hint: 'subtle, atmospheric, non-distracting from interactive elements',
+      },
+    };
   }
 
   return JSON.stringify(prompt, null, 2);

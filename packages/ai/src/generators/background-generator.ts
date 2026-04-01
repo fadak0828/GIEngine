@@ -13,10 +13,10 @@ import { buildBackgroundPrompt, buildRichBackgroundPrompt } from '../prompts/bac
 export async function generateBackground(
   request: BackgroundGenerateRequest,
 ): Promise<BackgroundGenerateResult> {
-  const { sceneDescription, style = 'painterly', aspectRatio = '16:9', gameContext } = request;
+  const { sceneDescription, style = 'painterly', aspectRatio = '16:9', gameContext, includeCharacter } = request;
 
   const prompt = gameContext
-    ? buildRichBackgroundPrompt(sceneDescription, gameContext, style)
+    ? buildRichBackgroundPrompt(sceneDescription, gameContext, style, includeCharacter)
     : buildBackgroundPrompt({ sceneDescription, style });
 
   const base64Data = await geminiClient.generateImage(prompt, aspectRatio);
