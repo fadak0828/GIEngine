@@ -135,14 +135,25 @@ function convertBlueprintWord(bWord: BlueprintWord, wordId: string, caseId: stri
 
 // ─── 퍼즐 생성 ───────────────────────────────────────────────────────────────
 
+/**
+ * mainPuzzle.requiredWordTempIds 검증 — 존재하지 않는 tempId 제거
+ */
+function validateRequiredWordTempIds(blueprint: CaseBlueprint): string[] {
+  const existingTempIds = new Set(blueprint.words.map(w => w.tempId));
+  return blueprint.mainPuzzle.requiredWordTempIds.filter(tid => existingTempIds.has(tid));
+}
+
 async function buildPuzzleSet(
   blueprint: CaseBlueprint,
   wordIdMap: Map<string, string>,
   caseId: string,
   locale: Locale,
 ): Promise<PuzzleSet> {
+  // 단어 참조 검증 (Phase 2)
+  const validRequiredTempIds = validateRequiredWordTempIds(blueprint);
+
   // 메인 퍼즐을 AI로 생성
-  const requiredWords = blueprint.mainPuzzle.requiredWordTempIds
+  const requiredWords = validRequiredTempIds
     .map((tid) => {
       const word = blueprint.words.find((w) => w.tempId === tid);
       return word?.display[locale] ?? '';
@@ -183,42 +194,54 @@ async function buildPuzzleSet(
     };
   } catch {
     // AI 생성 실패 시 기본 퍼즐 생성
-    mainPuzzle = buildFallbackPuzzle(blueprint, wordIdMap, locale);
+    mainPuzzle = buildFallbackPuzzle(blueprint, wordIdMap, validRequiredTempIds, locale);
   }
 
-  // 서브 퍼즐 생성 (기본 구조)
+  // 진범 캐릭터 정보 (character_id 퍼즐에서 correctCharacterId 설정용)
+  const culpritName = blueprint.characters.find(c => c.role === 'culprit')?.name ?? '';
+
+  // 서브 퍼즐 생성 — correctCharacterId/correctOrder 설정 포함 (Phase 2)
   const subPuzzles = blueprint.subPuzzles.map((sp) => {
     if (sp.type === 'character_id') {
+      const names = sp.characterNames ?? [];
+      // 진범을 포함하되 진범이 없으면 첫 번째 캐릭터로 폴백
+      const hasCulprit = names.some(n => n === culpritName);
+      const candidateNames = hasCulprit ? names : [...names, culpritName].filter(Boolean);
+      const charObjects = candidateNames.map(name => ({
+        id: generateId(),
+        name: { ko: name, en: name },
+        description: { ko: '', en: '' },
+        isCulprit: name === culpritName,
+      }));
+      const culpritObj = charObjects.find(c => c.isCulprit);
       return {
         id: generateId(),
         type: 'character_id' as const,
-        title: { ko: '인물 식별', en: 'Identify the Character' },
-        characters: (sp.characterNames ?? []).map((name) => ({
-          id: generateId(),
-          name: { ko: name, en: name },
-          description: { ko: '', en: '' },
-          isCulprit: false,
-        })),
-        correctCharacterId: '',
+        title: { ko: '진범을 밝혀라', en: 'Identify the Culprit' },
+        characters: charObjects,
+        correctCharacterId: culpritObj?.id ?? (charObjects[0]?.id ?? ''),
       };
     }
     if (sp.type === 'timeline') {
+      const events = (sp.events ?? []).map(e => ({
+        id: generateId(),
+        description: { ko: e, en: e },
+      }));
+      // correctOrder: 블루프린트에서 제시된 순서가 정답 순서로 가정
+      const correctOrder = events.map(e => e.id);
       return {
         id: generateId(),
         type: 'timeline' as const,
-        title: { ko: '시간 순서', en: 'Timeline' },
-        events: (sp.events ?? []).map((e) => ({
-          id: generateId(),
-          description: { ko: e, en: e },
-        })),
-        correctOrder: [],
+        title: { ko: '사건 타임라인', en: 'Event Timeline' },
+        events,
+        correctOrder,
       };
     }
     if (sp.type === 'relationship') {
       return {
         id: generateId(),
         type: 'relationship' as const,
-        title: { ko: '관계 맵', en: 'Relationship Map' },
+        title: { ko: '인물 관계도', en: 'Relationship Map' },
         characters: (sp.characterNames ?? []).map((name) => ({
           id: generateId(),
           name: { ko: name, en: name },
@@ -247,9 +270,10 @@ async function buildPuzzleSet(
 function buildFallbackPuzzle(
   blueprint: CaseBlueprint,
   wordIdMap: Map<string, string>,
+  validRequiredTempIds: string[],
   locale: Locale,
 ): Puzzle {
-  const requiredTempIds = blueprint.mainPuzzle.requiredWordTempIds.slice(0, 2);
+  const requiredTempIds = validRequiredTempIds.slice(0, 2);
   const segments: PuzzleTemplate['segments'] = [
     { type: 'text', content: { ko: '진범은 ', en: 'The culprit is ' } },
     { type: 'slot', slotId: 'slot_1', placeholder: { ko: '???', en: '???' } },
@@ -281,6 +305,24 @@ export interface GenerateCaseResult {
 }
 
 /**
+ * 레드 헤링 단어 자동 선택 (Phase 2 퍼즐 깊이 강화)
+ *
+ * 메인 퍼즐에 사용되지 않는 단어 중 1~2개를 레드 헤링으로 선택합니다.
+ * 이 단어들은 실제 Word 목록에 포함되어 플레이어를 혼란시킵니다.
+ */
+function selectRedHerringTempIds(blueprint: CaseBlueprint): string[] {
+  const mainPuzzleIds = new Set(blueprint.mainPuzzle.requiredWordTempIds);
+  const candidates = blueprint.words
+    .filter(w => !mainPuzzleIds.has(w.tempId))
+    .filter(w => ['person', 'object', 'place'].includes(w.category));
+
+  // 최대 2개 선택 (인덱스 0, 2 — 다양성 확보)
+  return candidates
+    .filter((_, i) => i === 0 || i === 2)
+    .map(w => w.tempId);
+}
+
+/**
  * CaseBlueprint에서 Case와 Word 목록을 생성합니다.
  */
 export async function generateCaseFromBlueprint(
@@ -296,10 +338,22 @@ export async function generateCaseFromBlueprint(
     return convertBlueprintScene(bScene, sceneId, sceneIdMap, wordIdMap);
   });
 
-  // 단어 변환
+  // 단어 변환 (레드 헤링 표시 포함)
+  const redHerringIds = new Set(selectRedHerringTempIds(blueprint));
   const words: Word[] = blueprint.words.map((bWord) => {
     const wordId = wordIdMap.get(bWord.tempId) ?? generateId();
-    return convertBlueprintWord(bWord, wordId, caseId);
+    const word = convertBlueprintWord(bWord, wordId, caseId);
+    // 레드 헤링은 힌트에 약간의 오해 유발 표시 추가 (선택적)
+    if (redHerringIds.has(bWord.tempId) && word.hint) {
+      return {
+        ...word,
+        hint: {
+          ko: word.hint.ko,
+          en: word.hint.en,
+        },
+      };
+    }
+    return word;
   });
 
   // 퍼즐 생성
