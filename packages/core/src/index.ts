@@ -7,3 +7,7 @@ export type { ProjectIssue, ProjectIssueSeverity, ProjectIssueKind, ProjectIssue
 export { transition } from './state/state-machine.js';
 export { SaveManager } from './save/save-manager.js';
 export { createInitialSaveState } from './save/initial-state.js';
+
+// Template System
+export type { ProjectTemplate, TemplateCategory, TemplateDefaultProperties, CreateProjectOptions } from './templates/index.js';
+export { TemplateRegistry, defaultTemplateRegistry, blankTemplate, classicMysteryTemplate, tutorialTemplate } from './templates/index.js';
