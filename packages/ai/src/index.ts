@@ -32,29 +32,15 @@ export {
 export { buildStoryPrompt } from './prompts/story-prompts.js';
 export { buildPuzzlePrompt } from './prompts/puzzle-prompts.js';
 
-// Interview module
-export { InterviewEngine, interviewEngine } from './interview/index.js';
+// Interview module — legacy InterviewEngine workflow removed (FADAA-107)
+// Quick Create module is the successor. Only CaseBlueprint types remain here.
 export type {
-  InterviewSession,
-  InterviewMessage,
-  InterviewStageMeta,
-  CollectedCaseInfo,
-  CaseOverviewInfo,
-  CorePlotInfo,
-  CharacterProfile,
-  LocationProfile,
-  EvidenceItem,
-  PuzzleOutlineInfo,
   CaseBlueprint,
   BlueprintScene,
   BlueprintWord,
   BlueprintCharacter,
   BlueprintHotspotHint,
-  SufficiencyScore,
-  ProcessMessageResult,
 } from './interview/index.js';
-export { InterviewStage, STAGE_META, INTERVIEW_STAGE_ORDER } from './interview/index.js';
-export { evaluateSufficiency, mergeCollectedInfo } from './interview/index.js';
 
 // Case generator
 export { generateCaseFromBlueprint } from './generators/case-generator.js';

@@ -1,31 +1,18 @@
-// Public API for @gi-engine/ai interview module
+/**
+ * Public API for @gi-engine/ai interview module
+ *
+ * @deprecated InterviewEngine based workflow is superseded by QuickCreateEngine.
+ * This module only exports CaseBlueprint types used by the Quick Create pipeline.
+ * - Blueprint types: CaseBlueprint, BlueprintScene, BlueprintWord, BlueprintCharacter, BlueprintHotspotHint
+ * - Use packages/ai/src/quick-create/ for case generation.
+ * - Use packages/ai/src/interview/blueprint-converter.ts for CaseBlueprint → Case conversion.
+ */
 
-export { InterviewEngine, interviewEngine } from './interview-engine.js';
-
+// Re-export CaseBlueprint types (used by Quick Create, Regenerator, BlueprintConverter)
 export type {
-  InterviewSession,
-  InterviewMessage,
-  InterviewStageMeta,
-  CollectedCaseInfo,
-  CaseOverviewInfo,
-  CorePlotInfo,
-  CharacterProfile,
-  LocationProfile,
-  EvidenceItem,
-  PuzzleOutlineInfo,
   CaseBlueprint,
   BlueprintScene,
   BlueprintWord,
   BlueprintCharacter,
   BlueprintHotspotHint,
-  SufficiencyScore,
-  ProcessMessageResult,
 } from './types.js';
-
-export { InterviewStage, STAGE_META, INTERVIEW_STAGE_ORDER } from './types.js';
-
-export {
-  evaluateSufficiency,
-  createSufficiencyScoreFromAI,
-  mergeCollectedInfo,
-} from './sufficiency-evaluator.js';

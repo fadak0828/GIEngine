@@ -3,17 +3,15 @@
  *
  * 검증 항목:
  * 1. 타입 안전성 (QuickCreateEngine <-> CaseBlueprint <-> Case)
- * 2. 기존 인터뷰 호환성 유지
- * 3. E2E 흐름: 1문장 입력 → 블루프린트 생성
- * 4. 엣지 케이스: 빈 입력, 초긴 입력, 특수문자
- * 5. 성능: 생성 시간 < 30초 (모킹 기반 검증)
- * 6. 폴백 전략
+ * 2. E2E 흐름: 1문장 입력 → 블루프린트 생성
+ * 3. 엣지 케이스: 빈 입력, 초긴 입력, 특수문자
+ * 4. 성능: 생성 시간 < 30초 (모킹 기반 검증)
+ * 5. 폴백 전략
+ * 6. CaseBlueprint 타입 호환성
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QuickCreateEngine } from '../src/quick-create/quick-create-engine.js';
-import { InterviewEngine } from '../src/interview/interview-engine.js';
-import { InterviewStage } from '../src/interview/types.js';
 import type { CaseBlueprint } from '../src/interview/types.js';
 import type { QuickCreateProgress } from '../src/quick-create/types.js';
 
@@ -536,40 +534,10 @@ describe('QuickCreateEngine', () => {
   });
 });
 
-// ─── 기존 인터뷰 호환성 ────────────────────────────────────────────────────────
+// ─── CaseBlueprint 타입 호환성 ───────────────────────────────────────────────
 
-describe('기존 인터뷰 호환성', () => {
-  it('InterviewEngine과 QuickCreateEngine이 독립적으로 동작합니다', async () => {
-    const interviewEngine = new InterviewEngine();
-    const quickEngine = new QuickCreateEngine();
-
-    // 인터뷰 엔진 세션 시작 (AI 호출 없음)
-    const session = await interviewEngine.startSession('ko');
-
-    // Quick Create 엔진으로 블루프린트 생성
-    mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
-    const { blueprint } = await quickEngine.startFromSentence('독립적인 사건');
-
-    expect(session.currentStage).toBe(InterviewStage.CASE_OVERVIEW);
-    expect(blueprint.id).toBeTruthy();
-  });
-
-  it('인터뷰 엔진 세션이 QuickCreateEngine과 상태를 공유하지 않습니다', async () => {
-    const interviewEngine = new InterviewEngine();
-    const quickEngine = new QuickCreateEngine();
-
-    mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
-    const { blueprint } = await quickEngine.startFromSentence('독립 테스트');
-
-    // 인터뷰 세션을 새로 시작해도 Quick Create 결과와 무관
-    const session = await interviewEngine.startSession('ko');
-
-    expect(session.id).not.toBe(blueprint.sessionId);
-    expect(session.status).toBe('active');
-    expect(blueprint.generatedAt).toBeGreaterThan(0);
-  });
-
-  it('CaseBlueprint 타입이 인터뷰 엔진과 Quick Create 엔진에서 동일하게 사용됩니다', async () => {
+describe('CaseBlueprint 타입 호환성', () => {
+  it('CaseBlueprint 타입이 Quick Create 엔진에서 올바르게 사용됩니다', async () => {
     mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
     const { blueprint } = await new QuickCreateEngine().startFromSentence('타입 호환성 테스트');
 
