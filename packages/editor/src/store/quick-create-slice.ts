@@ -171,8 +171,14 @@ export const createQuickCreateSlice: StateCreator<EditorStore, [], [], QuickCrea
   setQuickCreateProgress: (progress) =>
     set(s => ({ quickCreate: { ...s.quickCreate, progress } })),
 
-  openQuickCreateBlueprintPreview: () =>
-    set(s => ({ quickCreate: { ...s.quickCreate, blueprintPreviewOpen: true } })),
+  openQuickCreateBlueprintPreview: () => {
+    const { quickCreate, setBlueprint, openBlueprintPreview } = get();
+    if (!quickCreate.blueprint) return;
+    // Sync blueprint to interview state so CaseBlueprintPreview can read it
+    setBlueprint(quickCreate.blueprint);
+    // Open the interview preview modal (not the quick-create-specific one)
+    openBlueprintPreview();
+  },
 
   closeQuickCreateBlueprintPreview: () =>
     set(s => ({ quickCreate: { ...s.quickCreate, blueprintPreviewOpen: false } })),

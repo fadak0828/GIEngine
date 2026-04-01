@@ -223,15 +223,19 @@ export function QuickCreateModal(): React.ReactElement | null {
   ]);
 
   // 에디터에 적용
+  const project = useEditorStore(s => s.project);
   const handleApply = useCallback(async () => {
-    if (!qc.blueprint || !qc.targetActId) return;
+    if (!qc.blueprint) return;
+    // Fallback to first act if targetActId is not set
+    const actId = qc.targetActId ?? project?.acts[0]?.id;
+    if (!actId) return;
     setApplyingToEditor(true);
     try {
-      await applyQuickCreateBlueprintToEditor(qc.targetActId, false);
+      await applyQuickCreateBlueprintToEditor(actId, false);
     } finally {
       setApplyingToEditor(false);
     }
-  }, [qc.blueprint, qc.targetActId, applyQuickCreateBlueprintToEditor]);
+  }, [qc.blueprint, qc.targetActId, project?.acts, applyQuickCreateBlueprintToEditor]);
 
   if (!qc.open) return null;
 
