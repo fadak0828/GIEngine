@@ -1,9 +1,10 @@
 /**
  * CaseBlueprintPreview — 생성된 CaseBlueprint 시각적 프리뷰
- * Phase 5b (FADAA-44)
+ * Phase 5b (FADAA-44) / Phase 6 (FADAA-51)
  *
  * - 씬/핫스팟/단서 구조 표시
- * - 적용/취소 옵션
+ * - 케이스 생성 버튼 + 진행률 표시
+ * - 적용 완료 후 에디터 자동 로드
  */
 
 import React, { useState } from 'react';
@@ -46,83 +47,86 @@ const accentBadge: React.CSSProperties = {
   background: 'var(--accent-dim)',
 };
 
+// ── 진행률 바 ─────────────────────────────────────────────────────
+
+function ProgressBar({ percent, step }: { percent: number; step: string }): React.ReactElement {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 6,
+        padding: '10px 12px',
+        marginBottom: 10,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 6,
+        }}
+      >
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{step}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+          {percent}%
+        </div>
+      </div>
+      <div
+        style={{
+          height: 4,
+          background: 'var(--bg-secondary)',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${percent}%`,
+            background: 'var(--accent)',
+            borderRadius: 2,
+            transition: 'width 0.3s ease',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ── 메인 컴포넌트 ─────────────────────────────────────────────────
 
 export function CaseBlueprintPreview(): React.ReactElement | null {
   const {
     interview,
     closeBlueprintPreview,
-    closeInterview,
     resetInterview,
-    addCase,
-    setSelection,
+    applyBlueprintToEditor,
     project,
   } = useEditorStore();
 
-  const { blueprintPreviewOpen, blueprint } = interview;
-  const [applying, setApplying] = useState(false);
-  const [applyError, setApplyError] = useState<string | null>(null);
+  const { blueprintPreviewOpen, blueprint, generationProgress } = interview;
+  const [generateBg, setGenerateBg] = useState(false);
+
+  const isGenerating = generationProgress !== null;
 
   if (!blueprintPreviewOpen || !blueprint) return null;
 
-  const handleApply = async () => {
-    if (!project || applying) return;
-    setApplying(true);
-    setApplyError(null);
-    try {
-      const actId = project.acts[0]?.id ?? null;
-      if (!actId) throw new Error('Act가 없습니다. 먼저 Act를 생성해 주세요.');
-
-      // Apply the blueprint via AI module's applier
-      const ai = await import('@gi-engine/ai') as unknown as {
-        applyBlueprintToProject?: (
-          blueprint: CaseBlueprintState,
-          actId: string,
-          helpers: {
-            addCase: (actId: string) => void;
-            getState: () => { project: typeof project };
-          },
-        ) => Promise<string>;
-      };
-
-      // Blueprint applier가 없으면 기본 케이스 생성만 수행
-      if (typeof ai.applyBlueprintToProject === 'function') {
-        const store = useEditorStore.getState();
-        const newCaseId = await ai.applyBlueprintToProject(blueprint, actId, {
-          addCase: (aId: string) => store.addCase(aId),
-          getState: () => ({ project: store.project }),
-        });
-        const state = useEditorStore.getState();
-        const newCase = state.project?.acts
-          .flatMap((a) => a.cases)
-          .find((c) => c.id === newCaseId);
-        if (newCase) {
-          setSelection({ actId, caseId: newCaseId });
-        }
-      } else {
-        // Fallback: 새 케이스 생성 후 선택
-        addCase(actId);
-        const state = useEditorStore.getState();
-        const cases = state.project?.acts.find((a) => a.id === actId)?.cases ?? [];
-        const newCase = cases[cases.length - 1];
-        if (newCase) {
-          setSelection({ actId, caseId: newCase.id });
-        }
-      }
-
-      resetInterview();
-    } catch (e) {
-      setApplyError(e instanceof Error ? e.message : '적용 오류');
-    } finally {
-      setApplying(false);
-    }
+  const handleApply = () => {
+    if (!project || isGenerating) return;
+    const actId = project.acts[0]?.id ?? null;
+    if (!actId) return;
+    void applyBlueprintToEditor(actId, generateBg);
   };
 
   const handleDiscard = () => {
+    if (isGenerating) return;
     resetInterview();
   };
 
   const handleBackToInterview = () => {
+    if (isGenerating) return;
     closeBlueprintPreview();
   };
 
@@ -130,7 +134,7 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
     <>
       {/* Backdrop */}
       <div
-        onClick={applying ? undefined : handleBackToInterview}
+        onClick={isGenerating ? undefined : handleBackToInterview}
         style={{
           position: 'fixed',
           inset: 0,
@@ -180,13 +184,13 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
             </div>
           </div>
           <button
-            onClick={applying ? undefined : handleBackToInterview}
-            disabled={applying}
+            onClick={isGenerating ? undefined : handleBackToInterview}
+            disabled={isGenerating}
             style={{
               background: 'none',
               border: 'none',
               color: 'var(--text-muted)',
-              cursor: applying ? 'not-allowed' : 'pointer',
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
               fontSize: 18,
               lineHeight: 1,
               padding: 0,
@@ -198,6 +202,28 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+          {/* 진행률 표시 (생성 중일 때) */}
+          {isGenerating && generationProgress && (
+            <ProgressBar percent={generationProgress.percent} step={generationProgress.step} />
+          )}
+
+          {/* 에러 표시 */}
+          {interview.error && !isGenerating && (
+            <div
+              style={{
+                background: 'var(--danger-dim, rgba(255,80,80,0.1))',
+                border: '1px solid var(--danger)',
+                borderRadius: 6,
+                padding: '8px 12px',
+                marginBottom: 10,
+                fontSize: 12,
+                color: 'var(--danger)',
+              }}
+            >
+              {interview.error}
+            </div>
+          )}
+
           {/* Title & Meta */}
           <div style={{ marginBottom: 14 }}>
             <div
@@ -299,26 +325,38 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
             borderTop: '1px solid var(--border-color)',
             flexShrink: 0,
             display: 'flex',
+            alignItems: 'center',
             gap: 8,
           }}
         >
-          {applyError && (
-            <div
+          {/* 배경 이미지 생성 옵션 */}
+          {!isGenerating && (
+            <label
               style={{
-                flex: 1,
-                fontSize: 12,
-                color: 'var(--danger)',
                 display: 'flex',
                 alignItems: 'center',
+                gap: 5,
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                userSelect: 'none',
               }}
             >
-              {applyError}
-            </div>
+              <input
+                type="checkbox"
+                checked={generateBg}
+                onChange={(e) => setGenerateBg(e.target.checked)}
+                style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
+              />
+              씬 배경 AI 생성
+            </label>
           )}
+
           <div style={{ flex: 1 }} />
+
           <button
             onClick={handleDiscard}
-            disabled={applying}
+            disabled={isGenerating}
             style={{
               padding: '7px 14px',
               fontSize: 12,
@@ -326,14 +364,14 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
               color: 'var(--text-muted)',
               border: '1px solid var(--border-color)',
               borderRadius: 4,
-              cursor: applying ? 'not-allowed' : 'pointer',
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
             }}
           >
             버리기
           </button>
           <button
             onClick={handleBackToInterview}
-            disabled={applying}
+            disabled={isGenerating}
             style={{
               padding: '7px 14px',
               fontSize: 12,
@@ -341,26 +379,27 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
               color: 'var(--text-secondary)',
               border: '1px solid var(--border-color)',
               borderRadius: 4,
-              cursor: applying ? 'not-allowed' : 'pointer',
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
             }}
           >
             ← 인터뷰로 돌아가기
           </button>
           <button
-            onClick={() => void handleApply()}
-            disabled={applying}
+            onClick={handleApply}
+            disabled={isGenerating}
             style={{
               padding: '7px 18px',
               fontSize: 12,
               fontWeight: 600,
-              background: applying ? 'var(--bg-card)' : 'var(--accent)',
-              color: applying ? 'var(--text-muted)' : '#000',
+              background: isGenerating ? 'var(--bg-card)' : 'var(--accent)',
+              color: isGenerating ? 'var(--text-muted)' : '#000',
               border: 'none',
               borderRadius: 4,
-              cursor: applying ? 'not-allowed' : 'pointer',
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
+              minWidth: 100,
             }}
           >
-            {applying ? '적용 중...' : '프로젝트에 적용'}
+            {isGenerating ? '생성 중...' : '케이스 생성'}
           </button>
         </div>
       </div>

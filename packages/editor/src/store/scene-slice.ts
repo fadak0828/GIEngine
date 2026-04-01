@@ -83,6 +83,7 @@ export type SceneSlice = {
   reorderActs: (fromIndex: number, toIndex: number) => void;
 
   addCase: (actId: string) => void;
+  insertCase: (actId: string, caseData: Case) => void;
   updateCase: (caseId: string, patch: Partial<Omit<Case, 'scenes' | 'puzzles'>>) => void;
   deleteCase: (actId: string, caseId: string) => void;
   reorderCases: (actId: string, fromIndex: number, toIndex: number) => void;
@@ -177,6 +178,20 @@ export const createSceneSlice: StateCreator<EditorStore, [], [], SceneSlice> = (
         project: produce(state.project, draft => {
           const act = draft.acts.find(a => a.id === actId);
           if (act) act.cases.push(newCase);
+        }),
+        meta: { ...state.meta, isDirty: true },
+      };
+    });
+  },
+
+  insertCase: (actId, caseData) => {
+    get().pushToHistory();
+    set(state => {
+      if (!state.project) return state;
+      return {
+        project: produce(state.project, draft => {
+          const act = draft.acts.find(a => a.id === actId);
+          if (act) act.cases.push(caseData);
         }),
         meta: { ...state.meta, isDirty: true },
       };

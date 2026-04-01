@@ -59,3 +59,12 @@ export { evaluateSufficiency, mergeCollectedInfo } from './interview/index.js';
 // Case generator
 export { generateCaseFromBlueprint } from './generators/case-generator.js';
 export type { GenerateCaseResult } from './generators/case-generator.js';
+
+// Blueprint converter (Phase 6)
+export { convertBlueprintToGameData } from './interview/blueprint-converter.js';
+export type {
+  ConversionProgress,
+  OnProgress,
+  ConvertBlueprintOptions,
+  ConvertBlueprintResult,
+} from './interview/blueprint-converter.js';

@@ -138,6 +138,7 @@ export interface EditorStore extends InterviewSlice {
 
   // Case CRUD
   addCase: (actId: string) => void;
+  insertCase: (actId: string, caseData: Case) => void;
   updateCase: (caseId: string, patch: Partial<Omit<Case, 'scenes' | 'puzzles'>>) => void;
   deleteCase: (actId: string, caseId: string) => void;
   reorderCases: (actId: string, fromIndex: number, toIndex: number) => void;
