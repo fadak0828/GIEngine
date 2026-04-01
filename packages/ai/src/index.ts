@@ -82,3 +82,35 @@ export type {
   ChoiceSelection,
   StartFromSentenceOptions,
 } from './quick-create/index.js';
+
+// Quality system (Fun-Metric, Benchmark, Regeneration, Feedback)
+export { funMetricScorer, FunMetricScorer } from './quality/index.js';
+export type {
+  FunMetricScore,
+  FunMetricResult,
+  ScoredBlueprint,
+} from './quality/index.js';
+export {
+  submitFeedback,
+  getFeedbacksForGame,
+  getAverageRatingForGame,
+  getAggregatedStats,
+  clearAllFeedbacks,
+  exportFeedbacksAsJson,
+} from './quality/index.js';
+export type { GameFeedback, FeedbackTag, AggregatedStats } from './quality/index.js';
+export {
+  regenerateScene,
+  regenerateWord,
+  regeneratePuzzle,
+  regenerateFullBlueprint,
+} from './quality/index.js';
+export type { RegenerationResult } from './quality/index.js';
+export {
+  BENCHMARK_CORPUS,
+  getBenchmarkById,
+  getBenchmarksByDifficulty,
+  getBenchmarksByGenre,
+  compareWithGroundTruth,
+} from './quality/index.js';
+export type { BenchmarkCase, BenchmarkBlueprint } from './quality/index.js';

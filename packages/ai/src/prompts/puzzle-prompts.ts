@@ -14,14 +14,36 @@ export function buildPuzzlePrompt(options: PuzzlePromptOptions): string {
   const { caseTitle, caseDescription, wordBank, locale } = options;
   const localeName = locale === 'ko' ? '한국어' : 'English';
 
-  return `You are a game designer creating a fill-in-the-blank deduction puzzle.
+  return `You are a creative game designer crafting a mystery deduction fill-in-the-blank puzzle.
 
-Case: "${caseTitle}"
-Description: ${caseDescription}
-Available words: ${wordBank.join(', ')}
-Language: ${localeName}
+## Case Information
+- Case Title: "${caseTitle}"
+- Story: ${caseDescription}
+- Available Clue Words: ${wordBank.join(', ')}
+- Language: ${localeName}
 
-Create a fill-in-the-blank puzzle template. The puzzle should be a conclusion statement with 2-3 blank slots where the player fills in words from the word bank.
+## Design Requirements
+
+**Puzzle Variety (퍼즐 다양성)**
+- Create a NARATIVE CONCLUSION statement as the puzzle template
+- The conclusion should tell the FULL STORY of the crime (culprit + method + motive + location)
+- Use 3-5 blank slots — enough to be challenging but not overwhelming
+- Examples of good templates:
+  - Korean: "[빈칸1](이)가 [빈칸2]에서 [빈칸3]을(를) 사용하여 [빈칸4]을(를) [빈칸5]했다"
+  - English: "The culprit [blank1] used [blank2] to [blank3] at [blank4] targeting [blank5]"
+
+**Clue Clarity (단서 명확성)**
+- Only use words from the provided word bank
+- The narrative should be LOGICALLY DEDUCIBLE from clues found in the game
+- Each blank should be fillable by careful investigation
+- Add DECOY COMBINATIONS (red herring answers) that seem plausible but are incorrect
+
+**Puzzle Title**
+- Make it THEMATIC and memorable, not generic
+- Korean example: "진범을 밝혀라: 달빛下的음모"
+- English example: "Unmask the Culprit: Conspiracy Under Moonlight"
+
+## Output Format
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -39,8 +61,10 @@ Respond ONLY with valid JSON in this exact format:
     ]
   },
   "answers": {
-    "slot_1": { "correctWordId": "<word from wordBank>" },
-    "slot_2": { "correctWordId": "<word from wordBank>" }
+    "slot_1": { "correctWordId": "<exact word from wordBank>" },
+    "slot_2": { "correctWordId": "<exact word from wordBank>" }
   }
-}`;
+}
+
+IMPORTANT: The correctWordId MUST exactly match one of the words in the wordBank. JSON only, no markdown fences.`;
 }

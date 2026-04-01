@@ -37,6 +37,24 @@ export interface QuickCreateProgressState {
   percent: number;
 }
 
+/** Fun-Metric 품질 평가 결과 (Phase E-1) */
+export interface QualityScoreState {
+  /** AI 품질 점수 (0-100, null = 미평가) */
+  overallScore: number | null;
+  /** 등급 (A/B/C/D/F) */
+  grade: string | null;
+  /** 차원별 점수 */
+  dimensions: {
+    game_length_balance: number;
+    clue_clarity: number;
+    puzzle_variety: number;
+    character_depth: number;
+    narrative_coherence: number;
+  } | null;
+  /** 평가 완료 여부 */
+  evaluated: boolean;
+}
+
 export interface QuickCreateState {
   quickCreate: {
     open: boolean;
@@ -55,6 +73,17 @@ export interface QuickCreateState {
     selection: ChoiceSelection;
     progress: QuickCreateProgressState | null;
     blueprintPreviewOpen: boolean;
+    /** Fun-Metric 품질 점수 (Phase E-1) */
+    qualityScore: QualityScoreState;
+    /** 부분 재생성 상태 (Phase E-1) */
+    regenerating: {
+      active: boolean;
+      targetType: 'scene' | 'word' | 'puzzle' | null;
+      targetId: string | null;
+      error: string | null;
+    };
+    /** 피드백 모달 표시 여부 (Phase E-1) */
+    feedbackModalOpen: boolean;
   };
 }
 
@@ -81,6 +110,20 @@ export interface QuickCreateActions {
    * interview-slice의 applyBlueprintToEditor를 재사용합니다.
    */
   applyQuickCreateBlueprintToEditor: (actId: string, generateBackgrounds?: boolean) => Promise<void>;
+  // ── Phase E-1: Fun-Metric ────────────────────────────────────────
+  /** Fun-Metric 품질 점수 설정 */
+  setQualityScore: (score: QualityScoreState) => void;
+  /** 재생성 시작 */
+  startRegeneration: (targetType: 'scene' | 'word' | 'puzzle', targetId: string) => void;
+  /** 재생성 완료 */
+  finishRegeneration: (newBlueprint: CaseBlueprintState) => void;
+  /** 재생성 실패 */
+  failRegeneration: (error: string) => void;
+  /** 재생성 초기화 */
+  resetRegeneration: () => void;
+  /** 피드백 모달 열기/닫기 */
+  openFeedbackModal: () => void;
+  closeFeedbackModal: () => void;
 }
 
 export type QuickCreateSlice = QuickCreateState & QuickCreateActions;
@@ -103,6 +146,19 @@ const initialQuickCreateState: QuickCreateState['quickCreate'] = {
   selection: {},
   progress: null,
   blueprintPreviewOpen: false,
+  qualityScore: {
+    overallScore: null,
+    grade: null,
+    dimensions: null,
+    evaluated: false,
+  },
+  regenerating: {
+    active: false,
+    targetType: null,
+    targetId: null,
+    error: null,
+  },
+  feedbackModalOpen: false,
 };
 
 // ── Slice 팩토리 ──────────────────────────────────────────────────
@@ -194,4 +250,67 @@ export const createQuickCreateSlice: StateCreator<EditorStore, [], [], QuickCrea
     // 완료 후 닫기
     set({ quickCreate: { ...initialQuickCreateState } });
   },
+
+  // ── Phase E-1: Fun-Metric & Regeneration ──────────────────────────
+
+  setQualityScore: (score) =>
+    set(s => ({ quickCreate: { ...s.quickCreate, qualityScore: score } })),
+
+  startRegeneration: (targetType, targetId) =>
+    set(s => ({
+      quickCreate: {
+        ...s.quickCreate,
+        regenerating: {
+          active: true,
+          targetType,
+          targetId,
+          error: null,
+        },
+      },
+    })),
+
+  finishRegeneration: (newBlueprint) =>
+    set(s => ({
+      quickCreate: {
+        ...s.quickCreate,
+        blueprint: newBlueprint,
+        regenerating: {
+          active: false,
+          targetType: null,
+          targetId: null,
+          error: null,
+        },
+      },
+    })),
+
+  failRegeneration: (error) =>
+    set(s => ({
+      quickCreate: {
+        ...s.quickCreate,
+        regenerating: {
+          ...s.quickCreate.regenerating,
+          active: false,
+          error,
+        },
+      },
+    })),
+
+  resetRegeneration: () =>
+    set(s => ({
+      quickCreate: {
+        ...s.quickCreate,
+        regenerating: {
+          active: false,
+          targetType: null,
+          targetId: null,
+          error: null,
+        },
+      },
+    })),
+
+  openFeedbackModal: () =>
+    set(s => ({ quickCreate: { ...s.quickCreate, feedbackModalOpen: true } })),
+
+  closeFeedbackModal: () =>
+    set(s => ({ quickCreate: { ...s.quickCreate, feedbackModalOpen: false } })),
 });
