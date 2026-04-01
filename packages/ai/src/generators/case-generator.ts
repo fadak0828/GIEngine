@@ -51,12 +51,85 @@ function buildIdMap(blueprint: CaseBlueprint): {
 
 // ─── Blueprint 씬 → Scene 변환 ───────────────────────────────────────────────
 
+/**
+ * contentHint에서 scene tempId 패턴을 추출합니다.
+ * 예: "scene_2 로 이동" → "scene_2"
+ *     "scene_3" → "scene_3"
+ *     "카페 로비로" → null (tempId 없음)
+ */
+function extractSceneTempId(contentHint: string): string | null {
+  const match = contentHint.match(/\bscene_\d+\b/);
+  return match ? match[0] : null;
+}
+
+/**
+ * navigate hotspot의 targetSceneId를 올바르게 결정합니다.
+ * 1. contentHint에서 scene tempId 추출 시도
+ * 2. contentHint 자체가 tempId인지 확인
+ * 3. connections 배열에서 첫 번째 연결 대상 사용
+ * 4. 그래도 없으면 null 반환 (이 hotspot은 navigate로 만들지 않음)
+ */
+function resolveNavigateTarget(
+  contentHint: string,
+  connections: string[],
+  sceneIdMap: Map<string, string>,
+): string | null {
+  // 1. contentHint에서 tempId 추출
+  const extracted = extractSceneTempId(contentHint);
+  if (extracted && sceneIdMap.has(extracted)) {
+    return sceneIdMap.get(extracted)!;
+  }
+
+  // 2. contentHint 자체가 tempId인지 확인
+  if (sceneIdMap.has(contentHint)) {
+    return sceneIdMap.get(contentHint)!;
+  }
+
+  // 3. connections 배열의 첫 번째 연결 대상 사용
+  if (connections.length > 0) {
+    return sceneIdMap.get(connections[0]) ?? null;
+  }
+
+  return null;
+}
+
 function convertBlueprintScene(
   bScene: BlueprintScene,
   sceneId: string,
   sceneIdMap: Map<string, string>,
   wordIdMap: Map<string, string>,
+  blueprint: CaseBlueprint,
 ): Scene {
+  // hotspotHints에서 이미 생성된 navigate hotspot의 대상 씬 tempId 추출
+  const navigateTargetsInHints = new Set<string>();
+  for (const hint of bScene.hotspotHints) {
+    if (hint.actionType === 'navigate') {
+      const tempId = extractSceneTempId(hint.contentHint);
+      if (tempId) navigateTargetsInHints.add(tempId);
+      else if (sceneIdMap.has(hint.contentHint)) navigateTargetsInHints.add(hint.contentHint);
+    }
+  }
+
+  // connections 배열에서 navigate hotspot이 없는 대상만 자동 생성
+  const autoNavigateHotspots: Hotspot[] = [];
+  for (const targetTempId of bScene.connections) {
+    if (navigateTargetsInHints.has(targetTempId)) continue; // 이미 생성됨
+    const targetSceneId = sceneIdMap.get(targetTempId);
+    if (!targetSceneId) continue;
+    const targetScene = blueprint.scenes.find(s => s.tempId === targetTempId);
+    const label = targetScene
+      ? (targetScene.name.ko || targetScene.name.en || targetTempId)
+      : targetTempId;
+    autoNavigateHotspots.push({
+      id: generateId(),
+      name: `[이동] ${label}`,
+      area: { type: 'rect', x: 0, y: 0, width: 100, height: 100 },
+      action: { type: 'navigate', targetSceneId, transition: 'fade' },
+      cursor: 'pointer',
+      ariaLabel: { ko: `이동: ${label}`, en: `Go to: ${label}` },
+    });
+  }
+
   const hotspots: Hotspot[] = bScene.hotspotHints.map((hint) => {
     let action: HotspotAction;
 
@@ -71,14 +144,22 @@ function convertBlueprintScene(
         break;
       }
       case 'navigate': {
-        // contentHint에 대상 씬 tempId가 포함될 수 있음
-        const targetTempId = hint.contentHint;
-        const targetSceneId = sceneIdMap.get(targetTempId) ?? generateId();
-        action = {
-          type: 'navigate',
-          targetSceneId,
-          transition: 'fade',
-        };
+        const targetSceneId = resolveNavigateTarget(hint.contentHint, bScene.connections, sceneIdMap);
+        if (targetSceneId) {
+          action = {
+            type: 'navigate',
+            targetSceneId,
+            transition: 'fade',
+          };
+        } else {
+          action = {
+            type: 'examine',
+            content: { ko: `[연결 오류] ${hint.contentHint}`, en: `[Connection Error] ${hint.contentHint}` },
+            title: { ko: hint.label, en: hint.label },
+            highlightedWords: [],
+            collectibleWords: [],
+          };
+        }
         break;
       }
       case 'examine_image':
@@ -111,12 +192,15 @@ function convertBlueprintScene(
     };
   });
 
+  // 명시적 navigate hotspot + connections 기반 자동 생성 hotspot 병합
+  const allHotspots = [...hotspots, ...autoNavigateHotspots];
+
   return {
     id: sceneId,
     name: bScene.name,
     background: '' as AssetRef,
     dimensions: { width: 1920, height: 1080 },
-    hotspots,
+    hotspots: allHotspots,
     layers: [],
   };
 }
@@ -343,7 +427,7 @@ export async function generateCaseFromBlueprint(
   // 씬 변환
   const scenes: Scene[] = blueprint.scenes.map((bScene) => {
     const sceneId = sceneIdMap.get(bScene.tempId) ?? generateId();
-    return convertBlueprintScene(bScene, sceneId, sceneIdMap, wordIdMap);
+    return convertBlueprintScene(bScene, sceneId, sceneIdMap, wordIdMap, blueprint);
   });
 
   // 단어 변환 (레드 헤링 표시 포함)
