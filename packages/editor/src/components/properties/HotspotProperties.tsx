@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { LocalizedTextInput } from '@/components/shared/LocalizedTextInput';
 import { WordDropdown } from '@/components/words/WordDropdown';
 import { AudioAssetPicker } from '@/components/shared/AudioAssetPicker';
 import { CollectibleWordsEditor } from './CollectibleWordsEditor';
 import { InnerHotspotEditor } from './InnerHotspotEditor';
+import { AIExamineImageModal } from '@/components/ai/AIExamineImageModal';
 import type { Hotspot, HotspotAction, Scene } from '@gi-engine/core';
 
 interface HotspotPropertiesProps {
@@ -157,17 +158,7 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
 
     case 'examine_image':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Field label="이미지 에셋 ID">
-            <input type="text" value={action.image} onChange={e => onChange({ ...action, image: e.target.value })} style={{ width: '100%' }} />
-          </Field>
-          <LocalizedTextInput label="캡션 (선택)" value={action.caption ?? { ko: '', en: '' }} onChange={v => onChange({ ...action, caption: v })} />
-          <InnerHotspotEditor
-            caseId={caseId}
-            innerHotspots={action.innerHotspots ?? []}
-            onChange={innerHotspots => onChange({ ...action, innerHotspots })}
-          />
-        </div>
+        <ExamineImageActionEditor action={action} caseId={caseId} onChange={onChange} />
       );
 
     case 'word_reveal':
@@ -292,3 +283,63 @@ const labelStyle: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
 };
+
+// ── ExamineImage action editor ────────────────────────────────────
+
+interface ExamineImageActionEditorProps {
+  action: Extract<HotspotAction, { type: 'examine_image' }>;
+  caseId: string;
+  onChange: (a: HotspotAction) => void;
+}
+
+function ExamineImageActionEditor({ action, caseId, onChange }: ExamineImageActionEditorProps): React.ReactElement {
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <label style={labelStyle}>이미지 에셋 ID</label>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <input
+            type="text"
+            value={action.image}
+            onChange={e => onChange({ ...action, image: e.target.value })}
+            style={{ flex: 1 }}
+          />
+          <button
+            onClick={() => setAiModalOpen(true)}
+            title="AI로 이미지 생성"
+            style={{
+              padding: '0 8px',
+              fontSize: 11,
+              background: 'var(--accent)',
+              color: '#000',
+              border: 'none',
+              borderRadius: 3,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              fontWeight: 600,
+            }}
+          >
+            AI 생성
+          </button>
+        </div>
+      </div>
+      <LocalizedTextInput
+        label="캡션 (선택)"
+        value={action.caption ?? { ko: '', en: '' }}
+        onChange={v => onChange({ ...action, caption: v })}
+      />
+      <InnerHotspotEditor
+        caseId={caseId}
+        innerHotspots={action.innerHotspots ?? []}
+        onChange={innerHotspots => onChange({ ...action, innerHotspots })}
+      />
+      <AIExamineImageModal
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        onConfirm={assetId => onChange({ ...action, image: assetId })}
+      />
+    </div>
+  );
+}
