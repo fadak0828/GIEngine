@@ -88,6 +88,7 @@ export interface UIState {
   assetViewMode: AssetViewMode;
   assetTypeFilter: AssetTypeFilter;
   assetSearch: string;
+  shortcutHelpOpen: boolean;
 }
 
 // ── History ───────────────────────────────────────────────────────
@@ -204,6 +205,7 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice {
   setPreviewPlaying: (playing: boolean) => void;
   setSceneTool: (tool: UIState['sceneTool']) => void;
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
+  setShortcutHelpOpen: (open: boolean) => void;
 
   // Convenience: set selected scene / sub-puzzle
   setSelectedScene: (sceneId: string | null) => void;

@@ -35,6 +35,7 @@ export const defaultUI: UIState = {
   assetViewMode: 'grid',
   assetTypeFilter: 'all',
   assetSearch: '',
+  shortcutHelpOpen: false,
 };
 
 // ── Slice type ───────────────────────────────────────────────────
@@ -178,5 +179,9 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   setAssetSearch: (query) => {
     set(state => ({ ui: { ...state.ui, assetSearch: query } }));
+  },
+
+  setShortcutHelpOpen: (open) => {
+    set(state => ({ ui: { ...state.ui, shortcutHelpOpen: open } }));
   },
 });

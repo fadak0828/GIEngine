@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { WelcomeScreen } from '@/components/layout/WelcomeScreen';
 import { useEditorStore } from '@/store/editor-store';
+import type { ActivePanel } from '@/store/editor-store';
 
 export function App(): React.ReactElement {
   const project = useEditorStore((s) => s.project);
@@ -12,8 +13,24 @@ export function App(): React.ReactElement {
 
   // Keyboard shortcuts
   useEffect(() => {
+    const isTyping = () => {
+      const el = document.activeElement;
+      if (!el) return false;
+      const tag = el.tagName.toLowerCase();
+      return tag === 'input' || tag === 'textarea' || (el as HTMLElement).isContentEditable;
+    };
+
+    const PANEL_KEYS: Record<string, ActivePanel> = {
+      '1': 'scene',
+      '2': 'assets',
+      '3': 'words',
+      '4': 'puzzle',
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
+      const ctrl = e.ctrlKey || e.metaKey;
+
+      if (ctrl) {
         if (e.key === 'z' && !e.shiftKey) {
           e.preventDefault();
           useEditorStore.getState().undo();
@@ -23,9 +40,28 @@ export function App(): React.ReactElement {
         } else if (e.key === 's') {
           e.preventDefault();
           useEditorStore.getState().saveProject();
+        } else if (e.key === 'n') {
+          e.preventDefault();
+          useEditorStore.getState().newProject();
+        } else if (e.key === '/') {
+          e.preventDefault();
+          const store = useEditorStore.getState();
+          store.setShortcutHelpOpen(!store.ui.shortcutHelpOpen);
+        } else if (PANEL_KEYS[e.key]) {
+          e.preventDefault();
+          useEditorStore.getState().setActivePanel(PANEL_KEYS[e.key]);
         }
+        return;
+      }
+
+      // Non-modifier shortcuts — suppress when typing
+      if (e.key === '?' && !isTyping()) {
+        e.preventDefault();
+        const store = useEditorStore.getState();
+        store.setShortcutHelpOpen(!store.ui.shortcutHelpOpen);
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);

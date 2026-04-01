@@ -1,6 +1,7 @@
 import React from 'react';
 import { Toolbar } from './Toolbar';
 import { MainAreaTabBar } from './MainAreaTabBar';
+import { ShortcutHelpModal } from './ShortcutHelpModal';
 import { ProjectTree } from '@/components/tree/ProjectTree';
 import { SceneCanvas } from '@/components/canvas/SceneCanvas';
 import { PropertiesPanel } from '@/components/properties/PropertiesPanel';
@@ -65,6 +66,7 @@ export function MainLayout(): React.ReactElement {
           <PropertiesPanel />
         </div>
       </div>
+      <ShortcutHelpModal />
     </div>
   );
 }
