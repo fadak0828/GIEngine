@@ -407,7 +407,7 @@ export class PopupRenderer {
       );
     }
 
-    return escaped;
+    return escaped.replace(/\n/g, '<br>');
   }
 
   private highlightText(text: string, words: string[]): string {
@@ -427,7 +427,7 @@ export class PopupRenderer {
       escaped = escaped.replace(regex, '<span class="gi-highlighted">$1</span>');
     }
 
-    return escaped;
+    return escaped.replace(/\n/g, '<br>');
   }
 
   private escapeRegex(str: string): string {
