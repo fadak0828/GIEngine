@@ -6,6 +6,8 @@ coverage/
 *.html
 !packages/exporter/templates/*.html
 !examples/*.html
+!packages/editor/index.html
+!packages/editor/landing.html
 .gstack/
 .omc
 .agents/

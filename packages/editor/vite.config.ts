@@ -18,6 +18,14 @@ export default defineConfig({
   server: {
     port: 5174,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        landing: path.resolve(__dirname, 'landing.html'),
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
