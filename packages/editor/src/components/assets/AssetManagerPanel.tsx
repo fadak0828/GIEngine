@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import type { AssetDefinition } from '@gi-engine/core';
+import { AIAssetGeneratorModal } from '@/components/ai/AIAssetGeneratorModal';
 
 // ── AssetManagerPanel ─────────────────────────────────────────────
 
@@ -198,6 +199,7 @@ export function AssetManagerPanel(): React.ReactElement {
 
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [aiGeneratorOpen, setAiGeneratorOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const allAssets = project ? Object.values(project.assets.items) : [];
@@ -382,6 +384,25 @@ export function AssetManagerPanel(): React.ReactElement {
           ))}
         </div>
 
+        {/* AI Generate button */}
+        <button
+          onClick={() => setAiGeneratorOpen(true)}
+          title="AI로 에셋 생성"
+          style={{
+            padding: '3px 10px',
+            fontSize: 11,
+            background: 'rgba(99, 102, 241, 0.15)',
+            color: '#818cf8',
+            border: '1px solid rgba(99, 102, 241, 0.4)',
+            borderRadius: 3,
+            cursor: 'pointer',
+            flexShrink: 0,
+            fontWeight: 600,
+          }}
+        >
+          ✨ AI 생성
+        </button>
+
         {/* Upload button */}
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -466,6 +487,13 @@ export function AssetManagerPanel(): React.ReactElement {
         style={{ display: 'none' }}
         onChange={handleFileInput}
       />
+
+      {aiGeneratorOpen && (
+        <AIAssetGeneratorModal
+          open={aiGeneratorOpen}
+          onClose={() => setAiGeneratorOpen(false)}
+        />
+      )}
     </div>
   );
 }
