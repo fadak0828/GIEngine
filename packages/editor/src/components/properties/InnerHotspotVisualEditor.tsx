@@ -333,10 +333,10 @@ export function InnerHotspotVisualEditor({
         position: 'relative',
         aspectRatio: '16 / 9',
         minHeight: 180,
-        background: imgSrc ? undefined : '#16213e',
+        background: imgSrc ? undefined : 'var(--bg-secondary)',
         backgroundImage: imgSrc
           ? undefined
-          : 'repeating-conic-gradient(#1e2a4a 0% 25%, #16213e 0% 50%) 0 0 / 16px 16px',
+          : 'repeating-conic-gradient(var(--bg-card) 0% 25%, var(--bg-secondary) 0% 50%) 0 0 / 16px 16px',
         border: '1px solid var(--border-color)',
         borderRadius: 4,
         overflow: 'hidden',

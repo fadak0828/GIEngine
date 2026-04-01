@@ -69,7 +69,7 @@ export function CollectibleWordsEditor({
       <label style={labelStyle}>수집 가능한 단어</label>
 
       {collectibleWords.length === 0 && (
-        <div style={{ fontSize: 11, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ fontSize: 11, color: 'var(--partial)', display: 'flex', alignItems: 'center', gap: 4 }}>
           ⚠ 수집 단어가 없습니다
         </div>
       )}

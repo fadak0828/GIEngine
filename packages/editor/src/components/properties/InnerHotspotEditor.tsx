@@ -139,7 +139,7 @@ export function InnerHotspotEditor({
           <div
             key={hs.id}
             style={{
-              border: `1px solid ${isExpanded ? '#3b82f6' : 'var(--border-color)'}`,
+              border: `1px solid ${isExpanded ? 'var(--selection)' : 'var(--border-color)'}`,
               borderRadius: 4,
               background: 'var(--bg-card)',
               overflow: 'hidden',
@@ -147,12 +147,22 @@ export function InnerHotspotEditor({
           >
             {/* Header */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-expanded={isExpanded}
+              aria-label={`${hs.action.type === 'word_reveal' ? '단어 획득' : hs.action.type} 액션${isExpanded ? ' 접기' : ' 펼치기'}`}
               style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 padding: '6px 8px', cursor: 'pointer',
                 background: isExpanded ? 'var(--bg-secondary)' : 'transparent',
               }}
               onClick={() => setSelectedId(isExpanded ? null : hs.id)}
+              onKeyDown={e => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                  e.preventDefault();
+                  setSelectedId(isExpanded ? null : hs.id);
+                }
+              }}
             >
               <span style={{ fontSize: 12, fontWeight: 500 }}>
                 #{idx + 1} — {hs.action.type === 'word_reveal' ? '단어 획득' : hs.action.type}
@@ -288,7 +298,7 @@ function InnerHotspotToolbar({
           style={{
             padding: '3px 8px', fontSize: 10,
             background: tool === t.id ? 'var(--accent, #d4963a)' : 'var(--bg-secondary)',
-            color: tool === t.id ? '#000' : 'var(--text-secondary)',
+            color: tool === t.id ? 'var(--bg-primary)' : 'var(--text-secondary)',
             border: '1px solid var(--border-color)',
             borderRadius: 3, cursor: 'pointer', fontWeight: tool === t.id ? 600 : 400,
           }}

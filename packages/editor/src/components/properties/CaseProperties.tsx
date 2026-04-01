@@ -83,17 +83,20 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span
+            <label
+              htmlFor={`case-title-ko-${caseData.id}`}
               style={{
                 fontSize: 11,
                 color: 'var(--text-muted)',
                 width: 20,
                 flexShrink: 0,
+                cursor: 'pointer',
               }}
             >
               KO
-            </span>
+            </label>
             <input
+              id={`case-title-ko-${caseData.id}`}
               value={caseData.title.ko}
               onChange={e =>
                 updateCase(caseData.id, {
@@ -108,23 +111,25 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border-color)',
                 borderRadius: 3,
-                outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span
+            <label
+              htmlFor={`case-title-en-${caseData.id}`}
               style={{
                 fontSize: 11,
                 color: 'var(--text-muted)',
                 width: 20,
                 flexShrink: 0,
+                cursor: 'pointer',
               }}
             >
               EN
-            </span>
+            </label>
             <input
+              id={`case-title-en-${caseData.id}`}
               value={caseData.title.en}
               onChange={e =>
                 updateCase(caseData.id, {
@@ -139,7 +144,6 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border-color)',
                 borderRadius: 3,
-                outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
@@ -169,18 +173,21 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', gap: 6 }}>
-            <span
+            <label
+              htmlFor={`case-desc-ko-${caseData.id}`}
               style={{
                 fontSize: 11,
                 color: 'var(--text-muted)',
                 width: 20,
                 flexShrink: 0,
                 paddingTop: 4,
+                cursor: 'pointer',
               }}
             >
               KO
-            </span>
+            </label>
             <textarea
+              id={`case-desc-ko-${caseData.id}`}
               value={caseData.description.ko}
               onChange={e =>
                 updateCase(caseData.id, {
@@ -196,25 +203,27 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border-color)',
                 borderRadius: 3,
-                outline: 'none',
                 resize: 'vertical',
                 boxSizing: 'border-box',
               }}
             />
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <span
+            <label
+              htmlFor={`case-desc-en-${caseData.id}`}
               style={{
                 fontSize: 11,
                 color: 'var(--text-muted)',
                 width: 20,
                 flexShrink: 0,
                 paddingTop: 4,
+                cursor: 'pointer',
               }}
             >
               EN
-            </span>
+            </label>
             <textarea
+              id={`case-desc-en-${caseData.id}`}
               value={caseData.description.en}
               onChange={e =>
                 updateCase(caseData.id, {
@@ -230,7 +239,6 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border-color)',
                 borderRadius: 3,
-                outline: 'none',
                 resize: 'vertical',
                 boxSizing: 'border-box',
               }}
@@ -241,6 +249,7 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
 
       {/* Navigation buttons */}
       <button
+        type="button"
         onClick={() => setActivePanel('words')}
         style={{
           width: '100%',
@@ -259,6 +268,7 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
       </button>
 
       <button
+        type="button"
         onClick={() => setActivePanel('puzzle')}
         style={{
           width: '100%',
@@ -266,7 +276,7 @@ export function CaseProperties({ caseData }: CasePropertiesProps): React.ReactEl
           fontSize: 12,
           fontWeight: 600,
           background: 'var(--accent)',
-          color: '#000',
+          color: 'var(--bg-primary)',
           border: 'none',
           borderRadius: 3,
           cursor: 'pointer',

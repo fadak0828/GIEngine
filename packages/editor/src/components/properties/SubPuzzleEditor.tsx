@@ -26,8 +26,8 @@ const smallBtnStyle: React.CSSProperties = {
 
 const dangerBtnStyle: React.CSSProperties = {
   ...smallBtnStyle,
-  color: '#ef4444',
-  borderColor: '#ef4444',
+  color: 'var(--danger)',
+  borderColor: 'var(--danger)',
 };
 
 // ── SubPuzzleCard (compact) ───────────────────────────────────────
@@ -96,6 +96,8 @@ function SubPuzzleCard({
 
       {/* Edit button */}
       <button
+        type="button"
+        aria-label={`${puzzle.title.ko || puzzle.id} 편집`}
         onClick={() => onEdit(puzzle)}
         style={{
           ...smallBtnStyle,
@@ -110,13 +112,19 @@ function SubPuzzleCard({
       {/* Delete */}
       {confirmDelete && (
         <button
+          type="button"
           onClick={e => { e.stopPropagation(); setConfirmDelete(false); }}
           style={{ ...smallBtnStyle, flexShrink: 0 }}
         >
           취소
         </button>
       )}
-      <button onClick={handleDelete} style={{ ...dangerBtnStyle, flexShrink: 0 }}>
+      <button
+        type="button"
+        aria-label={`${puzzle.title.ko || puzzle.id} 삭제`}
+        onClick={handleDelete}
+        style={{ ...dangerBtnStyle, flexShrink: 0 }}
+      >
         {confirmDelete ? '확인' : '✕'}
       </button>
     </div>
@@ -179,6 +187,7 @@ export function SubPuzzleEditor({
           type => (
             <button
               key={type}
+              type="button"
               onClick={() => onAddAndEdit(type)}
               style={smallBtnStyle}
             >

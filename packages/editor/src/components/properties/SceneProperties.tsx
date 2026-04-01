@@ -26,6 +26,10 @@ export function SceneProperties({
   const [bgmOpen, setBgmOpen] = useState(true);
   const [onEnterOpen, setOnEnterOpen] = useState(false);
 
+  // ── Checkerboard pattern colors (warm dark palette) ───────────
+  const CHECKERBOARD_DARK = 'var(--bg-secondary)';
+  const CHECKERBOARD_LIGHT = 'var(--bg-card)';
+
   // ── BGM preview state ─────────────────────────────────────────
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
   const [bgmPlaying, setBgmPlaying] = useState(false);
@@ -217,6 +221,7 @@ export function SceneProperties({
           label="배경 이미지"
           open={bgOpen}
           onToggle={() => setBgOpen(o => !o)}
+          ariaControlsId="scene-bg-section"
         />
 
         {bgOpen && (
@@ -232,7 +237,7 @@ export function SceneProperties({
                 overflow: 'hidden',
                 background: bgAsset
                   ? undefined
-                  : 'repeating-conic-gradient(#2a2a3a 0% 25%, #1e1e2e 0% 50%) 0 0 / 16px 16px',
+                  : `repeating-conic-gradient(${CHECKERBOARD_DARK} 0% 25%, ${CHECKERBOARD_LIGHT} 0% 50%) 0 0 / 16px 16px`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -268,7 +273,7 @@ export function SceneProperties({
                   padding: '5px 8px',
                   fontSize: 11,
                   background: 'var(--accent)',
-                  color: '#000',
+                  color: 'var(--bg-primary)',
                   border: 'none',
                   borderRadius: 3,
                   cursor: 'pointer',
@@ -284,8 +289,8 @@ export function SceneProperties({
                     padding: '5px 8px',
                     fontSize: 11,
                     background: 'transparent',
-                    color: '#ef4444',
-                    border: '1px solid #ef4444',
+                    color: 'var(--danger)',
+                    border: '1px solid var(--danger)',
                     borderRadius: 3,
                     cursor: 'pointer',
                   }}
@@ -318,6 +323,7 @@ export function SceneProperties({
           label="BGM (배경음악)"
           open={bgmOpen}
           onToggle={() => setBgmOpen(o => !o)}
+          ariaControlsId="scene-bgm-section"
         />
 
         {bgmOpen && (
@@ -397,8 +403,8 @@ export function SceneProperties({
                     padding: '5px 8px',
                     fontSize: 11,
                     background: 'transparent',
-                    color: '#ef4444',
-                    border: '1px solid #ef4444',
+                    color: 'var(--danger)',
+                    border: '1px solid var(--danger)',
                     borderRadius: 3,
                     cursor: 'pointer',
                   }}
@@ -484,6 +490,7 @@ export function SceneProperties({
           label={`씬 진입 액션 (${(scene.onEnter ?? []).length})`}
           open={onEnterOpen}
           onToggle={() => setOnEnterOpen(o => !o)}
+          ariaControlsId="scene-onenter-section"
         />
         {onEnterOpen && (
           <OnEnterEditor
@@ -774,13 +781,18 @@ function SectionHeader({
   label,
   open,
   onToggle,
+  ariaControlsId,
 }: {
   label: string;
   open: boolean;
   onToggle: () => void;
+  ariaControlsId?: string;
 }): React.ReactElement {
   return (
     <button
+      type="button"
+      aria-expanded={open}
+      aria-controls={ariaControlsId}
       onClick={onToggle}
       style={{
         background: 'none',
