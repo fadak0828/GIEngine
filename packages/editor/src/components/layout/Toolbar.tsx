@@ -4,12 +4,13 @@ import { ExportModal } from '@/components/export/ExportModal';
 import { AISettingsModal } from '@/components/ai/AISettings';
 import { InterviewChatModal } from '@/components/ai/InterviewChatModal';
 import { CaseBlueprintPreview } from '@/components/ai/CaseBlueprintPreview';
+import { QuickCreateModal } from '@/components/ai/QuickCreateModal';
 
 export function Toolbar(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const meta = useEditorStore(s => s.meta);
   const ui = useEditorStore(s => s.ui);
-  const { newProject, saveProject, setEditorLocale, undo, redo, openInterview } = useEditorStore();
+  const { newProject, saveProject, setEditorLocale, undo, redo, openInterview, openQuickCreate } = useEditorStore();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
 
@@ -115,6 +116,21 @@ export function Toolbar(): React.ReactElement {
         </span>
       )}
 
+      {/* Quick Create */}
+      <button
+        onClick={() => openQuickCreate(undefined)}
+        style={{
+          ...btnStyle,
+          background: 'var(--accent)',
+          borderColor: 'var(--accent)',
+          color: '#000',
+          fontWeight: 600,
+        }}
+        title="1문장으로 빠르게 사건 생성"
+      >
+        ⚡ Quick Create
+      </button>
+
       {/* AI Interview */}
       <button
         onClick={() => openInterview(undefined)}
@@ -124,7 +140,7 @@ export function Toolbar(): React.ReactElement {
           borderColor: 'rgba(212,150,58,0.4)',
           color: 'var(--accent)',
         }}
-        title="AI 인터뷰로 새 사건 생성"
+        title="AI 인터뷰로 새 사건 생성 (상세)"
       >
         🕵️ AI 인터뷰
       </button>
@@ -169,6 +185,7 @@ export function Toolbar(): React.ReactElement {
       <AISettingsModal open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
       <InterviewChatModal />
       <CaseBlueprintPreview />
+      <QuickCreateModal />
 
       {/* Notification toast */}
       {ui.notification && (

@@ -20,6 +20,7 @@ import type {
   PuzzleSet,
 } from '@gi-engine/core';
 import type { InterviewSlice } from './interview-slice.js';
+import type { QuickCreateSlice } from './quick-create-slice.js';
 
 export type {
   GameDefinition,
@@ -99,7 +100,7 @@ export interface HistoryState {
 
 // ── EditorStore (full intersection type) ────────────────────────
 
-export interface EditorStore extends InterviewSlice {
+export interface EditorStore extends InterviewSlice, QuickCreateSlice {
   // State
   project: GameDefinition | null;
   words: Word[];
