@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useEditorStore, useCanUndo, useCanRedo } from '@/store/editor-store';
 import { ExportModal } from '@/components/export/ExportModal';
 import { AISettingsModal } from '@/components/ai/AISettings';
+import { InterviewChatModal } from '@/components/ai/InterviewChatModal';
+import { CaseBlueprintPreview } from '@/components/ai/CaseBlueprintPreview';
 
 export function Toolbar(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const meta = useEditorStore(s => s.meta);
   const ui = useEditorStore(s => s.ui);
-  const { newProject, saveProject, setEditorLocale, undo, redo } = useEditorStore();
+  const { newProject, saveProject, setEditorLocale, undo, redo, openInterview } = useEditorStore();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
 
@@ -113,6 +115,20 @@ export function Toolbar(): React.ReactElement {
         </span>
       )}
 
+      {/* AI Interview */}
+      <button
+        onClick={() => openInterview(undefined)}
+        style={{
+          ...btnStyle,
+          background: 'var(--accent-dim)',
+          borderColor: 'rgba(212,150,58,0.4)',
+          color: 'var(--accent)',
+        }}
+        title="AI 인터뷰로 새 사건 생성"
+      >
+        🕵️ AI 인터뷰
+      </button>
+
       {/* AI settings */}
       <button
         onClick={() => setAiSettingsOpen(true)}
@@ -151,6 +167,8 @@ export function Toolbar(): React.ReactElement {
       {/* Modals */}
       <ExportModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
       <AISettingsModal open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
+      <InterviewChatModal />
+      <CaseBlueprintPreview />
 
       {/* Notification toast */}
       {ui.notification && (

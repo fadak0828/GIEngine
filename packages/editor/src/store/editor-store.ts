@@ -6,6 +6,7 @@ import { createSceneSlice } from './scene-slice.js';
 import { createPuzzleSlice } from './puzzle-slice.js';
 import { createAssetSlice } from './asset-slice.js';
 import { createHistorySlice } from './history-slice.js';
+import { createInterviewSlice } from './interview-slice.js';
 
 export const useEditorStore = create<EditorStore>((...a) => ({
   ...createProjectSlice(...a),
@@ -14,6 +15,7 @@ export const useEditorStore = create<EditorStore>((...a) => ({
   ...createPuzzleSlice(...a),
   ...createAssetSlice(...a),
   ...createHistorySlice(...a),
+  ...createInterviewSlice(...a),
 }));
 
 // Re-export types and selectors

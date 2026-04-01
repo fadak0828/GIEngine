@@ -19,6 +19,7 @@ import type {
   LocalizedText,
   PuzzleSet,
 } from '@gi-engine/core';
+import type { InterviewSlice } from './interview-slice.js';
 
 export type {
   GameDefinition,
@@ -98,7 +99,7 @@ export interface HistoryState {
 
 // ── EditorStore (full intersection type) ────────────────────────
 
-export interface EditorStore {
+export interface EditorStore extends InterviewSlice {
   // State
   project: GameDefinition | null;
   words: Word[];
