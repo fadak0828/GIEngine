@@ -34,6 +34,14 @@ type QuickCreateModule = {
         atmosphere: { id: string; label: string; summary: string }[];
       };
     }>;
+    applyChoicesToBlueprint: (
+      originalSentence: string,
+      currentBlueprint: unknown,
+      selection: Record<string, string>,
+      choices: unknown,
+      options?: { locale?: string },
+      onProgress?: (p: { step: string; percent: number; message: string }) => void,
+    ) => Promise<{ blueprint: unknown }>;
   };
 };
 
@@ -186,6 +194,39 @@ export function QuickCreateModal(): React.ReactElement | null {
   } = useEditorStore();
 
   const [applyingToEditor, setApplyingToEditor] = useState(false);
+  const [applyingChoices, setApplyingChoices] = useState(false);
+
+  // Step 2 → 선택 사항 적용 후 블루프린트 재생성
+  const handleApplyChoices = useCallback(async () => {
+    if (!qc.blueprint || !qc.choices) return;
+
+    setApplyingChoices(true);
+    setQuickCreateError(null);
+
+    try {
+      const aiMod = (await import('@gi-engine/ai')) as QuickCreateModule;
+
+      const result = await aiMod.quickCreateEngine.applyChoicesToBlueprint(
+        qc.sentence.trim(),
+        qc.blueprint as never,
+        qc.selection,
+        qc.choices as never,
+        { locale: 'ko' },
+        (p) => setQuickCreateProgress({ step: p.message, percent: p.percent }),
+      );
+
+      setQuickCreateBlueprint(result.blueprint as never);
+      // 선택 적용 후 choices는 재생성하지 않음 (같은 선택 유지)
+      setQuickCreateProgress({ step: '선택 사항 적용 완료', percent: 100 });
+    } catch (err) {
+      setQuickCreateError(String(err));
+    } finally {
+      setApplyingChoices(false);
+    }
+  }, [ // eslint-disable-line react-hooks/exhaustive-deps
+    qc.sentence, qc.blueprint, qc.choices, qc.selection,
+    setQuickCreateError, setQuickCreateProgress, setQuickCreateBlueprint,
+  ]);
 
   // Step 1 → Step 3: AI 엔진 호출
   const handleGenerate = useCallback(async () => {
@@ -318,7 +359,13 @@ export function QuickCreateModal(): React.ReactElement | null {
           {qc.wizardStep === 2 && (
             <>
               <button onClick={() => setQuickCreateWizardStep(1)} style={baseBtn}>← 뒤로</button>
-              <button onClick={handleGenerate} style={primaryBtn}>🔄 이 설정으로 재생성</button>
+              <button
+                onClick={handleApplyChoices}
+                disabled={applyingChoices || qc.isGenerating}
+                style={applyingChoices || qc.isGenerating ? disabledBtn : primaryBtn}
+              >
+                {applyingChoices ? '반영 중...' : '🔄 이 설정으로 재생성'}
+              </button>
             </>
           )}
           {qc.wizardStep === 3 && (

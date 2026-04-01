@@ -149,7 +149,9 @@ describe('QuickCreateEngine', () => {
 
   beforeEach(() => {
     engine = new QuickCreateEngine();
-    vi.clearAllMocks();
+    // mockReset: mockResolvedValueOnce 큐 + 구현 완전 초기화 (테스트 간 오염 방지)
+    // clearAllMocks는 호출 이력만 삭제하고 큐는 남김 -> 테스트 간 오염 발생
+    mockGenerateText.mockReset();
   });
 
   // ── 1. 타입 안전성 ────────────────────────────────────────────────────────────
@@ -294,21 +296,30 @@ describe('QuickCreateEngine', () => {
       expect(mockGenerateText).toHaveBeenCalledTimes(1);
     });
 
-    it('applyChoiceSelection이 업데이트된 블루프린트를 반환합니다', async () => {
+    it('applyChoicesToBlueprint가 선택 사항을 반영한 블루프린트를 반환합니다', async () => {
       mockGenerateText
         .mockResolvedValueOnce(makeBlueprintJson())         // 최초 생성
         .mockResolvedValueOnce(makeBlueprintJson({ title: { ko: '개선된 사건', en: 'Improved' } }));  // 선택지 반영
 
       const { blueprint } = await engine.startFromSentence('카페 독살 사건');
-      const updated = await engine.applyChoiceSelection(
+      const updated = await engine.applyChoicesToBlueprint(
         '카페 독살 사건',
         blueprint,
-        '캐릭터 복잡화, 어두운 분위기',
+        { characters: 'option_2' },
+        {
+          characters: [
+            { id: 'option_1', label: '기본', summary: '유지' },
+            { id: 'option_2', label: '복잡화', summary: '관계 추가' },
+          ],
+          scenes: [],
+          puzzleStructure: [],
+          atmosphere: [],
+        },
       );
 
-      expect(updated.id).toBeTruthy();
+      expect(updated.blueprint.id).toBeTruthy();
       // sessionId는 원본 블루프린트와 동일해야 함
-      expect(updated.sessionId).toBe(blueprint.sessionId);
+      expect(updated.blueprint.sessionId).toBe(blueprint.sessionId);
     });
   });
 

@@ -212,6 +212,12 @@ export interface BlueprintHotspotHint {
   label: string;
   actionType: 'examine' | 'examine_image' | 'word_reveal' | 'navigate';
   contentHint: string;
+  /** 16:9 기준 정규화된 위치 (0~1). AI가 제안한 위치. */
+  positionHint?: {
+    x: number; // 0=left, 1=right
+    y: number; // 0=top, 1=bottom
+    description?: string; // 위치 설명 (예: "왼쪽 상단 근처")
+  };
   relatedWordId?: string;
 }
 

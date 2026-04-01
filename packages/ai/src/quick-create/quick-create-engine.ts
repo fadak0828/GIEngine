@@ -7,11 +7,14 @@
 import { geminiClient } from '../client.js';
 import type { CaseBlueprint } from '../interview/types.js';
 import { buildSentenceToBlueprintPrompt } from './prompts/sentence-to-blueprint-prompt.js';
+import { buildChoiceRefinedPrompt } from './prompts/choice-refined-prompt.js';
 import { choiceGenerator } from './choice-generator.js';
 import type {
   QuickCreateOptions,
   QuickCreateResult,
   OnQuickCreateProgress,
+  ChoiceSelection,
+  SectionChoices,
 } from './types.js';
 
 export interface StartFromSentenceOptions extends QuickCreateOptions {
@@ -84,20 +87,52 @@ export class QuickCreateEngine {
   }
 
   /**
-   * 사용자가 선택지를 고른 후 블루프린트를 업데이트합니다.
-   * 현재는 선택 사항을 반영한 새 블루프린트를 재생성합니다.
+   * 사용자가 선택지를 고른 후 블루프린트를 개선 재생성합니다.
+   * 선택 사항을 프롬프트에 반영하여 원본 설정은 유지하면서 해당 섹션만 개선합니다.
    */
-  async applyChoiceSelection(
+  async applyChoicesToBlueprint(
     originalSentence: string,
     currentBlueprint: CaseBlueprint,
-    selectionSummary: string,
+    selection: ChoiceSelection,
+    choices: SectionChoices,
     options: QuickCreateOptions = {},
-  ): Promise<CaseBlueprint> {
-    const { locale = 'ko', ...createOptions } = options;
+    onProgress?: OnQuickCreateProgress,
+  ): Promise<QuickCreateResult> {
+    const { locale = 'ko' } = options;
     const sessionId = currentBlueprint.sessionId;
 
-    const refinedSentence = `${originalSentence}\n\n사용자 선택 사항: ${selectionSummary}`;
-    return this.generateBlueprint(refinedSentence, sessionId, createOptions, locale);
+    onProgress?.({
+      step: 'applying_selection',
+      message: '선택 사항을 반영하는 중...',
+      percent: 20,
+    });
+
+    const prompt = buildChoiceRefinedPrompt(
+      originalSentence,
+      currentBlueprint,
+      selection,
+      choices,
+      {},
+      locale,
+    );
+
+    onProgress?.({
+      step: 'blueprint_generating',
+      message: '개선된 사건 구조 생성 중...',
+      percent: 50,
+    });
+
+    const refinedBlueprint = await this.generateBlueprintFromPrompt(prompt, sessionId);
+
+    onProgress?.({
+      step: 'blueprint_done',
+      message: '선택 사항 반영 완료',
+      percent: 90,
+    });
+
+    onProgress?.({ step: 'completed', message: '생성 완료', percent: 100 });
+
+    return { blueprint: refinedBlueprint };
   }
 
   // ─── 내부 메서드 ─────────────────────────────────────────────────────────────
@@ -109,6 +144,10 @@ export class QuickCreateEngine {
     locale: 'ko' | 'en',
   ): Promise<CaseBlueprint> {
     const prompt = buildSentenceToBlueprintPrompt(sentence, sessionId, options, locale);
+    return this.generateBlueprintFromPrompt(prompt, sessionId);
+  }
+
+  private async generateBlueprintFromPrompt(prompt: string, sessionId: string): Promise<CaseBlueprint> {
     const raw = await geminiClient.generateText(prompt, this.proModel);
     return this.parseAndEnrichBlueprint(raw, sessionId);
   }
