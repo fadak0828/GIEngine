@@ -283,6 +283,20 @@ export class DeductionRenderer {
       el.dataset.acceptCategory = segment.acceptCategory;
     }
 
+    // Reserve width matching the longest word that could fill this slot,
+    // so empty slots are as large as filled ones and easy to drag onto.
+    const relevantWords = segment.acceptCategory
+      ? words.filter(w => w.category === segment.acceptCategory)
+      : words;
+    if (relevantWords.length > 0) {
+      const longestText = relevantWords.reduce((max, w) => {
+        const text = this.i18n.resolveText(w.display);
+        return text.length > max.length ? text : max;
+      }, placeholder);
+      // 1em per character approximates CJK width; add 2em for horizontal padding.
+      el.style.minWidth = `${Math.max(5, longestText.length + 2)}em`;
+    }
+
     const assignedWordId = puzzleState.slotAssignments[segment.slotId];
 
     if (assignedWordId) {

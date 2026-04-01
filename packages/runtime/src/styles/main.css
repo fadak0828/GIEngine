@@ -252,7 +252,6 @@
 .gi-slot--empty {
   font-style: italic;
   color: var(--gi-text-dim);
-  opacity: 0.6;
 }
 
 /* Category-specific border colors for empty slots */
