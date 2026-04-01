@@ -3,6 +3,7 @@ import type { Scene, HotspotAction } from '@gi-engine/core';
 import { useEditorStore } from '@/store/editor-store';
 import { LayerPanel } from '@/components/layers/LayerPanel';
 import { AudioAssetPicker } from '@/components/shared/AudioAssetPicker';
+import { WordDropdown } from '@/components/words/WordDropdown';
 
 interface ScenePropertiesProps {
   scene: Scene;
@@ -550,6 +551,7 @@ function OnEnterEditor({
         <OnEnterActionRow
           key={idx}
           idx={idx}
+          caseId={caseId}
           action={action}
           scene={scene}
           onUpdate={updated => handleUpdate(idx, updated)}
@@ -597,12 +599,14 @@ function makeDefaultOnEnterAction(type: HotspotAction['type']): HotspotAction {
 
 function OnEnterActionRow({
   idx,
+  caseId,
   action,
   scene,
   onUpdate,
   onRemove,
 }: {
   idx: number;
+  caseId: string;
   action: HotspotAction;
   scene: Scene;
   onUpdate: (a: HotspotAction) => void;
@@ -754,31 +758,11 @@ function OnEnterActionRow({
       )}
 
       {action.type === 'word_reveal' && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          wordIds: {JSON.stringify((action as { type: 'word_reveal'; wordIds: string[] }).wordIds)}
-          <br />
-          <span style={{ fontSize: 10 }}>(단어 ID를 쉼표로 구분하여 입력)</span>
-          <input
-            type="text"
-            value={(action as { type: 'word_reveal'; wordIds: string[] }).wordIds.join(', ')}
-            onChange={e => {
-              const wordIds = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-              onUpdate({ ...action, wordIds });
-            }}
-            placeholder="word_id_1, word_id_2"
-            style={{
-              width: '100%',
-              padding: '2px 4px',
-              fontSize: 11,
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 3,
-              boxSizing: 'border-box',
-              marginTop: 4,
-            }}
-          />
-        </div>
+        <WordDropdown
+          caseId={caseId}
+          wordIds={(action as { type: 'word_reveal'; wordIds: string[] }).wordIds}
+          onChange={wordIds => onUpdate({ ...action, wordIds })}
+        />
       )}
     </div>
   );
