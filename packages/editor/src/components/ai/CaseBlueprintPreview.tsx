@@ -1,101 +1,53 @@
 /**
- * CaseBlueprintPreview — 생성된 CaseBlueprint 시각적 프리뷰
- * Phase 5b (FADAA-44) / Phase 6 (FADAA-51)
- *
- * - 씬/핫스팟/단서 구조 표시
- * - 케이스 생성 버튼 + 진행률 표시
- * - 적용 완료 후 에디터 자동 로드
+ * CaseBlueprintPreview - preview generated case blueprint
+ * Phase 5b / Phase 6
  */
 
 import React, { useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
-import type { CaseBlueprintState, BlueprintScene, BlueprintWord, BlueprintCharacter } from '@/store/interview-slice';
+import type {
+  BlueprintCharacter,
+  BlueprintScene,
+  BlueprintWord,
+} from '@/store/interview-slice';
+import styles from './CaseBlueprintPreview.module.css';
 
-// ── 스타일 상수 ───────────────────────────────────────────────────
-
-const sectionStyle: React.CSSProperties = {
-  background: 'var(--bg-card)',
-  border: '1px solid var(--border-color)',
-  borderRadius: 6,
-  padding: '10px 12px',
-  marginBottom: 10,
+const ROLE_LABEL: Record<string, string> = {
+  culprit: 'Culprit',
+  victim: 'Victim',
+  suspect: 'Suspect',
+  witness: 'Witness',
 };
 
-const sectionTitle: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  marginBottom: 8,
+const ROLE_CLASS_KEY: Record<string, string> = {
+  culprit: 'roleCulprit',
+  victim: 'roleVictim',
+  suspect: 'roleSuspect',
+  witness: 'roleWitness',
 };
 
-const badge: React.CSSProperties = {
-  display: 'inline-block',
-  padding: '1px 6px',
-  fontSize: 10,
-  borderRadius: 3,
-  border: '1px solid var(--border-color)',
-  color: 'var(--text-secondary)',
-  background: 'var(--bg-secondary)',
-};
+const cx = (...tokens: Array<string | false | null | undefined>): string =>
+  tokens.filter((token): token is string => Boolean(token)).join(' ');
 
-const accentBadge: React.CSSProperties = {
-  ...badge,
-  color: 'var(--accent)',
-  borderColor: 'var(--accent-dim)',
-  background: 'var(--accent-dim)',
-};
-
-// ── 진행률 바 ─────────────────────────────────────────────────────
+function roleClass(role: string): string {
+  const key = ROLE_CLASS_KEY[role] ?? 'roleDefault';
+  return styles[key];
+}
 
 function ProgressBar({ percent, step }: { percent: number; step: string }): React.ReactElement {
   return (
-    <div
-      style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 6,
-        padding: '10px 12px',
-        marginBottom: 10,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 6,
-        }}
-      >
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{step}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-          {percent}%
-        </div>
+    <div className={styles.progressCard}>
+      <div className={styles.progressHeader}>
+        <div className={styles.progressStep}>{step}</div>
+        <div className={styles.progressPercent}>{percent}%</div>
       </div>
-      <div
-        style={{
-          height: 4,
-          background: 'var(--bg-secondary)',
-          borderRadius: 2,
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            height: '100%',
-            width: `${percent}%`,
-            background: 'var(--accent)',
-            borderRadius: 2,
-            transition: 'width 0.3s ease',
-          }}
-        />
+
+      <div className={styles.progressTrack}>
+        <div className={styles.progressFill} style={{ width: `${percent}%` }} />
       </div>
     </div>
   );
 }
-
-// ── 메인 컴포넌트 ─────────────────────────────────────────────────
 
 export function CaseBlueprintPreview(): React.ReactElement | null {
   const {
@@ -115,8 +67,10 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
 
   const handleApply = () => {
     if (!project || isGenerating) return;
+
     const actId = project.acts[0]?.id ?? null;
     if (!actId) return;
+
     void applyBlueprintToEditor(actId, generateBg);
   };
 
@@ -132,274 +86,154 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={isGenerating ? undefined : handleBackToInterview}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.7)',
-          zIndex: 1002,
-        }}
+        className={styles.backdrop}
       />
 
-      {/* Modal */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 680,
-          maxWidth: '96vw',
-          height: '85vh',
-          maxHeight: 760,
-          display: 'flex',
-          flexDirection: 'column',
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 8,
-          zIndex: 1003,
-          boxShadow: '0 12px 48px rgba(0,0,0,0.7)',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid var(--border-color)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
-              📋 사건 블루프린트 프리뷰
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-              생성된 사건 구조를 확인하고 프로젝트에 적용하세요
+      <div className={styles.modal}>
+        <div className={styles.header}>
+          <div className={styles.headerBody}>
+            <div className={styles.title}>Case Blueprint Preview</div>
+            <div className={styles.subtitle}>
+              Review generated case structure before applying it to the project.
             </div>
           </div>
+
           <button
             onClick={isGenerating ? undefined : handleBackToInterview}
             disabled={isGenerating}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: isGenerating ? 'not-allowed' : 'pointer',
-              fontSize: 18,
-              lineHeight: 1,
-              padding: 0,
-            }}
+            aria-label="미리보기 닫기"
+            className={cx(styles.closeButton, isGenerating && styles.buttonDisabled)}
           >
-            ×
+            X
           </button>
         </div>
 
-        {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          {/* 진행률 표시 (생성 중일 때) */}
+        <div className={styles.content}>
           {isGenerating && generationProgress && (
             <ProgressBar percent={generationProgress.percent} step={generationProgress.step} />
           )}
 
-          {/* 에러 표시 */}
           {interview.error && !isGenerating && (
-            <div
-              style={{
-                background: 'var(--danger-dim, rgba(255,80,80,0.1))',
-                border: '1px solid var(--danger)',
-                borderRadius: 6,
-                padding: '8px 12px',
-                marginBottom: 10,
-                fontSize: 12,
-                color: 'var(--danger)',
-              }}
-            >
-              {interview.error}
-            </div>
+            <div className={styles.errorBox}>{interview.error}</div>
           )}
 
-          {/* Title & Meta */}
-          <div style={{ marginBottom: 14 }}>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                fontFamily: 'Instrument Serif, serif',
-                marginBottom: 4,
-              }}
-            >
-              {blueprint.title.ko}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 6 }}>
-              {blueprint.description.ko}
-            </div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <span style={accentBadge}>장르: {blueprint.genre}</span>
-              <span style={badge}>씬 {blueprint.scenes.length}개</span>
-              <span style={badge}>단서어 {blueprint.words.length}개</span>
-              <span style={badge}>인물 {blueprint.characters.length}명</span>
+          <div className={styles.metaBlock}>
+            <div className={styles.blueprintTitle}>{blueprint.title.ko}</div>
+            <div className={styles.blueprintDescription}>{blueprint.description.ko}</div>
+            <div className={styles.metaBadges}>
+              <span className={cx(styles.badge, styles.accentBadge)}>
+                Genre: {blueprint.genre}
+              </span>
+              <span className={styles.badge}>Scenes: {blueprint.scenes.length}</span>
+              <span className={styles.badge}>Words: {blueprint.words.length}</span>
+              <span className={styles.badge}>Characters: {blueprint.characters.length}</span>
             </div>
           </div>
 
-          {/* Characters */}
           {blueprint.characters.length > 0 && (
-            <div style={sectionStyle}>
-              <div style={sectionTitle}>등장인물</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Characters</div>
+              <div className={styles.characterList}>
                 {blueprint.characters.map((char, i) => (
                   <CharacterCard key={i} char={char} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Scenes */}
           {blueprint.scenes.length > 0 && (
-            <div style={sectionStyle}>
-              <div style={sectionTitle}>씬 구성</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Scene Structure</div>
+              <div className={styles.sceneList}>
                 {blueprint.scenes.map((scene, i) => (
                   <SceneCard key={i} scene={scene} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Words */}
           {blueprint.words.length > 0 && (
-            <div style={sectionStyle}>
-              <div style={sectionTitle}>단서어 목록</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Word List</div>
+              <div className={styles.wordList}>
                 {blueprint.words.map((word, i) => (
                   <WordTag key={i} word={word} />
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Main Puzzle */}
           {blueprint.mainPuzzle && (
-            <div style={sectionStyle}>
-              <div style={sectionTitle}>메인 퍼즐</div>
-              <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 3 }}>
-                {blueprint.mainPuzzle.titleHint}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Main Puzzle</div>
+              <div className={styles.mainPuzzleTitle}>{blueprint.mainPuzzle.titleHint}</div>
+              <div className={styles.mainPuzzleDescription}>
                 {blueprint.mainPuzzle.descriptionHint}
               </div>
               {blueprint.mainPuzzle.requiredWordTempIds.length > 0 && (
-                <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)' }}>
-                  필요 단서어: {blueprint.mainPuzzle.requiredWordTempIds.length}개
+                <div className={styles.requiredWords}>
+                  Required words: {blueprint.mainPuzzle.requiredWordTempIds.length}
                 </div>
               )}
-            </div>
+            </section>
           )}
 
-          {/* Sub Puzzles */}
           {blueprint.subPuzzles.length > 0 && (
-            <div style={sectionStyle}>
-              <div style={sectionTitle}>서브 퍼즐 ({blueprint.subPuzzles.length}개)</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>
+                Sub Puzzles ({blueprint.subPuzzles.length})
+              </div>
+              <div className={styles.puzzleList}>
                 {blueprint.subPuzzles.map((sp, i) => (
-                  <div key={i} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    <span style={badge}>{sp.type}</span>
-                    &nbsp;&nbsp;{sp.description}
+                  <div key={i} className={styles.puzzleItem}>
+                    <span className={styles.badge}>{sp.type}</span>
+                    <span>{sp.description}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </div>
 
-        {/* Footer */}
-        <div
-          style={{
-            padding: '10px 16px 12px',
-            borderTop: '1px solid var(--border-color)',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          {/* 배경 이미지 생성 옵션 */}
+        <div className={styles.footer}>
           {!isGenerating && (
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-                fontSize: 11,
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
+            <label className={styles.backgroundOption}>
               <input
                 type="checkbox"
                 checked={generateBg}
                 onChange={(e) => setGenerateBg(e.target.checked)}
-                style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
+                className={styles.backgroundCheckbox}
               />
-              씬 배경 AI 생성
+              Generate background image with AI
             </label>
           )}
 
-          <div style={{ flex: 1 }} />
+          <div className={styles.spacer} />
 
           <button
             onClick={handleDiscard}
             disabled={isGenerating}
-            style={{
-              padding: '7px 14px',
-              fontSize: 12,
-              background: 'transparent',
-              color: 'var(--text-muted)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 4,
-              cursor: isGenerating ? 'not-allowed' : 'pointer',
-            }}
+            className={cx(styles.ghostButton, isGenerating && styles.buttonDisabled)}
           >
-            버리기
+            Discard
           </button>
+
           <button
             onClick={handleBackToInterview}
             disabled={isGenerating}
-            style={{
-              padding: '7px 14px',
-              fontSize: 12,
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 4,
-              cursor: isGenerating ? 'not-allowed' : 'pointer',
-            }}
+            className={cx(styles.ghostButton, isGenerating && styles.buttonDisabled)}
           >
-            ← 인터뷰로 돌아가기
+            Back to Interview
           </button>
+
           <button
             onClick={handleApply}
             disabled={isGenerating}
-            style={{
-              padding: '7px 18px',
-              fontSize: 12,
-              fontWeight: 600,
-              background: isGenerating ? 'var(--bg-card)' : 'var(--accent)',
-              color: isGenerating ? 'var(--text-muted)' : '#000',
-              border: 'none',
-              borderRadius: 4,
-              cursor: isGenerating ? 'not-allowed' : 'pointer',
-              minWidth: 100,
-            }}
+            className={cx(styles.primaryButton, isGenerating && styles.buttonDisabled)}
           >
-            {isGenerating ? '생성 중...' : '케이스 생성'}
+            {isGenerating ? 'Generating...' : 'Create Case'}
           </button>
         </div>
       </div>
@@ -407,63 +241,22 @@ export function CaseBlueprintPreview(): React.ReactElement | null {
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────
-
 function CharacterCard({ char }: { char: BlueprintCharacter }): React.ReactElement {
-  const roleColor: Record<string, string> = {
-    culprit: 'var(--danger)',
-    victim: '#9c6b4a',
-    suspect: 'var(--partial)',
-    witness: 'var(--success)',
-  };
-  const roleLabel: Record<string, string> = {
-    culprit: '범인',
-    victim: '피해자',
-    suspect: '용의자',
-    witness: '목격자',
-  };
+  const cls = roleClass(char.role);
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 8,
-        padding: '6px 0',
-        borderBottom: '1px solid var(--border-light)',
-      }}
-    >
-      <div
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: roleColor[char.role] ?? 'var(--text-muted)',
-          marginTop: 5,
-          flexShrink: 0,
-        }}
-      />
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+    <div className={styles.characterRow}>
+      <div className={cx(styles.roleDot, cls)} />
+
+      <div className={styles.characterBody}>
+        <div className={styles.characterTitle}>
           {char.name}
-          &nbsp;
-          <span
-            style={{
-              fontSize: 10,
-              color: roleColor[char.role] ?? 'var(--text-muted)',
-              fontWeight: 400,
-            }}
-          >
-            [{roleLabel[char.role] ?? char.role}]
-          </span>
+          <span className={cx(styles.roleLabel, cls)}>[{ROLE_LABEL[char.role] ?? char.role}]</span>
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          {char.description}
-        </div>
-        {char.alibi && (
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
-            알리바이: {char.alibi}
-          </div>
-        )}
+
+        <div className={styles.characterDescription}>{char.description}</div>
+
+        {char.alibi && <div className={styles.alibi}>Alibi: {char.alibi}</div>}
       </div>
     </div>
   );
@@ -471,65 +264,40 @@ function CharacterCard({ char }: { char: BlueprintCharacter }): React.ReactEleme
 
 function SceneCard({ scene }: { scene: BlueprintScene }): React.ReactElement {
   const [expanded, setExpanded] = useState(false);
+
   return (
-    <div
-      style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-light)',
-        borderRadius: 4,
-        padding: '7px 10px',
-      }}
-    >
+    <div className={styles.sceneCard}>
       <button
-        onClick={() => setExpanded((v) => !v)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
+        onClick={() => setExpanded((value) => !value)}
+        className={styles.sceneToggle}
       >
-        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{expanded ? '▼' : '▶'}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>
-          {scene.name.ko}
-        </span>
+        <span className={styles.sceneArrow}>{expanded ? '▾' : '▸'}</span>
+        <span className={styles.sceneName}>{scene.name.ko}</span>
         {scene.hotspotHints.length > 0 && (
-          <span style={{ ...badge, marginLeft: 'auto' }}>{scene.hotspotHints.length}개 핫스팟</span>
+          <span className={cx(styles.badge, styles.sceneMetaBadge)}>
+            {scene.hotspotHints.length} hotspots
+          </span>
         )}
       </button>
 
       {expanded && (
-        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 6 }}>
-            {scene.description}
-          </div>
+        <div className={styles.sceneExpanded}>
+          <div className={styles.sceneDescription}>{scene.description}</div>
+
           {scene.connections.length > 0 && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
-              연결: {scene.connections.join(', ')}
+            <div className={styles.sceneConnections}>
+              Connections: {scene.connections.join(', ')}
             </div>
           )}
+
           {scene.hotspotHints.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {scene.hotspotHints.map((h, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 11,
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  <span style={{ ...badge, fontSize: 9 }}>{h.actionType}</span>
-                  <span>{h.label}</span>
-                  {h.contentHint && (
-                    <span style={{ color: 'var(--text-muted)' }}>— {h.contentHint}</span>
+            <div className={styles.hotspotList}>
+              {scene.hotspotHints.map((hint, i) => (
+                <div key={i} className={styles.hotspotRow}>
+                  <span className={cx(styles.badge, styles.hotspotType)}>{hint.actionType}</span>
+                  <span>{hint.label}</span>
+                  {hint.contentHint && (
+                    <span className={styles.hotspotHint}>→ {hint.contentHint}</span>
                   )}
                 </div>
               ))}
@@ -543,21 +311,9 @@ function SceneCard({ scene }: { scene: BlueprintScene }): React.ReactElement {
 
 function WordTag({ word }: { word: BlueprintWord }): React.ReactElement {
   return (
-    <div
-      style={{
-        padding: '3px 8px',
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 3,
-        fontSize: 11,
-        color: 'var(--text-primary)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-      }}
-    >
-      <div style={{ fontWeight: 500 }}>{word.display.ko}</div>
-      <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>{word.category}</div>
+    <div className={styles.wordTag}>
+      <div className={styles.wordDisplay}>{word.display.ko}</div>
+      <div className={styles.wordCategory}>{word.category}</div>
     </div>
   );
 }

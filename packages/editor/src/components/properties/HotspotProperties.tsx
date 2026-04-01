@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { LocalizedTextInput } from '@/components/shared/LocalizedTextInput';
 import { WordDropdown } from '@/components/words/WordDropdown';
+import { SceneDropdown } from '@/components/scenes/SceneDropdown';
 import { AudioAssetPicker } from '@/components/shared/AudioAssetPicker';
 import { CollectibleWordsEditor } from './CollectibleWordsEditor';
 import { InnerHotspotEditor } from './InnerHotspotEditor';
@@ -52,7 +53,7 @@ export function HotspotProperties({ hotspot, scene }: HotspotPropertiesProps): R
   const area = hotspot.area.type === 'rect' ? hotspot.area : null;
 
   return (
-    <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
       <div style={sectionHeader}>핫스팟 속성</div>
 
       {/* ID */}
@@ -64,9 +65,9 @@ export function HotspotProperties({ hotspot, scene }: HotspotPropertiesProps): R
       {area && (
         <div>
           <div style={labelStyle}>위치 / 크기</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2xs)' }}>
             {(['x', 'y', 'width', 'height'] as const).map(prop => (
-              <label key={prop} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <label key={prop} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2xs)' }}>
                 <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{prop.toUpperCase()}</span>
                 <input
                   type="number"
@@ -145,7 +146,7 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
   switch (action.type) {
     case 'examine':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
           <LocalizedTextInput label="내용" value={action.content} onChange={v => onChange({ ...action, content: v })} multiline />
           <LocalizedTextInput label="제목 (선택)" value={action.title ?? { ko: '', en: '' }} onChange={v => onChange({ ...action, title: v })} />
           <CollectibleWordsEditor
@@ -163,7 +164,7 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
 
     case 'word_reveal':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
           <WordDropdown
             caseId={caseId}
             wordIds={action.wordIds}
@@ -175,33 +176,16 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
 
     case 'navigate':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Field label="대상 씬">
-            <select value={action.targetSceneId} onChange={e => onChange({ ...action, targetSceneId: e.target.value })} style={{ width: '100%' }}>
-              <option value="">-- 씬 선택 --</option>
-              {scene && scene.hotspots && (
-                // We show all scenes from the case via a generic list approach
-                <option value={action.targetSceneId}>{action.targetSceneId || '(미지정)'}</option>
-              )}
-            </select>
-          </Field>
-          <Field label="대상 씬 ID (직접 입력)">
-            <input type="text" value={action.targetSceneId} onChange={e => onChange({ ...action, targetSceneId: e.target.value })} style={{ width: '100%' }} />
-          </Field>
-          <Field label="전환 효과">
-            <select value={action.transition ?? 'instant'} onChange={e => onChange({ ...action, transition: e.target.value as 'fade' | 'slide_left' | 'slide_right' | 'instant' })} style={{ width: '100%' }}>
-              <option value="instant">즉시</option>
-              <option value="fade">페이드</option>
-              <option value="slide_left">왼쪽 슬라이드</option>
-              <option value="slide_right">오른쪽 슬라이드</option>
-            </select>
-          </Field>
-        </div>
+        <NavigateActionEditor
+          action={action}
+          caseId={caseId}
+          onChange={onChange}
+        />
       );
 
     case 'toggle_layer':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
           <Field label="대상 레이어">
             <select
               value={action.layerId}
@@ -233,7 +217,7 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
 
     case 'play_sound':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
           <Field label="오디오 에셋">
             <AudioAssetPicker
               assetId={action.assetRef}
@@ -245,7 +229,7 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
 
     case 'composite':
       return (
-        <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: 8, border: '1px dashed var(--border-color)', borderRadius: 4 }}>
+        <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: 'var(--space-sm)', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
           복합 액션: {action.actions.length}개 하위 액션<br />
           (상세 편집은 차후 업데이트)
         </div>
@@ -257,9 +241,82 @@ function ActionEditor({ action, scene, caseId, onChange }: ActionEditorProps): R
 
 // ── Shared UI ─────────────────────────────────────────────────────
 
+interface NavigateActionEditorProps {
+  action: Extract<HotspotAction, { type: 'navigate' }>;
+  caseId: string;
+  onChange: (a: HotspotAction) => void;
+}
+
+function NavigateActionEditor({ action, caseId, onChange }: NavigateActionEditorProps): React.ReactElement {
+  const targetSceneExists = useEditorStore(s => {
+    if (!s.project || action.targetSceneId === '') return false;
+
+    for (const act of s.project.acts) {
+      const selectedCase = act.cases.find(c => c.id === caseId);
+      if (selectedCase) {
+        return selectedCase.scenes.some(candidate => candidate.id === action.targetSceneId);
+      }
+    }
+
+    return false;
+  });
+
+  const [targetInputMode, setTargetInputMode] = useState<'dropdown' | 'manual'>(
+    action.targetSceneId !== '' && !targetSceneExists ? 'manual' : 'dropdown',
+  );
+
+  useEffect(() => {
+    if (action.targetSceneId !== '' && !targetSceneExists && targetInputMode !== 'manual') {
+      setTargetInputMode('manual');
+    }
+  }, [action.targetSceneId, targetInputMode, targetSceneExists]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+      <Field label="Target Input">
+        <select
+          value={targetInputMode}
+          onChange={e => setTargetInputMode(e.target.value as 'dropdown' | 'manual')}
+          style={{ width: '100%' }}
+        >
+          <option value="dropdown">Scene Dropdown</option>
+          <option value="manual">Manual Scene ID</option>
+        </select>
+      </Field>
+
+      {targetInputMode === 'dropdown' ? (
+        <SceneDropdown
+          caseId={caseId}
+          sceneId={action.targetSceneId}
+          onChange={targetSceneId => onChange({ ...action, targetSceneId })}
+          label="Target Scene"
+        />
+      ) : (
+        <Field label="Target Scene ID">
+          <input
+            type="text"
+            value={action.targetSceneId}
+            onChange={e => onChange({ ...action, targetSceneId: e.target.value })}
+            style={{ width: '100%' }}
+          />
+        </Field>
+      )}
+
+      <Field label="전환 효과">
+        <select value={action.transition ?? 'instant'} onChange={e => onChange({ ...action, transition: e.target.value as 'fade' | 'slide_left' | 'slide_right' | 'instant' })} style={{ width: '100%' }}>
+          <option value="instant">즉시</option>
+          <option value="fade">페이드</option>
+          <option value="slide_left">왼쪽 슬라이드</option>
+          <option value="slide_right">오른쪽 슬라이드</option>
+        </select>
+      </Field>
+    </div>
+  );
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }): React.ReactElement {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2xs)' }}>
       <label style={labelStyle}>{label}</label>
       {children}
     </div>
@@ -272,7 +329,7 @@ const sectionHeader: React.CSSProperties = {
   color: 'var(--text-muted)',
   textTransform: 'uppercase',
   letterSpacing: '0.1em',
-  paddingBottom: 8,
+  paddingBottom: 'var(--space-sm)',
   borderBottom: '1px solid var(--border-color)',
 };
 
@@ -296,10 +353,10 @@ function ExamineImageActionEditor({ action, caseId, onChange }: ExamineImageActi
   const [aiModalOpen, setAiModalOpen] = useState(false);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2xs)' }}>
         <label style={labelStyle}>이미지 에셋 ID</label>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div style={{ display: 'flex', gap: 'var(--space-2xs)' }}>
           <input
             type="text"
             value={action.image}
@@ -310,12 +367,12 @@ function ExamineImageActionEditor({ action, caseId, onChange }: ExamineImageActi
             onClick={() => setAiModalOpen(true)}
             title="AI로 이미지 생성"
             style={{
-              padding: '0 8px',
+              padding: '0 var(--space-sm)',
               fontSize: 11,
               background: 'var(--accent)',
               color: '#000',
               border: 'none',
-              borderRadius: 3,
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
               fontWeight: 600,

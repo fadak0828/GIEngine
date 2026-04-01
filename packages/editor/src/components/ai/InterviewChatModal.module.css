@@ -1,0 +1,428 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  width: min(600px, 95vw);
+  height: min(80vh, 700px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.62);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.headerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  margin-top: var(--space-2xs);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.closeButton {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.closeButton:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.closeButtonDisabled,
+.closeButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.progressSection {
+  flex-shrink: 0;
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stageRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-bottom: 5px;
+}
+
+.stageLabel {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.stageDone {
+  color: var(--accent);
+}
+
+.stageCurrent {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progressTrack {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bg-card);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width var(--duration-medium) var(--ease-move);
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.loadingState {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding-top: 40px;
+}
+
+.typingWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.typingBubble {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm) 12px 12px var(--radius-sm);
+  background: var(--bg-card);
+}
+
+.typingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+
+.typingDot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typingDot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+
+  40% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+.errorBox {
+  flex-shrink: 0;
+  margin: 0 var(--space-lg) var(--space-sm);
+  padding: 7px var(--space-sm);
+  border: 1px solid rgba(196, 64, 64, 0.3);
+  border-radius: var(--radius-sm);
+  background: rgba(196, 64, 64, 0.12);
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.inputArea {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 10px var(--space-lg) var(--space-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.ghostButton,
+.accentButton,
+.editCancelButton,
+.editConfirmButton {
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  transition:
+    background var(--duration-short) var(--ease-enter),
+    border-color var(--duration-short) var(--ease-enter),
+    opacity var(--duration-short) var(--ease-enter);
+}
+
+.ghostButton {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ghostButton:hover:not(:disabled) {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+.accentButton {
+  border: 0;
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.accentButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.smallButton {
+  padding: var(--space-xs) 10px;
+  font-size: 11px;
+}
+
+.inputRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.textInput {
+  flex: 1;
+  resize: none;
+  min-height: 54px;
+  line-height: 1.5;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 7px var(--space-sm);
+  font-size: 13px;
+}
+
+.textInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.sendButton {
+  min-width: 84px;
+  padding: 10px var(--space-lg);
+  font-size: 13px;
+}
+
+.buttonDisabled,
+.accentButton:disabled,
+.ghostButton:disabled,
+.sendButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.inputDisabled,
+.textInput:disabled {
+  opacity: 0.6;
+}
+
+.bubbleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  flex-direction: row;
+}
+
+.bubbleRowUser {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--accent-dim);
+}
+
+.avatarUser {
+  background: var(--bg-card);
+}
+
+.bubbleColumn {
+  max-width: 78%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stageBadge {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.stageBadgeUser {
+  text-align: right;
+}
+
+.messageBody {
+  padding: 9px var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm) 12px 12px 12px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.messageBodyUser {
+  border-color: rgba(212, 150, 58, 0.3);
+  border-radius: 12px var(--radius-sm) 12px 12px;
+  background: var(--accent-dim);
+}
+
+.messageBodyEditable {
+  background: var(--bg-card);
+  border-width: 1px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.messageBodyEditable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.editWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.editTextarea {
+  resize: vertical;
+  line-height: 1.5;
+  min-height: 76px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 7px var(--space-sm);
+  font-size: 13px;
+}
+
+.editTextarea:focus {
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.editCancelButton,
+.editConfirmButton {
+  padding: 3px 10px;
+  font-size: 11px;
+}
+
+.editCancelButton {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.editCancelButton:hover {
+  background: var(--bg-card);
+}
+
+.editConfirmButton {
+  border: 0;
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editConfirmButton:hover {
+  background: var(--accent-hover);
+}

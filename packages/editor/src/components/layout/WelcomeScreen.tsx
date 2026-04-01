@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEditorStore } from '@/store/editor-store';
+import styles from './WelcomeScreen.module.css';
 
 export function WelcomeScreen(): React.ReactElement {
   const { newProject } = useEditorStore();
@@ -26,31 +27,123 @@ export function WelcomeScreen(): React.ReactElement {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full bg-gray-950 text-amber-100 gap-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-amber-400 mb-2">GIEngine Editor</h1>
-        <p className="text-gray-400 text-lg">황금 우상 스타일 추리게임 비주얼 에디터</p>
-      </div>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--bg-primary)',
+        backgroundImage: `
+          radial-gradient(circle at top, rgba(212, 150, 58, 0.16), transparent 56%),
+          linear-gradient(45deg, rgba(255, 255, 255, 0.02) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.02) 75%, rgba(255, 255, 255, 0.02)),
+          linear-gradient(45deg, transparent 25%, rgba(0, 0, 0, 0.22) 25%, rgba(0, 0, 0, 0.22) 75%, transparent 75%, transparent)
+        `,
+        backgroundSize: '100% 100%, 24px 24px, 24px 24px',
+        backgroundPosition: '0 0, 0 0, 12px 12px',
+        color: 'var(--text-primary)',
+        padding: 'var(--space-2xl)',
+      }}
+    >
+      <section
+        style={{
+          width: 'min(680px, 100%)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border-color)',
+          background: 'rgba(36, 31, 26, 0.82)',
+          boxShadow: '0 18px 50px rgba(0, 0, 0, 0.42)',
+          backdropFilter: 'blur(6px)',
+          textAlign: 'center',
+          padding: 'clamp(24px, 5vw, 48px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-xl)',
+        }}
+      >
+        <header style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '11px',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--accent)',
+            }}
+          >
+            Warm Industrial Workspace
+          </p>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontWeight: 400,
+              fontSize: 'clamp(34px, 5vw, 48px)',
+              lineHeight: 1.15,
+              color: 'var(--text-primary)',
+            }}
+          >
+            GIEngine Editor
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 'clamp(15px, 2.2vw, 18px)',
+              lineHeight: 1.6,
+              color: 'var(--text-secondary)',
+            }}
+          >
+            Build detective cases with a focused, token-driven authoring workflow.
+          </p>
+        </header>
 
-      <div className="flex gap-4">
-        <button
-          onClick={handleNewProject}
-          className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-lg transition-colors"
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 'var(--space-md)',
+          }}
         >
-          새 프로젝트
-        </button>
-        <button
-          onClick={handleTryDemo}
-          className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-amber-200 font-semibold rounded-lg transition-colors border border-amber-800"
-        >
-          데모 시작
-        </button>
-      </div>
+          <button
+            onClick={handleNewProject}
+            className={styles.primaryBtn}
+          >
+            Start New Project
+          </button>
+          <button
+            onClick={handleTryDemo}
+            className={styles.ghostBtn}
+          >
+            Try Demo Case
+          </button>
+        </div>
 
-      <div className="text-gray-600 text-sm text-center max-w-md">
-        <p>새 프로젝트를 시작하거나 데모로 에디터 기능을 체험해 보세요.</p>
-        <p className="mt-1">완성된 게임은 단일 HTML 파일로 익스포트할 수 있습니다.</p>
-      </div>
+        <div
+          style={{
+            margin: '0 auto',
+            maxWidth: 560,
+            paddingTop: 'var(--space-sm)',
+            borderTop: '1px solid var(--border-color)',
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: 'var(--text-muted)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-2xs)',
+          }}
+        >
+          <p style={{ margin: 0 }}>
+            Start from a blank project or open a demo to explore editor interactions quickly.
+          </p>
+          <p style={{ margin: 0 }}>
+            Export your final mystery game as a standalone HTML runtime package.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
