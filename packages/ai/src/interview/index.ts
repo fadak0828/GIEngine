@@ -5,7 +5,6 @@ export { InterviewEngine, interviewEngine } from './interview-engine.js';
 export type {
   InterviewSession,
   InterviewMessage,
-  InterviewStage,
   InterviewStageMeta,
   CollectedCaseInfo,
   CaseOverviewInfo,
@@ -23,7 +22,7 @@ export type {
   ProcessMessageResult,
 } from './types.js';
 
-export { STAGE_META, INTERVIEW_STAGE_ORDER } from './types.js';
+export { InterviewStage, STAGE_META, INTERVIEW_STAGE_ORDER } from './types.js';
 
 export {
   evaluateSufficiency,
