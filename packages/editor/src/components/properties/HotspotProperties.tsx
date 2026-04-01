@@ -332,6 +332,7 @@ function ExamineImageActionEditor({ action, caseId, onChange }: ExamineImageActi
       />
       <InnerHotspotEditor
         caseId={caseId}
+        imageAssetRef={action.image}
         innerHotspots={action.innerHotspots ?? []}
         onChange={innerHotspots => onChange({ ...action, innerHotspots })}
       />
