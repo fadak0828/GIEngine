@@ -31,7 +31,7 @@ interface HotspotOverlayProps {
   ) => void;
 }
 
-export function HotspotOverlay({
+export const HotspotOverlay = React.memo(function HotspotOverlay({
   hotspots,
   selectedHotspotId,
   scaleX,
@@ -172,4 +172,4 @@ export function HotspotOverlay({
       })}
     </svg>
   );
-}
+});

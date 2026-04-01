@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import type { Act, Case, Scene } from '@gi-engine/core';
 
@@ -11,8 +11,8 @@ interface SceneNodeProps {
   onSelect: () => void;
 }
 
-function SceneNode({ scene, caseId, isSelected, onSelect }: SceneNodeProps): React.ReactElement {
-  const ui = useEditorStore(s => s.ui);
+const SceneNode = React.memo(function SceneNode({ scene, caseId, isSelected, onSelect }: SceneNodeProps): React.ReactElement {
+  const editorLocale = useEditorStore(s => s.ui.editorLocale);
   const { updateScene } = useEditorStore();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -26,25 +26,25 @@ function SceneNode({ scene, caseId, isSelected, onSelect }: SceneNodeProps): Rea
     }
   }, [isEditing]);
 
-  const currentName = scene.name[ui.editorLocale] || scene.id;
+  const currentName = scene.name[editorLocale] || scene.id;
 
-  const commitEdit = () => {
+  const commitEdit = useCallback(() => {
     const trimmed = editValue.trim();
     if (trimmed) {
-      updateScene(caseId, scene.id, { name: { ...scene.name, [ui.editorLocale]: trimmed } });
+      updateScene(caseId, scene.id, { name: { ...scene.name, [editorLocale]: trimmed } });
     }
     setIsEditing(false);
-  };
+  }, [editValue, updateScene, caseId, scene.id, scene.name, editorLocale]);
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setIsEditing(false);
-  };
+  }, []);
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
     setEditValue(currentName);
-  };
+  }, [currentName]);
 
   return (
     <div
@@ -97,7 +97,7 @@ function SceneNode({ scene, caseId, isSelected, onSelect }: SceneNodeProps): Rea
       )}
     </div>
   );
-}
+});
 
 // ── CaseNode ────────────────────────────────────────────────────
 
@@ -106,14 +106,15 @@ interface CaseNodeProps {
   actId: string;
   isSelected: boolean;
   isExpanded: boolean;
+  selectedSceneId: string | null;
   onSelect: () => void;
   onToggle: () => void;
+  onSceneSelect: (sceneId: string) => void;
 }
 
-function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle }: CaseNodeProps): React.ReactElement {
-  const ui = useEditorStore(s => s.ui);
-  const selection = useEditorStore(s => s.selection);
-  const { addScene, deleteCase, setSelection, updateCase, setActivePanel } = useEditorStore();
+const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isExpanded, selectedSceneId, onSelect, onToggle, onSceneSelect }: CaseNodeProps): React.ReactElement {
+  const editorLocale = useEditorStore(s => s.ui.editorLocale);
+  const { addScene, deleteCase, updateCase } = useEditorStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -126,25 +127,35 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
     }
   }, [isEditing]);
 
-  const currentTitle = caseData.title[ui.editorLocale] || caseData.id;
+  const currentTitle = caseData.title[editorLocale] || caseData.id;
 
-  const commitEdit = () => {
+  const commitEdit = useCallback(() => {
     const trimmed = editValue.trim();
     if (trimmed) {
-      updateCase(caseData.id, { title: { ...caseData.title, [ui.editorLocale]: trimmed } });
+      updateCase(caseData.id, { title: { ...caseData.title, [editorLocale]: trimmed } });
     }
     setIsEditing(false);
-  };
+  }, [editValue, updateCase, caseData.id, caseData.title, editorLocale]);
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setIsEditing(false);
-  };
+  }, []);
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
     setEditValue(currentTitle);
-  };
+  }, [currentTitle]);
+
+  const handleAddScene = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    addScene(caseData.id);
+  }, [addScene, caseData.id]);
+
+  const handleDeleteCase = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('사건을 삭제하시겠습니까?')) deleteCase(actId, caseData.id);
+  }, [deleteCase, actId, caseData.id]);
 
   return (
     <div>
@@ -211,7 +222,7 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
           {caseData.scenes.length}씬
         </span>
         <button
-          onClick={e => { e.stopPropagation(); addScene(caseData.id); }}
+          onClick={handleAddScene}
           style={iconBtn}
           title="씬 추가"
           aria-label="씬 추가"
@@ -219,7 +230,7 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
           +
         </button>
         <button
-          onClick={e => { e.stopPropagation(); if (window.confirm('사건을 삭제하시겠습니까?')) deleteCase(actId, caseData.id); }}
+          onClick={handleDeleteCase}
           style={{ ...iconBtn, color: '#ef4444' }}
           title="사건 삭제"
           aria-label="사건 삭제"
@@ -232,28 +243,26 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
           key={scene.id}
           scene={scene}
           caseId={caseData.id}
-          isSelected={selection.sceneId === scene.id}
-          onSelect={() => {
-            setSelection({ caseId: caseData.id, sceneId: scene.id, hotspotId: null });
-            setActivePanel('scene');
-          }}
+          isSelected={selectedSceneId === scene.id}
+          onSelect={() => onSceneSelect(scene.id)}
         />
       ))}
     </div>
   );
-}
+});
 
 // ── ActNode ─────────────────────────────────────────────────────
 
 interface ActNodeProps {
   act: Act;
   isExpanded: boolean;
+  selectedCaseId: string | null;
+  selectedSceneId: string | null;
   onToggle: () => void;
 }
 
-function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElement {
-  const ui = useEditorStore(s => s.ui);
-  const selection = useEditorStore(s => s.selection);
+const ActNode = React.memo(function ActNode({ act, isExpanded, selectedCaseId, selectedSceneId, onToggle }: ActNodeProps): React.ReactElement {
+  const editorLocale = useEditorStore(s => s.ui.editorLocale);
   const { addCase, deleteAct, setSelection, updateAct, setActivePanel } = useEditorStore();
   const [expandedCases, setExpandedCases] = useState<Set<string>>(new Set());
 
@@ -268,33 +277,54 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
     }
   }, [isEditing]);
 
-  const currentTitle = act.title[ui.editorLocale] || act.id;
+  const currentTitle = act.title[editorLocale] || act.id;
 
-  const commitEdit = () => {
+  const commitEdit = useCallback(() => {
     const trimmed = editValue.trim();
     if (trimmed) {
-      updateAct(act.id, { title: { ...act.title, [ui.editorLocale]: trimmed } });
+      updateAct(act.id, { title: { ...act.title, [editorLocale]: trimmed } });
     }
     setIsEditing(false);
-  };
+  }, [editValue, updateAct, act.id, act.title, editorLocale]);
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
     setIsEditing(false);
-  };
+  }, []);
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
     setEditValue(currentTitle);
-  };
+  }, [currentTitle]);
 
-  const toggleCase = (caseId: string) => {
+  const toggleCase = useCallback((caseId: string) => {
     setExpandedCases(prev => {
       const next = new Set(prev);
       if (next.has(caseId)) next.delete(caseId); else next.add(caseId);
       return next;
     });
-  };
+  }, []);
+
+  const handleAddCase = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    addCase(act.id);
+  }, [addCase, act.id]);
+
+  const handleDeleteAct = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('막을 삭제하시겠습니까?')) deleteAct(act.id);
+  }, [deleteAct, act.id]);
+
+  const handleCaseSelect = useCallback((c: Case) => {
+    setSelection({ actId: act.id, caseId: c.id, sceneId: null, hotspotId: null });
+    setActivePanel('words');
+    if (!expandedCases.has(c.id)) toggleCase(c.id);
+  }, [act.id, expandedCases, toggleCase, setSelection, setActivePanel]);
+
+  const handleSceneSelect = useCallback((caseId: string, sceneId: string) => {
+    setSelection({ caseId, sceneId, hotspotId: null });
+    setActivePanel('scene');
+  }, [setSelection, setActivePanel]);
 
   return (
     <div>
@@ -364,7 +394,7 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
           {act.cases.length}건
         </span>
         <button
-          onClick={e => { e.stopPropagation(); addCase(act.id); }}
+          onClick={handleAddCase}
           style={iconBtn}
           title="사건 추가"
           aria-label="사건 추가"
@@ -372,7 +402,7 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
           +
         </button>
         <button
-          onClick={e => { e.stopPropagation(); if (window.confirm('막을 삭제하시겠습니까?')) deleteAct(act.id); }}
+          onClick={handleDeleteAct}
           style={{ ...iconBtn, color: '#ef4444' }}
           title="막 삭제"
           aria-label="막 삭제"
@@ -385,34 +415,34 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
           key={c.id}
           caseData={c}
           actId={act.id}
-          isSelected={selection.caseId === c.id}
+          isSelected={selectedCaseId === c.id}
           isExpanded={expandedCases.has(c.id)}
+          selectedSceneId={selectedSceneId}
           onToggle={() => toggleCase(c.id)}
-          onSelect={() => {
-            setSelection({ actId: act.id, caseId: c.id, sceneId: null, hotspotId: null });
-            setActivePanel('words');
-            if (!expandedCases.has(c.id)) toggleCase(c.id);
-          }}
+          onSelect={() => handleCaseSelect(c)}
+          onSceneSelect={(sceneId) => handleSceneSelect(c.id, sceneId)}
         />
       ))}
     </div>
   );
-}
+});
 
 // ── ProjectTree ──────────────────────────────────────────────────
 
 export function ProjectTree(): React.ReactElement {
   const project = useEditorStore(s => s.project);
+  const selectedCaseId = useEditorStore(s => s.selection.caseId);
+  const selectedSceneId = useEditorStore(s => s.selection.sceneId);
   const { addAct } = useEditorStore();
   const [expandedActs, setExpandedActs] = useState<Set<string>>(new Set());
 
-  const toggleAct = (actId: string) => {
+  const toggleAct = useCallback((actId: string) => {
     setExpandedActs(prev => {
       const next = new Set(prev);
       if (next.has(actId)) next.delete(actId); else next.add(actId);
       return next;
     });
-  };
+  }, []);
 
   if (!project) {
     return (
@@ -441,6 +471,8 @@ export function ProjectTree(): React.ReactElement {
             key={act.id}
             act={act}
             isExpanded={expandedActs.has(act.id)}
+            selectedCaseId={selectedCaseId}
+            selectedSceneId={selectedSceneId}
             onToggle={() => toggleAct(act.id)}
           />
         ))

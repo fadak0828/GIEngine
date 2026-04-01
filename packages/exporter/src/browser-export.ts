@@ -12,6 +12,7 @@ import runtimeCss from '../../runtime/dist/runtime.css?raw';
 export interface BrowserExportOptions {
   gameDefinition: GameDefinition;
   mode: 'development' | 'production';
+  author?: string;
 }
 
 export interface BrowserExportResult {
@@ -95,7 +96,7 @@ async function inlineAssetsForBrowser(
  * Runs entirely in the browser — no Node.js APIs used.
  */
 export async function browserExport(options: BrowserExportOptions): Promise<BrowserExportResult> {
-  const { gameDefinition, mode } = options;
+  const { gameDefinition, mode, author } = options;
 
   // 0. Inline all assets as base64 data URIs (browser fetch, no Node.js)
   const baseUrl = window.location.href;
@@ -112,12 +113,28 @@ export async function browserExport(options: BrowserExportOptions): Promise<Brow
     mode === 'development' ? 2 : undefined,
   );
 
-  // 2. Determine title and lang
+  // 2. Determine title, lang, and OG metadata
   const title =
     exportDef.title?.ko ??
     exportDef.title?.en ??
     'GIEngine Game';
   const lang = exportDef.supportedLocales?.[0] ?? 'ko';
+  const description =
+    exportDef.description?.ko ??
+    exportDef.description?.en ??
+    undefined;
+
+  // Find a thumbnail: use the first case's inlined thumbnail asset if available
+  const ogImage = (() => {
+    const cases = exportDef.acts?.flatMap(a => a.cases) ?? [];
+    for (const c of cases) {
+      if (c.thumbnail) {
+        const asset = inlinedManifest.items[c.thumbnail];
+        if (asset?.inline) return asset.inline;
+      }
+    }
+    return undefined;
+  })();
 
   // 3. Assemble HTML using the browser-safe template
   const html = assembleHtml({
@@ -126,6 +143,9 @@ export async function browserExport(options: BrowserExportOptions): Promise<Brow
     js: runtimeJs,
     gameData: gameDataJson,
     lang,
+    description,
+    author: author ?? undefined,
+    ogImage,
   });
 
   // 4. Compute sizes (TextEncoder is browser-safe)

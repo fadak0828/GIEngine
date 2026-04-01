@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { HotspotOverlay } from './HotspotOverlay';
 import { AIBackgroundModal } from '@/components/ai/AIBackgroundModal';
@@ -33,13 +33,14 @@ export function SceneCanvas(): React.ReactElement {
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const dragHotspotIdRef = useRef<string | null>(null);
 
-  let scene = null;
-  if (project && selection.caseId && selection.sceneId) {
+  const scene = useMemo(() => {
+    if (!project || !selection.caseId || !selection.sceneId) return null;
     for (const act of project.acts) {
       const c = act.cases.find(cs => cs.id === selection.caseId);
-      if (c) { scene = c.scenes.find(s => s.id === selection.sceneId) ?? null; break; }
+      if (c) return c.scenes.find(s => s.id === selection.sceneId) ?? null;
     }
-  }
+    return null;
+  }, [project, selection.caseId, selection.sceneId]);
 
   const updateCanvasRect = useCallback(() => {
     if (!containerRef.current) return;

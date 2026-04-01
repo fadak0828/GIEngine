@@ -8,6 +8,9 @@ export interface AssembleHtmlOptions {
   js: string;
   gameData: string;
   lang: string;
+  description?: string;
+  author?: string;
+  ogImage?: string;
 }
 
 /**
@@ -15,11 +18,13 @@ export interface AssembleHtmlOptions {
  * the game runtime, styles, and game data.
  */
 export function assembleHtml(options: AssembleHtmlOptions): string {
-  const { title, css, js, gameData, lang } = options;
+  const { title, css, js, gameData, lang, description, author, ogImage } = options;
 
   // Escape </script> inside embedded JSON/JS to prevent premature tag closing
   const safeGameData = gameData.replace(/<\/script>/gi, '<\\/script>');
   const safeJs = js.replace(/<\/script>/gi, '<\\/script>');
+
+  const ogTags = buildOgTags({ title, description, author, ogImage });
 
   return `<!DOCTYPE html>
 <html lang="${escapeAttr(lang)}">
@@ -29,6 +34,7 @@ export function assembleHtml(options: AssembleHtmlOptions): string {
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>${escapeHtml(title)}</title>
+${ogTags}
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -77,6 +83,35 @@ ${safeJs}
   </script>
 </body>
 </html>`;
+}
+
+function buildOgTags(opts: {
+  title: string;
+  description?: string;
+  author?: string;
+  ogImage?: string;
+}): string {
+  const lines: string[] = [];
+  const t = escapeAttr(opts.title);
+  lines.push(`  <meta property="og:type" content="website">`);
+  lines.push(`  <meta property="og:title" content="${t}">`);
+  lines.push(`  <meta name="twitter:card" content="summary_large_image">`);
+  lines.push(`  <meta name="twitter:title" content="${t}">`);
+  if (opts.description) {
+    const d = escapeAttr(opts.description);
+    lines.push(`  <meta property="og:description" content="${d}">`);
+    lines.push(`  <meta name="twitter:description" content="${d}">`);
+    lines.push(`  <meta name="description" content="${d}">`);
+  }
+  if (opts.author) {
+    lines.push(`  <meta name="author" content="${escapeAttr(opts.author)}">`);
+  }
+  if (opts.ogImage) {
+    const img = escapeAttr(opts.ogImage);
+    lines.push(`  <meta property="og:image" content="${img}">`);
+    lines.push(`  <meta name="twitter:image" content="${img}">`);
+  }
+  return lines.join('\n');
 }
 
 function escapeHtml(str: string): string {

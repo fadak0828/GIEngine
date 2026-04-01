@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { validateProjectDefinition } from '@gi-engine/core';
 
@@ -29,8 +29,11 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
 
   const [phase, setPhase] = useState<Phase>('idle');
   const [mode, setMode] = useState<'development' | 'production'>('production');
+  const [author, setAuthor] = useState<string>('');
   const [result, setResult] = useState<BrowserExportResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copiedHtml, setCopiedHtml] = useState(false);
+  const embedRef = useRef<HTMLTextAreaElement>(null);
 
   const validation = useMemo(() => {
     if (!project) return null;
@@ -48,6 +51,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
     setPhase('idle');
     setResult(null);
     setErrorMessage(null);
+    setCopiedHtml(false);
     onClose();
   };
 
@@ -70,7 +74,11 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
       const exportDef = { ...project, words: wordsDict };
 
       const exporterModule = await import('@gi-engine/exporter');
-      const exportResult = await exporterModule.browserExport({ gameDefinition: exportDef as never, mode });
+      const exportResult = await exporterModule.browserExport({
+        gameDefinition: exportDef as never,
+        mode,
+        author: author.trim() || undefined,
+      });
 
       // Trigger download
       const blob = new Blob([exportResult.html], { type: 'text/html;charset=utf-8' });
@@ -112,7 +120,9 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 440,
+        width: 480,
+        maxHeight: '90vh',
+        overflowY: 'auto',
         background: 'var(--bg-panel)',
         border: '1px solid var(--border-color)',
         borderRadius: 8,
@@ -188,6 +198,31 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
           </div>
         )}
 
+        {/* Author field */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+            제작자 (선택 사항 — OG 메타 태그에 포함됩니다)
+          </label>
+          <input
+            type="text"
+            value={author}
+            onChange={e => setAuthor(e.target.value)}
+            disabled={isExporting}
+            placeholder="예: 홍길동"
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              fontSize: 12,
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 3,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
         {/* Mode selector */}
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
@@ -214,13 +249,13 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
           </select>
         </div>
 
-        {/* Success: size breakdown */}
+        {/* Success: size breakdown + share tools */}
         {phase === 'success' && result && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 12, color: '#4ade80', marginBottom: 8, fontWeight: 600 }}>
               ✅ 다운로드 완료
             </div>
-            <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse', marginBottom: 12 }}>
               <tbody>
                 {([
                   ['JS 런타임', result.breakdown.js],
@@ -239,6 +274,56 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                 </tr>
               </tbody>
             </table>
+
+            {/* Copy HTML button */}
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(result.html).then(() => {
+                  setCopiedHtml(true);
+                  setTimeout(() => setCopiedHtml(false), 2000);
+                });
+              }}
+              style={{
+                width: '100%',
+                padding: '6px 10px',
+                fontSize: 12,
+                background: 'var(--bg-card)',
+                color: copiedHtml ? '#4ade80' : 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 3,
+                cursor: 'pointer',
+                marginBottom: 10,
+                textAlign: 'left',
+              }}
+            >
+              {copiedHtml ? '✅ HTML 복사 완료!' : '📋 HTML 전체 복사 (클립보드)'}
+            </button>
+
+            {/* Embed code */}
+            <div>
+              <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+                임베드 코드 — 게임을 호스팅한 후 URL을 교체하세요
+              </label>
+              <textarea
+                ref={embedRef}
+                readOnly
+                rows={3}
+                value={`<iframe src="YOUR_HOSTED_URL/${result.fileName}" width="960" height="540" frameborder="0" allowfullscreen></iframe>`}
+                onClick={() => embedRef.current?.select()}
+                style={{
+                  width: '100%',
+                  padding: '6px 8px',
+                  fontSize: 11,
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 3,
+                  resize: 'none',
+                  fontFamily: 'monospace',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
           </div>
         )}
 

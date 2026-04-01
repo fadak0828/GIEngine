@@ -149,7 +149,7 @@ export class Renderer {
         this.renderCaseCompleted(state, def);
         break;
       case 'game_completed':
-        this.renderGameCompleted();
+        this.renderGameCompleted(def);
         break;
     }
   }
@@ -478,7 +478,7 @@ export class Renderer {
 
   // --- Game Completed ---
 
-  private renderGameCompleted(): void {
+  private renderGameCompleted(def: GameDefinition): void {
     if (this.currentView !== 'gameCompleted') {
       this.clearView([]);
       this.removeControls();
@@ -493,6 +493,10 @@ export class Renderer {
       title.textContent = this.i18n.resolveKey('ui.game_complete');
       el.appendChild(title);
 
+      // Social share buttons (only shown when hosted over http/https)
+      const shareSection = this.buildShareSection(def);
+      if (shareSection) el.appendChild(shareSection);
+
       const btn = document.createElement('button');
       btn.className = 'gi-btn gi-btn--primary';
       btn.textContent = this.i18n.resolveKey('ui.back');
@@ -501,6 +505,80 @@ export class Renderer {
 
       this.container.appendChild(el);
     }
+  }
+
+  private buildShareSection(def: GameDefinition): HTMLElement | null {
+    const isHosted =
+      typeof window !== 'undefined' &&
+      (window.location.protocol === 'http:' || window.location.protocol === 'https:');
+    if (!isHosted) return null;
+
+    const gameTitle = this.i18n.resolveText(def.title) || 'GIEngine Game';
+    const shareUrl = window.location.href;
+    const tweetText = encodeURIComponent(`「${gameTitle}」 클리어했습니다! #GIEngine`);
+    const encodedUrl = encodeURIComponent(shareUrl);
+
+    const section = document.createElement('div');
+    section.className = 'gi-share-section';
+    section.style.cssText =
+      'margin: 16px 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;';
+
+    const shareLabel = document.createElement('p');
+    shareLabel.style.cssText =
+      'width: 100%; text-align: center; font-size: 0.75rem; opacity: 0.6; margin-bottom: 4px;';
+    shareLabel.textContent = '공유하기';
+    section.appendChild(shareLabel);
+
+    // Twitter/X
+    const twitterBtn = this.buildShareBtn(
+      '🐦 X (Twitter)',
+      `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodedUrl}`
+    );
+    section.appendChild(twitterBtn);
+
+    // Reddit
+    const redditBtn = this.buildShareBtn(
+      '🔴 Reddit',
+      `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodeURIComponent(gameTitle)}`
+    );
+    section.appendChild(redditBtn);
+
+    // Copy Link
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'gi-btn';
+    copyBtn.textContent = '🔗 링크 복사';
+    copyBtn.style.cssText = 'font-size: 0.75rem; padding: 6px 12px;';
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        copyBtn.textContent = '✅ 복사 완료!';
+        setTimeout(() => { copyBtn.textContent = '🔗 링크 복사'; }, 2000);
+      }).catch(() => {
+        // fallback: select a hidden input
+        const inp = document.createElement('input');
+        inp.value = shareUrl;
+        document.body.appendChild(inp);
+        inp.select();
+        document.execCommand('copy');
+        document.body.removeChild(inp);
+        copyBtn.textContent = '✅ 복사 완료!';
+        setTimeout(() => { copyBtn.textContent = '🔗 링크 복사'; }, 2000);
+      });
+    });
+    section.appendChild(copyBtn);
+
+    return section;
+  }
+
+  private buildShareBtn(label: string, url: string): HTMLElement {
+    const btn = document.createElement('a');
+    btn.href = url;
+    btn.target = '_blank';
+    btn.rel = 'noopener noreferrer';
+    btn.className = 'gi-btn';
+    btn.textContent = label;
+    btn.style.cssText =
+      'font-size: 0.75rem; padding: 6px 12px; text-decoration: none; display: inline-block;';
+    return btn;
   }
 
   private removeCompletion(): void {
