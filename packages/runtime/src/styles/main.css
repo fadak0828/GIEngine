@@ -656,6 +656,7 @@
   font-size: 1rem;
   line-height: 1.7;
   color: var(--gi-text);
+  white-space: pre-wrap;
 }
 
 .gi-popup-body .gi-highlighted {
