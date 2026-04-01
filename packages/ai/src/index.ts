@@ -31,3 +31,31 @@ export {
 } from './prompts/background-prompts.js';
 export { buildStoryPrompt } from './prompts/story-prompts.js';
 export { buildPuzzlePrompt } from './prompts/puzzle-prompts.js';
+
+// Interview module
+export { InterviewEngine, interviewEngine } from './interview/index.js';
+export type {
+  InterviewSession,
+  InterviewMessage,
+  InterviewStageMeta,
+  CollectedCaseInfo,
+  CaseOverviewInfo,
+  CorePlotInfo,
+  CharacterProfile,
+  LocationProfile,
+  EvidenceItem,
+  PuzzleOutlineInfo,
+  CaseBlueprint,
+  BlueprintScene,
+  BlueprintWord,
+  BlueprintCharacter,
+  BlueprintHotspotHint,
+  SufficiencyScore,
+  ProcessMessageResult,
+} from './interview/index.js';
+export { InterviewStage, STAGE_META, INTERVIEW_STAGE_ORDER } from './interview/index.js';
+export { evaluateSufficiency, mergeCollectedInfo } from './interview/index.js';
+
+// Case generator
+export { generateCaseFromBlueprint } from './generators/case-generator.js';
+export type { GenerateCaseResult } from './generators/case-generator.js';
