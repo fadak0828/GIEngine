@@ -62,6 +62,9 @@ export function AIExamineImageModal({
     if (!generatedAsset) return;
     addAsset(generatedAsset);
     onConfirm(generatedAsset.id);
+    setDescription('');
+    setGeneratedAsset(null);
+    setError(null);
     onClose();
   };
 
@@ -97,7 +100,7 @@ export function AIExamineImageModal({
           overflowY: 'auto',
           background: 'var(--bg-panel)',
           border: '1px solid var(--border-color)',
-          borderRadius: 8,
+          borderRadius: 10,
           padding: 20,
           zIndex: 1001,
           boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
