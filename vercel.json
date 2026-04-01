@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm install && npm run build --workspace=packages/editor",
+  "outputDirectory": "packages/editor/dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

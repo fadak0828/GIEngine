@@ -93,6 +93,21 @@ gi-engine/
 └── CLAUDE.md       # 에이전트 지침
 ```
 
+## Vercel 배포
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-org/gi-engine)
+
+에디터를 Vercel에 배포하려면:
+
+1. 이 저장소를 Vercel에 연결합니다.
+2. 빌드 설정은 `vercel.json`에 이미 구성되어 있습니다:
+   - **Build Command**: `npm install && npm run build --workspace=packages/editor`
+   - **Output Directory**: `packages/editor/dist`
+3. 환경 변수는 **불필요**합니다. Gemini API 키는 에디터 내 설정 화면에서 입력하며 브라우저 localStorage에 저장됩니다.
+4. 배포 후 제공되는 URL로 에디터에 바로 접근할 수 있습니다.
+
+> SPA 라우팅을 위한 fallback(`/* → /index.html`)이 `vercel.json`에 설정되어 있습니다.
+
 ## 기여 가이드
 
 - 변경 전 `npm run ci:check` 통과 확인
