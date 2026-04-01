@@ -9,18 +9,17 @@ on:
       - main
 
 jobs:
-  ci:
-    name: Lint, Typecheck, Test, Build
+  lint-and-typecheck:
+    name: Lint and Typecheck
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20 LTS
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -32,25 +31,52 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: []
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Test
         run: npm test
 
-      - name: Build
-        run: |
-          echo "=== Node version ==="
-          node --version
-          echo "=== npm version ==="
-          npm --version
-          echo "=== vite version ==="
-          npx vite --version
-          echo "=== Running build ==="
-          npm run build 2>&1; exit_code=$?; echo "BUILD EXIT CODE: $exit_code"; exit $exit_code
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: []
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Upload build artifacts
-        if: failure()
-        uses: actions/upload-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: build-logs
-          path: |
-            build.log
-            packages/*/dist/**
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build workspace packages individually
+        run: |
+          echo "=== Building ai ==="
+          npm run build --workspace=packages/ai 2>&1; echo "ai exit: $?"
+          echo "=== Building core ==="
+          npm run build --workspace=packages/core 2>&1; echo "core exit: $?"
+          echo "=== Building exporter ==="
+          npm run build --workspace=packages/exporter 2>&1; echo "exporter exit: $?"
+          echo "=== Building runtime ==="
+          npm run build --workspace=packages/runtime 2>&1; echo "runtime exit: $?"
+          echo "=== Building editor ==="
+          npm run build --workspace=packages/editor 2>&1; echo "editor exit: $?"
