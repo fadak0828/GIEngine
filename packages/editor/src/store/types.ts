@@ -21,6 +21,9 @@ import type {
 } from '@gi-engine/core';
 import type { InterviewSlice } from './interview-slice.js';
 import type { QuickCreateSlice } from './quick-create-slice.js';
+import type { ItchSlice, ItchState } from './itch-slice.js';
+
+export type { ItchCredentials, ItchPublishConfig, ItchState } from './itch-slice.js';
 
 export type {
   GameDefinition,
@@ -105,7 +108,7 @@ export interface HistoryState {
 
 // ── EditorStore (full intersection type) ────────────────────────
 
-export interface EditorStore extends InterviewSlice, QuickCreateSlice {
+export interface EditorStore extends InterviewSlice, QuickCreateSlice, ItchSlice {
   // State
   project: GameDefinition | null;
   words: Word[];
@@ -113,6 +116,7 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice {
   selection: SelectionState;
   ui: UIState;
   history: HistoryState;
+  itch: ItchState;
 
   // Project lifecycle
   newProject: () => void;

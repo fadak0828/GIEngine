@@ -65,6 +65,7 @@ export type SelectionSlice = {
   setAssetViewMode: (mode: AssetViewMode) => void;
   setAssetTypeFilter: (filter: AssetTypeFilter) => void;
   setAssetSearch: (query: string) => void;
+  setShortcutHelpOpen: (open: boolean) => void;
 };
 
 // ── Slice creator ────────────────────────────────────────────────

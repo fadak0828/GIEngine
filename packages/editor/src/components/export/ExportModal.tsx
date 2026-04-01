@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { validateProjectDefinition } from '@gi-engine/core';
+import { ItchPublishModal } from './ItchPublishModal.js';
 
 // Inline type to avoid compile-time dependency on @gi-engine/exporter
 interface BrowserExportResult {
@@ -33,6 +34,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
   const [result, setResult] = useState<BrowserExportResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedHtml, setCopiedHtml] = useState(false);
+  const [itchModalOpen, setItchModalOpen] = useState(false);
   const embedRef = useRef<HTMLTextAreaElement>(null);
 
   const validation = useMemo(() => {
@@ -324,6 +326,25 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                 }}
               />
             </div>
+
+            {/* itch.io publish button */}
+            <button
+              onClick={() => setItchModalOpen(true)}
+              style={{
+                width: '100%',
+                padding: '6px 10px',
+                fontSize: 12,
+                background: '#ff2449',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 3,
+                cursor: 'pointer',
+                marginTop: 10,
+                textAlign: 'center',
+              }}
+            >
+              🎮 itch.io로 发布하기
+            </button>
           </div>
         )}
 
@@ -381,6 +402,14 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
           )}
         </div>
       </div>
+
+      {/* itch.io publish modal */}
+      <ItchPublishModal
+        open={itchModalOpen}
+        onClose={() => setItchModalOpen(false)}
+        exportHtml={phase === 'success' ? result?.html : undefined}
+        exportFileName={phase === 'success' ? result?.fileName : undefined}
+      />
     </>
   );
 }

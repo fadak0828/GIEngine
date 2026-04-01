@@ -8,6 +8,7 @@ import { createAssetSlice } from './asset-slice.js';
 import { createHistorySlice } from './history-slice.js';
 import { createInterviewSlice } from './interview-slice.js';
 import { createQuickCreateSlice } from './quick-create-slice.js';
+import { createItchSlice } from './itch-slice.js';
 
 export const useEditorStore = create<EditorStore>((...a) => ({
   ...createProjectSlice(...a),
@@ -18,10 +19,12 @@ export const useEditorStore = create<EditorStore>((...a) => ({
   ...createHistorySlice(...a),
   ...createInterviewSlice(...a),
   ...createQuickCreateSlice(...a),
+  ...createItchSlice(...a),
 }));
 
 // Re-export types and selectors
 export type { ProjectMeta, SelectionState, UIState, LocalizedText, ActivePanel, PreviewMode } from './types.js';
+export type { ItchCredentials, ItchPublishConfig } from './types.js';
 export {
   useProject, useSelection, useUI, useWords, useCanUndo, useCanRedo,
   useEditorLocale, usePreviewLocale, useActivePanel, useSceneTool,
