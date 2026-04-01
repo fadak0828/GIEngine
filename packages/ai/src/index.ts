@@ -68,3 +68,17 @@ export type {
   ConvertBlueprintOptions,
   ConvertBlueprintResult,
 } from './interview/blueprint-converter.js';
+
+// Quick Create module
+export { QuickCreateEngine, quickCreateEngine, ChoiceGenerator, choiceGenerator } from './quick-create/index.js';
+export type {
+  QuickCreateOptions,
+  QuickCreateResult,
+  QuickCreateProgress,
+  QuickCreateStep,
+  OnQuickCreateProgress,
+  SectionChoices,
+  ChoiceItem,
+  ChoiceSelection,
+  StartFromSentenceOptions,
+} from './quick-create/index.js';
