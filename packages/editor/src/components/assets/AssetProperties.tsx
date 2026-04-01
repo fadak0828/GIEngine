@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import type { AssetCategory } from '@gi-engine/core';
+import { ImageEditorModal } from './ImageEditorModal';
+import { AudioEditorModal } from './AudioEditorModal';
 
 // ── Constants ─────────────────────────────────────────────────────
 
@@ -148,6 +150,9 @@ export function AssetProperties(): React.ReactElement | null {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
   const { updateAsset, deleteAsset, setSelectedAsset, getAssetUsages, showNotification } = useEditorStore();
 
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [showAudioEditor, setShowAudioEditor] = useState(false);
+
   if (!project || !selectedAssetId) return null;
   const asset = project.assets.items[selectedAssetId];
   if (!asset) return null;
@@ -171,8 +176,31 @@ export function AssetProperties(): React.ReactElement | null {
     showNotification('에셋이 삭제되었습니다.', 'success');
   };
 
+  const handleEditSave = (newBase64: string, newMimeType: string) => {
+    updateAsset(selectedAssetId, { inline: newBase64, mimeType: newMimeType });
+    setShowImageEditor(false);
+    setShowAudioEditor(false);
+    showNotification('에셋이 저장되었습니다.', 'success');
+  };
+
   return (
     <div>
+      {/* Modals */}
+      {showImageEditor && (asset.type === 'image') && (
+        <ImageEditorModal
+          asset={asset}
+          onSave={handleEditSave}
+          onClose={() => setShowImageEditor(false)}
+        />
+      )}
+      {showAudioEditor && (asset.type === 'audio') && (
+        <AudioEditorModal
+          asset={asset}
+          onSave={handleEditSave}
+          onClose={() => setShowAudioEditor(false)}
+        />
+      )}
+
       {/* Preview */}
       <div style={{ padding: 12, display: 'flex', gap: 12, alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{
@@ -212,6 +240,27 @@ export function AssetProperties(): React.ReactElement | null {
               </span>
             )}
           </div>
+          {(asset.type === 'image' || asset.type === 'audio') && (
+            <button
+              onClick={() => {
+                if (asset.type === 'image') setShowImageEditor(true);
+                else setShowAudioEditor(true);
+              }}
+              style={{
+                marginTop: 8,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 600,
+                background: 'var(--accent-dim)',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent)',
+                borderRadius: 3,
+                cursor: 'pointer',
+              }}
+            >
+              ✏ 편집
+            </button>
+          )}
         </div>
       </div>
 
