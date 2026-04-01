@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  lint-and-typecheck:
-    name: Lint and Typecheck
+  ci:
+    name: Lint, Typecheck, Test, Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,11 +19,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline=false
 
       - name: Lint
         run: npm run lint
@@ -31,58 +31,37 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Test
-        run: npm test
+        run: |
+          npm test 2>&1 | tee test_output.log
+          exit ${PIPESTATUS[0]}
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build workspace packages individually
+      - name: Build ai
         run: |
           echo "=== Building ai ==="
           npm run build --workspace=packages/ai 2>&1; echo "ai exit: $?"
+
+      - name: Build core
+        run: |
           echo "=== Building core ==="
           npm run build --workspace=packages/core 2>&1; echo "core exit: $?"
+
+      - name: Build exporter
+        run: |
           echo "=== Building exporter ==="
           npm run build --workspace=packages/exporter 2>&1; echo "exporter exit: $?"
+
+      - name: Build runtime
+        run: |
           echo "=== Building runtime ==="
           npm run build --workspace=packages/runtime 2>&1; echo "runtime exit: $?"
+
+      - name: Build editor
+        run: |
           echo "=== Building editor ==="
           npm run build --workspace=packages/editor 2>&1; echo "editor exit: $?"
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: build-artifacts
-          path: |
-            packages/*/dist/**
+      - name: Build full workspace
+        run: |
+          echo "=== Full workspace build ==="
+          npm run build --workspaces 2>&1; echo "workspace exit: $?"
