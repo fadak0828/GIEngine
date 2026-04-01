@@ -16,6 +16,8 @@ function resetStore() {
       zoom: 1.0,
       previewVisible: false,
       previewHeight: 280,
+      previewMode: 'scene',
+      previewPlaying: false,
       leftPanelWidth: 260,
       rightPanelWidth: 320,
       sceneTool: 'select',
@@ -25,6 +27,7 @@ function resetStore() {
       assetViewMode: 'grid',
       assetTypeFilter: 'all',
       assetSearch: '',
+      shortcutHelpOpen: false,
     },
   });
 }

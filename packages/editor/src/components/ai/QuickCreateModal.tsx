@@ -37,7 +37,7 @@ type QuickCreateModule = {
     applyChoicesToBlueprint: (
       originalSentence: string,
       currentBlueprint: unknown,
-      selection: Record<string, string>,
+      selection: ChoiceSelection,
       choices: unknown,
       options?: { locale?: string },
       onProgress?: (p: { step: string; percent: number; message: string }) => void,

@@ -51,7 +51,7 @@ function makeScene(sceneIndex: number, caseIndex: number): Scene {
   return {
     id: id('scene', sceneIndex),
     name: localizedText(`씬 ${sceneIndex + 1}`, `Scene ${sceneIndex + 1}`),
-    background: { assetId: null },
+    background: '',
     dimensions: { width: 1280, height: 720 },
     hotspots,
     layers: [],
@@ -67,9 +67,9 @@ function makeCase(caseIndex: number, sceneOffset: number): Case {
     title: localizedText(`사건 ${caseIndex + 1}`, `Case ${caseIndex + 1}`),
     description: localizedText(`사건 ${caseIndex + 1}의 설명`, `Description of case ${caseIndex + 1}`),
     scenes,
-    puzzles: { puzzles: [] },
+    puzzles: { main: { id: '', title: localizedText('', ''), type: 'fill_in_blank', template: { segments: [] }, answers: {} }, sub: [] },
     prerequisites: [],
-    thumbnail: { assetId: null },
+    thumbnail: '',
   };
 }
 
@@ -79,8 +79,8 @@ function makeWords(count: number): Record<string, Word> {
     const wordId = id('word', i);
     words[wordId] = {
       id: wordId,
-      text: localizedText(`단어${i + 1}`, `Word${i + 1}`),
-      description: localizedText(`단어 ${i + 1}의 설명`, `Description of word ${i + 1}`),
+      display: localizedText(`단어${i + 1}`, `Word${i + 1}`),
+      caseId: '',
       category: 'evidence',
     };
   }
@@ -138,7 +138,7 @@ export function createStressTestProject(): GameDefinition {
       cssPrefix: 'gi',
     },
     acts: [act],
-    assets: { images: {}, audio: {}, fonts: {} },
+    assets: { items: {} },
     words: makeWords(WORD_COUNT),
   };
 }

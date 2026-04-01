@@ -341,7 +341,7 @@ export function PreviewPane(): React.ReactElement {
   };
 
   const caseName = getLocalizedName(selectedCase?.title);
-  const sceneName = getLocalizedName(selectedScene?.title);
+  const sceneName = getLocalizedName(selectedScene?.name);
 
   // ── Expanded state ─────────────────────────────────────────────────────────
 
