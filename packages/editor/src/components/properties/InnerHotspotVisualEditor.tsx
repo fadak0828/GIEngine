@@ -389,8 +389,8 @@ export function InnerHotspotVisualEditor({
             <g key={hs.id}>
               <rect
                 x={px} y={py} width={pw} height={ph}
-                fill={isSelected ? 'rgba(59,130,246,0.25)' : 'rgba(212,150,58,0.20)'}
-                stroke={isSelected ? '#3b82f6' : '#d4963a'}
+                fill={isSelected ? 'var(--hotspot-selected)' : 'var(--hotspot-color)'}
+                stroke={isSelected ? 'var(--selection)' : 'var(--accent)'}
                 strokeWidth={isSelected ? 2 : 1.5}
                 strokeDasharray={isSelected ? undefined : '4 2'}
                 style={{
@@ -411,8 +411,8 @@ export function InnerHotspotVisualEditor({
                   y={py + dy * ph - 4}
                   width={8}
                   height={8}
-                  fill="white"
-                  stroke="#3b82f6"
+                  fill="#fff"
+                  stroke="var(--selection)"
                   strokeWidth={1.5}
                   style={{ pointerEvents: 'all', cursor }}
                   onPointerDown={e => handleResizePointerDown(e, hs.id, mode)}
@@ -429,8 +429,8 @@ export function InnerHotspotVisualEditor({
             y={(drawPreview.y / 100) * h}
             width={(drawPreview.width / 100) * w}
             height={(drawPreview.height / 100) * h}
-            fill="rgba(212,150,58,0.20)"
-            stroke="#d4963a"
+            fill="rgba(212, 150, 58, 0.20)"
+            stroke="var(--accent)"
             strokeWidth={1.5}
             strokeDasharray="4 2"
             style={{ pointerEvents: 'none' }}

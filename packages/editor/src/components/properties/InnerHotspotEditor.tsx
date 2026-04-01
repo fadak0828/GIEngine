@@ -113,7 +113,7 @@ export function InnerHotspotEditor({
         />
 
         {/* Hint */}
-        <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           {tool === 'draw_rect' && '빈 영역을 드래그하여 새 핫스팟을 그립니다'}
           {tool === 'select'   && '핫스팟을 클릭하여 선택하고 드래그하여 이동합니다'}
           {tool === 'delete'   && '핫스팟을 클릭하면 즉시 삭제됩니다'}
