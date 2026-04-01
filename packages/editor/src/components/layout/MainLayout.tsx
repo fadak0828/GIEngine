@@ -16,6 +16,15 @@ import { useEditorStore } from '@/store/editor-store';
 export function MainLayout(): React.ReactElement {
   const ui = useEditorStore(s => s.ui);
 
+  const panelId = ui.activePanel === 'assets' ? 'panel-assets'
+    : ui.activePanel === 'words' ? 'panel-words'
+    : ui.activePanel === 'puzzle' ? 'panel-puzzle'
+    : ui.activePanel === 'subPuzzle' ? 'panel-subpuzzle'
+    : ui.activePanel === 'validation' ? 'panel-validation'
+    : 'panel-scene';
+
+  const tabId = panelId.replace('panel-', 'tab-');
+
   const renderCenterContent = () => {
     if (ui.activePanel === 'puzzle') return <PuzzleEditorPanel />;
     if (ui.activePanel === 'subPuzzle') return <SubPuzzlePanel />;
@@ -46,7 +55,7 @@ export function MainLayout(): React.ReactElement {
         {/* Center panel */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           <MainAreaTabBar />
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+          <div id={panelId} role="tabpanel" aria-labelledby={tabId} style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
             {renderCenterContent()}
           </div>
           <PreviewPane />

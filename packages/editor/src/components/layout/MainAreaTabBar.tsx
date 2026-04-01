@@ -81,6 +81,7 @@ export function MainAreaTabBar(): React.ReactElement {
   return (
     <div role="tablist" aria-label="에디터 패널" style={containerStyle}>
       <button
+        id="tab-scene"
         role="tab"
         aria-selected={isSceneActive}
         aria-controls="panel-scene"
@@ -92,6 +93,7 @@ export function MainAreaTabBar(): React.ReactElement {
         씬 편집
       </button>
       <button
+        id="tab-assets"
         role="tab"
         aria-selected={isAssetsActive}
         aria-controls="panel-assets"
@@ -104,6 +106,7 @@ export function MainAreaTabBar(): React.ReactElement {
         <span style={badgeStyle} aria-label={`에셋 ${assetCount}개`}>{assetCount}</span>
       </button>
       <button
+        id="tab-words"
         role="tab"
         aria-selected={isWordsActive}
         aria-controls="panel-words"
@@ -116,6 +119,7 @@ export function MainAreaTabBar(): React.ReactElement {
         <span style={badgeStyle} aria-label={`단어 ${wordCount}개`}>{wordCount}</span>
       </button>
       <button
+        id="tab-puzzle"
         role="tab"
         aria-selected={isPuzzleActive}
         aria-controls="panel-puzzle"
@@ -127,6 +131,7 @@ export function MainAreaTabBar(): React.ReactElement {
         퍼즐 편집
       </button>
       <button
+        id="tab-subpuzzle"
         role="tab"
         aria-selected={isSubPuzzleActive}
         aria-controls="panel-subpuzzle"
@@ -139,6 +144,7 @@ export function MainAreaTabBar(): React.ReactElement {
         <span style={badgeStyle} aria-label={`서브 퍼즐 ${subPuzzleCount}개`}>{subPuzzleCount}</span>
       </button>
       <button
+        id="tab-validation"
         role="tab"
         aria-selected={isValidationActive}
         aria-controls="panel-validation"

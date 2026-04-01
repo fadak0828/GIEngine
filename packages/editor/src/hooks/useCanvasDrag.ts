@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { canvasToScene, type CanvasRect, type SceneDimensions } from '@/utils/coordinate';
+import { canvasToScene, type CanvasRect, type SceneDimensions } from '../utils/coordinate';
 
 export type DragMode = 'move' | 'resize-nw' | 'resize-ne' | 'resize-sw' | 'resize-se' | 'resize-n' | 'resize-s' | 'resize-w' | 'resize-e';
 
