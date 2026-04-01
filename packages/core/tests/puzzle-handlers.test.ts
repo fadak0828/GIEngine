@@ -4,9 +4,41 @@
 import { describe, it, expect } from 'vitest';
 import { handleThinking } from '../src/state/puzzle-handlers.js';
 import { createInitialSaveState } from '../src/save/initial-state.js';
-import type { GameDefinition, GameState, SaveState, CaseState } from '../src/models/types.js';
+import type {
+  GameDefinition,
+  GameState,
+  SaveState,
+  CaseState,
+  TimelinePuzzle,
+  RelationshipPuzzle,
+} from '../src/models/types.js';
 
-// --- fixture ---
+// --- fixtures ---
+
+const timelineSub: TimelinePuzzle = {
+  id: 'pz-timeline',
+  title: { ko: '타임라인', en: 'Timeline' },
+  type: 'timeline',
+  slots: [
+    { slotId: 'tslot-1', label: { ko: '첫 번째', en: 'First' }, answerId: 'ev-morning' },
+    { slotId: 'tslot-2', label: { ko: '두 번째', en: 'Second' }, answerId: 'ev-noon' },
+    { slotId: 'tslot-3', label: { ko: '세 번째', en: 'Third' }, answerId: 'ev-night' },
+  ],
+};
+
+const relationshipSub: RelationshipPuzzle = {
+  id: 'pz-relationship',
+  title: { ko: '관계도', en: 'Relationship' },
+  type: 'relationship',
+  nodes: [
+    { id: 'n-alice', label: { ko: '앨리스', en: 'Alice' } },
+    { id: 'n-bob', label: { ko: '밥', en: 'Bob' } },
+  ],
+  edges: [
+    { fromNodeId: 'n-alice', toNodeId: 'n-bob', slotId: 'edge-ab', answerId: 'rel-suspect' },
+    { fromNodeId: 'n-bob', toNodeId: 'n-alice', slotId: 'edge-ba', answerId: 'rel-alibi', symmetric: false },
+  ],
+};
 
 const testDef: GameDefinition = {
   id: 'g',
@@ -41,7 +73,7 @@ const testDef: GameDefinition = {
               template: { segments: [{ id: 's1', type: 'slot', slotId: 'slot1' }] },
               answers: { slot1: { correctWordId: 'correct-word' } },
             },
-            sub: [],
+            sub: [timelineSub, relationshipSub],
           },
           prerequisites: [],
           thumbnail: '',
@@ -220,5 +252,188 @@ describe('handleThinking solved puzzle guard', () => {
     const result = handleThinking(state, save, { type: 'ASSIGN_WORD', slotId: 'slot1', wordId: 'w' }, testDef);
     expect(result.nextState).toBe(state);
     expect(result.effects).toEqual([]);
+  });
+});
+
+// ── Timeline SubPuzzle 통합 테스트 ────────────────────────────────
+
+describe('handleThinking - Timeline SubPuzzle', () => {
+  function makeTimelineSave(): SaveState {
+    const save = createInitialSaveState(testDef);
+    save.caseStates['case1'].puzzleStates['pz-timeline'] = {
+      slotAssignments: { 'tslot-1': null, 'tslot-2': null, 'tslot-3': null },
+      attemptCount: 0,
+      solved: false,
+    };
+    return save;
+  }
+
+  it('정확한 순서 배정 후 VALIDATE_PUZZLE → solved', () => {
+    const save = makeTimelineSave();
+    save.caseStates['case1'].puzzleStates['pz-timeline'].slotAssignments = {
+      'tslot-1': 'ev-morning',
+      'tslot-2': 'ev-noon',
+      'tslot-3': 'ev-night',
+    };
+    const state = makeThinkingState('pz-timeline');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-timeline']?.solved).toBe(true);
+    const nextState = result.nextState as GameState & { type: 'thinking' };
+    expect(nextState.sub.type).toBe('solved');
+  });
+
+  it('잘못된 순서 배정 후 VALIDATE_PUZZLE → not solved', () => {
+    const save = makeTimelineSave();
+    save.caseStates['case1'].puzzleStates['pz-timeline'].slotAssignments = {
+      'tslot-1': 'ev-noon',
+      'tslot-2': 'ev-morning',
+      'tslot-3': 'ev-night',
+    };
+    const state = makeThinkingState('pz-timeline');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-timeline']?.solved).toBe(false);
+    const nextState = result.nextState as GameState & { type: 'thinking' };
+    expect(nextState.sub.type).toBe('showing_result');
+  });
+
+  it('충돌(중복) 배정 후 VALIDATE_PUZZLE → not solved', () => {
+    const save = makeTimelineSave();
+    save.caseStates['case1'].puzzleStates['pz-timeline'].slotAssignments = {
+      'tslot-1': 'ev-morning',
+      'tslot-2': 'ev-morning',  // 중복 충돌
+      'tslot-3': 'ev-night',
+    };
+    const state = makeThinkingState('pz-timeline');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-timeline']?.solved).toBe(false);
+  });
+
+  it('ASSIGN_WORD로 타임라인 슬롯에 단어 배정', () => {
+    const save = makeTimelineSave();
+    const state = makeThinkingState('pz-timeline');
+    const result = handleThinking(
+      state,
+      save,
+      { type: 'ASSIGN_WORD', slotId: 'tslot-1', wordId: 'ev-morning' },
+      testDef
+    );
+    const assignments =
+      result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-timeline']?.slotAssignments;
+    expect(assignments?.['tslot-1']).toBe('ev-morning');
+  });
+
+  it('CLEAR_ALL_WORDS로 타임라인 슬롯 초기화', () => {
+    const save = makeTimelineSave();
+    save.caseStates['case1'].puzzleStates['pz-timeline'].slotAssignments = {
+      'tslot-1': 'ev-morning',
+      'tslot-2': 'ev-noon',
+      'tslot-3': 'ev-night',
+    };
+    const state = makeThinkingState('pz-timeline');
+    const result = handleThinking(state, save, { type: 'CLEAR_ALL_WORDS' }, testDef);
+    const assignments =
+      result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-timeline']?.slotAssignments;
+    expect(Object.values(assignments ?? {}).every(v => v === null)).toBe(true);
+  });
+
+  it('시도 횟수 증가 확인', () => {
+    const save = makeTimelineSave();
+    save.caseStates['case1'].puzzleStates['pz-timeline'].slotAssignments = {
+      'tslot-1': 'ev-wrong',
+      'tslot-2': 'ev-noon',
+      'tslot-3': 'ev-night',
+    };
+    save.caseStates['case1'].puzzleStates['pz-timeline'].attemptCount = 1;
+    const state = makeThinkingState('pz-timeline');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-timeline']?.attemptCount).toBe(2);
+  });
+});
+
+// ── Relationship SubPuzzle 통합 테스트 ──────────────────────────────
+
+describe('handleThinking - Relationship SubPuzzle', () => {
+  function makeRelSave(): SaveState {
+    const save = createInitialSaveState(testDef);
+    save.caseStates['case1'].puzzleStates['pz-relationship'] = {
+      slotAssignments: { 'edge-ab': null, 'edge-ba': null },
+      attemptCount: 0,
+      solved: false,
+    };
+    return save;
+  }
+
+  it('정확한 관계 배정 후 VALIDATE_PUZZLE → solved', () => {
+    const save = makeRelSave();
+    save.caseStates['case1'].puzzleStates['pz-relationship'].slotAssignments = {
+      'edge-ab': 'rel-suspect',
+      'edge-ba': 'rel-alibi',
+    };
+    const state = makeThinkingState('pz-relationship');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-relationship']?.solved).toBe(true);
+    const nextState = result.nextState as GameState & { type: 'thinking' };
+    expect(nextState.sub.type).toBe('solved');
+  });
+
+  it('잘못된 관계 배정 후 VALIDATE_PUZZLE → not solved', () => {
+    const save = makeRelSave();
+    save.caseStates['case1'].puzzleStates['pz-relationship'].slotAssignments = {
+      'edge-ab': 'rel-wrong',
+      'edge-ba': 'rel-alibi',
+    };
+    const state = makeThinkingState('pz-relationship');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-relationship']?.solved).toBe(false);
+    const nextState = result.nextState as GameState & { type: 'thinking' };
+    expect(nextState.sub.type).toBe('showing_result');
+  });
+
+  it('미배정 상태로 VALIDATE_PUZZLE → not solved', () => {
+    const save = makeRelSave();
+    const state = makeThinkingState('pz-relationship');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-relationship']?.solved).toBe(false);
+  });
+
+  it('ASSIGN_WORD로 엣지에 관계 배정', () => {
+    const save = makeRelSave();
+    const state = makeThinkingState('pz-relationship');
+    const result = handleThinking(
+      state,
+      save,
+      { type: 'ASSIGN_WORD', slotId: 'edge-ab', wordId: 'rel-suspect' },
+      testDef
+    );
+    const assignments =
+      result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-relationship']?.slotAssignments;
+    expect(assignments?.['edge-ab']).toBe('rel-suspect');
+  });
+
+  it('UNASSIGN_WORD로 엣지 관계 해제', () => {
+    const save = makeRelSave();
+    save.caseStates['case1'].puzzleStates['pz-relationship'].slotAssignments = {
+      'edge-ab': 'rel-suspect',
+      'edge-ba': 'rel-alibi',
+    };
+    const state = makeThinkingState('pz-relationship');
+    const result = handleThinking(
+      state,
+      save,
+      { type: 'UNASSIGN_WORD', slotId: 'edge-ab' },
+      testDef
+    );
+    const assignments =
+      result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-relationship']?.slotAssignments;
+    expect(assignments?.['edge-ab']).toBeNull();
+    expect(assignments?.['edge-ba']).toBe('rel-alibi');
+  });
+
+  it('시도 횟수 증가 확인', () => {
+    const save = makeRelSave();
+    save.caseStates['case1'].puzzleStates['pz-relationship'].attemptCount = 3;
+    const state = makeThinkingState('pz-relationship');
+    const result = handleThinking(state, save, { type: 'VALIDATE_PUZZLE' }, testDef);
+    expect(result.saveState?.caseStates?.['case1']?.puzzleStates?.['pz-relationship']?.attemptCount).toBe(4);
   });
 });

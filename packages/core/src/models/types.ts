@@ -259,12 +259,21 @@ export interface TimelineSlot {
   answerId: string;
 }
 
+export interface RelationshipEdge {
+  fromNodeId: string;
+  toNodeId: string;
+  slotId: string;
+  answerId: string;
+  /** true이면 역방향 엣지와 동일한 단어가 배정되어야 함 (대칭 검증) */
+  symmetric?: boolean;
+}
+
 export interface RelationshipPuzzle {
   id: string;
   title: LocalizedText;
   type: 'relationship';
   nodes: { id: string; label: LocalizedText; portrait?: AssetRef }[];
-  edges: { fromNodeId: string; toNodeId: string; slotId: string; answerId: string }[];
+  edges: RelationshipEdge[];
 }
 
 export interface PuzzleTemplate {
