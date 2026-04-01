@@ -12,6 +12,19 @@ Golden Idol 스타일의 추리/연역 게임 엔진입니다. 에디터로 게�
 | `packages/exporter` | 게임을 독립 실행 HTML로 번들링 |
 | `packages/ai` | AI 보조 콘텐츠 생성 (Gemini API) |
 
+## 사용자 가이드
+
+더 자세한 내용은 **[docs/guide/](docs/guide/index.md)** 를 참고하세요.
+
+- [빠른 시작 — AI Quick Create로 5분 안에 첫 게임 만들기](docs/guide/quick-start.md)
+- [에디터 기본 조작](docs/guide/editor-basics.md)
+- [씬 관리](docs/guide/scene-management.md)
+- [오디오 시스템](docs/guide/audio-system.md)
+- [게임 익스포트](docs/guide/export.md)
+- [키보드 단축키 참조표](docs/guide/keyboard-shortcuts.md)
+
+---
+
 ## 빠른 시작
 
 ### 사전 요구 사항
