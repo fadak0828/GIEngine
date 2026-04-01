@@ -268,15 +268,22 @@ export function QuickCreateModal(): React.ReactElement | null {
   const handleApply = useCallback(async () => {
     if (!qc.blueprint) return;
     // Fallback to first act if targetActId is not set
-    const actId = qc.targetActId ?? project?.acts[0]?.id;
-    if (!actId) return;
+    const actId = qc.targetActId ?? project?.acts?.[0]?.id;
+    if (!actId) {
+      setQuickCreateError('사건을 적용할 막(Act)이 없습니다. 에디터에서 막을 먼저 선택해주세요.');
+      return;
+    }
     setApplyingToEditor(true);
+    setQuickCreateError(null);
     try {
       await applyQuickCreateBlueprintToEditor(actId, false);
     } finally {
       setApplyingToEditor(false);
     }
-  }, [qc.blueprint, qc.targetActId, project?.acts, applyQuickCreateBlueprintToEditor]);
+  }, [qc.blueprint, qc.targetActId, project, setQuickCreateError, applyQuickCreateBlueprintToEditor]);
+
+  // 적용 버튼 활성 조건: blueprint 있고, actId가 있으며, 현재 적용 중이 아닐 때
+  const actId = qc.targetActId ?? project?.acts?.[0]?.id;
 
   if (!qc.open) return null;
 
@@ -371,7 +378,7 @@ export function QuickCreateModal(): React.ReactElement | null {
           {qc.wizardStep === 3 && (
             <>
               <button
-                onClick={() => { setQuickCreateWizardStep(1); setQuickCreateProgress(null); }}
+                onClick={() => { setQuickCreateWizardStep(1); setQuickCreateProgress(null); setQuickCreateError(null); }}
                 style={baseBtn}
                 disabled={qc.isGenerating}
               >
@@ -385,8 +392,8 @@ export function QuickCreateModal(): React.ReactElement | null {
                     </button>
                     <button
                       onClick={handleApply}
-                      disabled={applyingToEditor}
-                      style={applyingToEditor ? disabledBtn : primaryBtn}
+                      disabled={applyingToEditor || !actId}
+                      style={applyingToEditor || !actId ? disabledBtn : primaryBtn}
                     >
                       {applyingToEditor ? '적용 중...' : '✅ 에디터에 적용'}
                     </button>
