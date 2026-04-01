@@ -1,0 +1,715 @@
+{
+  "id": "sf-mystery-aris3",
+  "version": "1.0.0",
+  "title": {
+    "ko": "아리스 III호의 비밀",
+    "en": "The Secret of Aris III"
+  },
+  "description": {
+    "ko": "2157년, 성간 화물선 아리스 III호의 선장이 죽은 채 발견되었다. AI 분석 시스템 ARIA와 함께 우주에서의 살인을 풀어라.",
+    "en": "Year 2157. Captain of the interstellar freighter Aris III has been found dead. Solve a murder in space alongside AI analysis system ARIA."
+  },
+  "supportedLocales": ["ko", "en"],
+  "settings": {
+    "validationFeedbackDuration": 2500,
+    "autoSaveInterval": 30000,
+    "debug": false,
+    "unlockMode": "sequential",
+    "cssPrefix": "gi-"
+  },
+  "acts": [
+    {
+      "id": "act-1",
+      "title": {
+        "ko": "제1막: 진공 속의 범죄",
+        "en": "Act 1: Crime in the Void"
+      },
+      "cases": [
+        {
+          "id": "case-spaceship-sabotage",
+          "title": {
+            "ko": "권 선장 피살 사건",
+            "en": "The Murder of Captain Kwon"
+          },
+          "description": {
+            "ko": "아리스 III호 선장 권씨가 엔진실에서 두부 외상으로 사망한 채 발견되었다. 우주선에는 네 명의 승무원이 남아 있으며, 외부 침입 흔적은 없다. AI 분석관 ARIA의 도움을 받아 세 개 구역을 조사하라. 화물칸의 비밀이 모든 것을 설명한다.",
+            "en": "Captain Kwon of the Aris III was found dead in the engine room with blunt force trauma to the head. Four crew members remain aboard, with no sign of external intrusion. Investigate three sections with the help of AI analyst ARIA. The secret in the cargo hold explains everything."
+          },
+          "prerequisites": [],
+          "thumbnail": "thumb-spaceship",
+          "scenes": [
+            {
+              "id": "scene-engine-room",
+              "name": {
+                "ko": "엔진실",
+                "en": "Engine Room"
+              },
+              "background": "bg-engine-room",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-panel-open",
+                  "image": "img-panel-open",
+                  "position": { "x": 1300, "y": 350 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-engine-hum" },
+                { "type": "delay", "duration": 800 }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-examine-captain-body",
+                  "area": { "type": "circle", "cx": 800, "cy": 650, "radius": 100 },
+                  "action": {
+                    "type": "examine",
+                    "title": { "ko": "권 선장의 시신", "en": "Captain Kwon's Body" },
+                    "content": {
+                      "ko": "권 선장은 엔진 냉각 파이프 아래에 쓰러져 있다. 후두부에 파이프렌치 형태의 타박상이 있으며, 손에는 누군가의 우주복 조각이 쥐어져 있다. ARIA가 분석하면 소유자를 특정할 수 있을 것이다.",
+                      "en": "Captain Kwon lies beneath the engine cooling pipe. There is a pipe-wrench-shaped contusion on the back of his head, and he clutches a fragment of someone's spacesuit. ARIA can analyze it to identify the owner."
+                    },
+                    "highlightedWords": ["word-capt-kwon", "word-spacesuit-fragment"]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "선장 시신 조사", "en": "Examine captain's body" }
+                },
+                {
+                  "id": "hs-aria-spacesuit-scan",
+                  "area": { "type": "rect", "x": 820, "y": 700, "width": 200, "height": 100 },
+                  "action": {
+                    "type": "examine_image",
+                    "image": "img-aria-spacesuit-analysis",
+                    "caption": {
+                      "ko": "ARIA 분석 결과: 우주복 조각의 섬유 패턴과 ID 칩 잔여 신호를 분석했습니다. 소유자는 강 엔지니어(Eng. Kang)로 확인됩니다. 해당 우주복은 사건 발생 추정 시간대에 착용된 흔적이 있습니다.",
+                      "en": "ARIA Analysis: Fiber pattern and residual ID chip signal analyzed. Owner identified as Engineer Kang. The suit shows signs of wear during the estimated time of the incident."
+                    },
+                    "innerHotspots": [
+                      {
+                        "id": "hs-inner-collect-kang",
+                        "area": { "type": "rect", "x": 200, "y": 150, "width": 400, "height": 200 },
+                        "action": {
+                          "type": "word_reveal",
+                          "wordIds": ["word-eng-kang"],
+                          "feedback": {
+                            "ko": "ARIA 분석으로 우주복 소유자가 강 엔지니어임을 확인했다.",
+                            "en": "ARIA analysis confirmed the spacesuit belongs to Engineer Kang."
+                          }
+                        },
+                        "cursor": "pointer",
+                        "ariaLabel": { "ko": "ARIA 분석 결과 확인", "en": "Confirm ARIA analysis result" }
+                      }
+                    ]
+                  },
+                  "cursor": "magnifier",
+                  "condition": { "type": "word_collected", "wordId": "word-spacesuit-fragment" },
+                  "ariaLabel": { "ko": "ARIA로 우주복 조각 분석", "en": "Analyze spacesuit fragment with ARIA" }
+                },
+                {
+                  "id": "hs-collect-spacesuit-fragment",
+                  "area": { "type": "rect", "x": 830, "y": 710, "width": 170, "height": 80 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-spacesuit-fragment"],
+                    "feedback": {
+                      "ko": "우주복 조각을 수거했다. ARIA에 분석을 요청할 수 있다.",
+                      "en": "Collected spacesuit fragment. Can request ARIA analysis."
+                    }
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "우주복 조각 수거", "en": "Collect spacesuit fragment" }
+                },
+                {
+                  "id": "hs-open-panel",
+                  "area": { "type": "rect", "x": 1290, "y": 330, "width": 150, "height": 120 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-panel-open",
+                    "visible": true
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "제어 패널 열기", "en": "Open control panel" }
+                },
+                {
+                  "id": "hs-collect-nav-log",
+                  "area": { "type": "rect", "x": 1310, "y": 360, "width": 120, "height": 90 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-hidden-cargo"],
+                        "feedback": {
+                          "ko": "제어 패널 내부에서 항법 로그를 발견했다. 비공식 화물 구역 접근 기록이 있다.",
+                          "en": "Found a navigation log inside the control panel. Records of unofficial cargo section access."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "항법 로그", "en": "Navigation Log" },
+                        "content": {
+                          "ko": "항법 시스템 로그다. 72시간 전, 공식 항로를 이탈해 미지정 소행성 벨트를 통과한 기록이 있다. 이 구간에서 화물칸 C-7 구역의 압력이 비정상적으로 변동했다. 이것은 공식 화물 목록에 없는 물건이 있다는 의미다.",
+                          "en": "Navigation system log. 72 hours ago, a deviation from the official route through an undesignated asteroid belt was recorded. During this period, cargo bay C-7 showed abnormal pressure fluctuations. This suggests cargo not on the official manifest."
+                        },
+                        "highlightedWords": ["word-hidden-cargo"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "condition": { "type": "layer_visible", "layerId": "layer-panel-open" },
+                  "ariaLabel": { "ko": "항법 로그 분석", "en": "Analyze navigation log" }
+                },
+                {
+                  "id": "hs-navigate-medical",
+                  "area": { "type": "rect", "x": 40, "y": 350, "width": 150, "height": 300 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-medical-bay",
+                    "transition": "slide_left"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "의무실로 이동", "en": "Go to medical bay" }
+                }
+              ],
+              "audio": "sfx-engine-hum"
+            },
+            {
+              "id": "scene-medical-bay",
+              "name": {
+                "ko": "의무실",
+                "en": "Medical Bay"
+              },
+              "background": "bg-medical-bay",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-medical-ambient" }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-med-officer-yoon",
+                  "area": { "type": "rect", "x": 500, "y": 400, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-med-yoon"],
+                        "feedback": {
+                          "ko": "의무실 기록에서 윤 의무관이 선장에게 진정제를 처방했음을 확인했다.",
+                          "en": "Medical records show Medical Officer Yoon prescribed sedatives to the captain."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "의무 기록", "en": "Medical Records" },
+                        "content": {
+                          "ko": "윤 의무관의 의무 기록이다. 48시간 전 권 선장이 극심한 스트레스를 호소해 수면 유도제를 처방받았다. 그러나 부검 결과 선장의 혈액에서 처방 용량의 3배가 넘는 약물이 검출되었다. 과다 투여 가능성이 있다.",
+                          "en": "Medical Officer Yoon's records. 48 hours ago, Captain Kwon complained of extreme stress and was prescribed a sleep aid. However, the autopsy detected over 3x the prescribed dose in the captain's blood. Possible overdose."
+                        },
+                        "highlightedWords": ["word-med-yoon", "word-capt-kwon"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "의무 기록 조사", "en": "Examine medical records" }
+                },
+                {
+                  "id": "hs-aria-blood-analysis",
+                  "area": { "type": "rect", "x": 1100, "y": 300, "width": 250, "height": 200 },
+                  "action": {
+                    "type": "examine_image",
+                    "image": "img-aria-blood-analysis",
+                    "caption": {
+                      "ko": "ARIA 혈액 분석 보고서: 검출된 진정제 성분은 ZX-7 계열로, 의무실 재고 목록에 있는 성분과 일치합니다. 또한 혈흔 패턴 분석 결과, 타박상은 쓰러진 후 피해자가 움직임 없는 상태에서 가해진 것으로 추정됩니다. 엔진실 입장 전 이미 무력화되어 있었을 가능성이 높습니다.",
+                      "en": "ARIA Blood Analysis Report: Detected sedative compound matches ZX-7 class found in the medical bay inventory. Blood pattern analysis indicates the contusion was inflicted after the victim fell and was immobile. High probability the victim was already incapacitated before being moved to the engine room."
+                    },
+                    "innerHotspots": [
+                      {
+                        "id": "hs-inner-collect-sedative",
+                        "area": { "type": "rect", "x": 150, "y": 100, "width": 500, "height": 150 },
+                        "action": {
+                          "type": "word_reveal",
+                          "wordIds": ["word-sedative"],
+                          "feedback": {
+                            "ko": "ARIA 분석으로 진정제 과다 투여가 선행됐음을 확인했다.",
+                            "en": "ARIA analysis confirmed sedative overdose preceded the blunt force."
+                          }
+                        },
+                        "cursor": "pointer",
+                        "ariaLabel": { "ko": "진정제 분석 결과 확인", "en": "Confirm sedative analysis" }
+                      }
+                    ]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "ARIA 혈액 분석 요청", "en": "Request ARIA blood analysis" }
+                },
+                {
+                  "id": "hs-collect-ai-spec-oh",
+                  "area": { "type": "circle", "cx": 1600, "cy": 500, "radius": 80 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-ai-spec-oh"],
+                        "feedback": {
+                          "ko": "의무실에서 오 AI 전문가의 개인 장비를 발견했다.",
+                          "en": "Found AI Specialist Oh's personal equipment in the medical bay."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "AI 전문가 장비", "en": "AI Specialist's Equipment" },
+                        "content": {
+                          "ko": "오 AI 전문가가 의무실에 장비를 두고 간 이유가 의심스럽다. 장비에는 ARIA 시스템 접근 코드가 저장되어 있다. 누군가 AI 분석 결과를 조작하려 한 것일까?",
+                          "en": "Suspicious that AI Specialist Oh left equipment in the medical bay. The equipment stores ARIA system access codes. Was someone trying to tamper with AI analysis results?"
+                        },
+                        "highlightedWords": ["word-ai-spec-oh"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "AI 전문가 장비 조사", "en": "Examine AI specialist's equipment" }
+                },
+                {
+                  "id": "hs-navigate-engine",
+                  "area": { "type": "rect", "x": 1720, "y": 400, "width": 150, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-engine-room",
+                    "transition": "slide_right"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "엔진실로 돌아가기", "en": "Return to engine room" }
+                },
+                {
+                  "id": "hs-navigate-cargo",
+                  "area": { "type": "rect", "x": 40, "y": 400, "width": 150, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-cargo-hold",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "화물칸으로 이동", "en": "Go to cargo hold" }
+                }
+              ],
+              "audio": "sfx-medical-ambient"
+            },
+            {
+              "id": "scene-cargo-hold",
+              "name": {
+                "ko": "화물칸 C-7",
+                "en": "Cargo Hold C-7"
+              },
+              "background": "bg-cargo-hold",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-crate-open",
+                  "image": "img-crate-open",
+                  "position": { "x": 900, "y": 400 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-cargo-ambient" },
+                { "type": "delay", "duration": 600 }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-open-crate",
+                  "area": { "type": "rect", "x": 880, "y": 380, "width": 160, "height": 130 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-crate-open",
+                    "visible": true
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "화물 상자 열기", "en": "Open cargo crate" }
+                },
+                {
+                  "id": "hs-aria-cargo-scan",
+                  "area": { "type": "rect", "x": 900, "y": 410, "width": 140, "height": 110 },
+                  "action": {
+                    "type": "examine_image",
+                    "image": "img-aria-cargo-scan",
+                    "caption": {
+                      "ko": "ARIA 화물 스캔 결과: 상자 내부에서 불법 생물학적 샘플이 검출되었습니다. 성간 조약 제7조 위반에 해당하는 '외계 바이러스 배양체'입니다. 암시장 가치는 추정 120억 신연방 크레딧. 강 엔지니어의 생체 서명이 최근 이 상자에 등록되어 있습니다.",
+                      "en": "ARIA Cargo Scan: Illegal biological samples detected inside the crate. These are 'alien virus cultures' in violation of Interstellar Treaty Article 7. Estimated black market value: 12 billion New Federation credits. Engineer Kang's biometric signature was recently registered to this crate."
+                    },
+                    "innerHotspots": [
+                      {
+                        "id": "hs-inner-collect-illegal-cargo",
+                        "area": { "type": "rect", "x": 100, "y": 200, "width": 500, "height": 200 },
+                        "action": {
+                          "type": "word_reveal",
+                          "wordIds": ["word-illegal-cargo", "word-eng-kang"],
+                          "feedback": {
+                            "ko": "ARIA 스캔으로 불법 화물의 존재와 강 엔지니어의 연루가 확인되었다.",
+                            "en": "ARIA scan confirmed illegal cargo and Engineer Kang's involvement."
+                          }
+                        },
+                        "cursor": "pointer",
+                        "ariaLabel": { "ko": "불법 화물 증거 확보", "en": "Secure illegal cargo evidence" }
+                      }
+                    ]
+                  },
+                  "cursor": "magnifier",
+                  "condition": { "type": "layer_visible", "layerId": "layer-crate-open" },
+                  "ariaLabel": { "ko": "ARIA로 화물 스캔", "en": "Scan cargo with ARIA" }
+                },
+                {
+                  "id": "hs-collect-kang-motive",
+                  "area": { "type": "rect", "x": 300, "y": 500, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-motive-profit"],
+                        "feedback": {
+                          "ko": "화물칸에서 강 엔지니어의 개인 데이터패드를 발견했다. 거래 협상 기록이 있다.",
+                          "en": "Found Engineer Kang's personal datapad in the cargo hold. Contains negotiation records."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "강 엔지니어 데이터패드", "en": "Engineer Kang's Datapad" },
+                        "content": {
+                          "ko": "강 엔지니어의 개인 데이터패드다. 암호화된 메시지가 여럿 있는데, 해독하면 '화물 인도 시 200억 크레딧 지급'이라는 내용이 나온다. 선장 권씨가 불법 화물을 발견하고 신고하려 하자 강 엔지니어가 범행을 저지른 것이다.",
+                          "en": "Engineer Kang's personal datapad. Several encrypted messages, when decoded, read '20 billion credits upon cargo delivery.' Captain Kwon discovered the illegal cargo and attempted to report it, prompting Engineer Kang to commit the murder."
+                        },
+                        "highlightedWords": ["word-eng-kang", "word-motive-profit", "word-illegal-cargo"]
+                      }
+                    ],
+                    "delayBetween": 300
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "데이터패드 조사", "en": "Examine datapad" }
+                },
+                {
+                  "id": "hs-navigate-medical-back",
+                  "area": { "type": "rect", "x": 1720, "y": 400, "width": 150, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-medical-bay",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "의무실로 돌아가기", "en": "Return to medical bay" }
+                }
+              ],
+              "audio": "sfx-cargo-ambient"
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-aris-main",
+              "title": {
+                "ko": "아리스 III호 살인 사건의 진상",
+                "en": "The Truth Behind the Aris III Murder"
+              },
+              "description": {
+                "ko": "ARIA와 함께 수집한 증거로 사건의 전말을 밝혀라.",
+                "en": "Reveal the full story of the case with evidence collected alongside ARIA."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "slot", "slotId": "murderer", "placeholder": { "ko": "살인자", "en": "murderer" }, "acceptCategory": "person" },
+                  { "type": "text", "content": { "ko": "이(가) ", "en": " first used " } },
+                  { "type": "slot", "slotId": "method1", "placeholder": { "ko": "1차 수단", "en": "1st method" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "으로 선장을 무력화한 뒤 ", "en": " to incapacitate the captain, then killed him with " } },
+                  { "type": "slot", "slotId": "method2", "placeholder": { "ko": "2차 수단", "en": "2nd method" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "으로 살해했다.", "en": "." } },
+                  { "type": "line_break" },
+                  { "type": "text", "content": { "ko": "동기는 ", "en": "The motive was " } },
+                  { "type": "slot", "slotId": "motive", "placeholder": { "ko": "동기", "en": "motive" }, "acceptCategory": "motive" },
+                  { "type": "text", "content": { "ko": "이며, 화물칸에는 ", "en": ". The cargo hold contained " } },
+                  { "type": "slot", "slotId": "cargo", "placeholder": { "ko": "비밀 화물", "en": "secret cargo" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "이 숨겨져 있었다.", "en": "." } }
+                ]
+              },
+              "answers": {
+                "murderer": {
+                  "correctWordId": "word-eng-kang",
+                  "partiallyCorrectWordIds": ["word-med-yoon", "word-ai-spec-oh"]
+                },
+                "method1": {
+                  "correctWordId": "word-sedative",
+                  "partiallyCorrectWordIds": []
+                },
+                "method2": {
+                  "correctWordId": "word-spacesuit-fragment",
+                  "partiallyCorrectWordIds": []
+                },
+                "motive": {
+                  "correctWordId": "word-motive-profit"
+                },
+                "cargo": {
+                  "correctWordId": "word-illegal-cargo"
+                }
+              }
+            },
+            "sub": [
+              {
+                "id": "puzzle-aris-timeline",
+                "title": {
+                  "ko": "범행 타임라인",
+                  "en": "Crime Timeline"
+                },
+                "type": "timeline",
+                "slots": [
+                  {
+                    "slotId": "aris-time-1",
+                    "label": {
+                      "ko": "T-72h: 항로 이탈, 불법 화물 수령",
+                      "en": "T-72h: Route deviation, illegal cargo received"
+                    },
+                    "answerId": "word-hidden-cargo"
+                  },
+                  {
+                    "slotId": "aris-time-2",
+                    "label": {
+                      "ko": "T-48h: 선장이 화물칸 이상 감지",
+                      "en": "T-48h: Captain detects anomaly in cargo hold"
+                    },
+                    "answerId": "word-capt-kwon"
+                  },
+                  {
+                    "slotId": "aris-time-3",
+                    "label": {
+                      "ko": "T-6h: 진정제 과다 투여로 선장 무력화",
+                      "en": "T-6h: Captain incapacitated by sedative overdose"
+                    },
+                    "answerId": "word-sedative"
+                  },
+                  {
+                    "slotId": "aris-time-4",
+                    "label": {
+                      "ko": "T-0: 엔진실에서 파이프렌치로 살해",
+                      "en": "T-0: Killed in engine room with pipe wrench"
+                    },
+                    "answerId": "word-eng-kang"
+                  }
+                ]
+              },
+              {
+                "id": "puzzle-aris-relationship",
+                "title": {
+                  "ko": "승무원 관계도",
+                  "en": "Crew Relationship Map"
+                },
+                "type": "relationship",
+                "nodes": [
+                  {
+                    "id": "node-capt-kwon",
+                    "label": { "ko": "권 선장", "en": "Captain Kwon" },
+                    "portrait": "portrait-capt-kwon"
+                  },
+                  {
+                    "id": "node-eng-kang",
+                    "label": { "ko": "강 엔지니어", "en": "Engineer Kang" },
+                    "portrait": "portrait-eng-kang"
+                  },
+                  {
+                    "id": "node-med-yoon",
+                    "label": { "ko": "윤 의무관", "en": "Medical Officer Yoon" },
+                    "portrait": "portrait-med-yoon"
+                  },
+                  {
+                    "id": "node-ai-spec-oh",
+                    "label": { "ko": "오 AI 전문가", "en": "AI Specialist Oh" },
+                    "portrait": "portrait-ai-spec-oh"
+                  }
+                ],
+                "edges": [
+                  {
+                    "fromNodeId": "node-eng-kang",
+                    "toNodeId": "node-capt-kwon",
+                    "slotId": "rel-kang-capt",
+                    "answerId": "word-motive-profit"
+                  },
+                  {
+                    "fromNodeId": "node-med-yoon",
+                    "toNodeId": "node-capt-kwon",
+                    "slotId": "rel-yoon-capt",
+                    "answerId": "word-sedative"
+                  },
+                  {
+                    "fromNodeId": "node-eng-kang",
+                    "toNodeId": "node-ai-spec-oh",
+                    "slotId": "rel-kang-oh",
+                    "answerId": "word-illegal-cargo"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "items": {
+      "bg-engine-room": {
+        "id": "bg-engine-room",
+        "type": "image",
+        "src": "backgrounds/engine-room.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-medical-bay": {
+        "id": "bg-medical-bay",
+        "type": "image",
+        "src": "backgrounds/medical-bay.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-cargo-hold": {
+        "id": "bg-cargo-hold",
+        "type": "image",
+        "src": "backgrounds/cargo-hold.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "thumb-spaceship": {
+        "id": "thumb-spaceship",
+        "type": "image",
+        "src": "thumbnails/spaceship-thumb.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "img-panel-open": {
+        "id": "img-panel-open",
+        "type": "image",
+        "src": "scenes/panel-open.png",
+        "mimeType": "image/png"
+      },
+      "img-crate-open": {
+        "id": "img-crate-open",
+        "type": "image",
+        "src": "scenes/crate-open.png",
+        "mimeType": "image/png"
+      },
+      "img-aria-spacesuit-analysis": {
+        "id": "img-aria-spacesuit-analysis",
+        "type": "image",
+        "src": "aria-analysis/spacesuit-analysis.png",
+        "mimeType": "image/png"
+      },
+      "img-aria-blood-analysis": {
+        "id": "img-aria-blood-analysis",
+        "type": "image",
+        "src": "aria-analysis/blood-analysis.png",
+        "mimeType": "image/png"
+      },
+      "img-aria-cargo-scan": {
+        "id": "img-aria-cargo-scan",
+        "type": "image",
+        "src": "aria-analysis/cargo-scan.png",
+        "mimeType": "image/png"
+      },
+      "portrait-capt-kwon": {
+        "id": "portrait-capt-kwon",
+        "type": "image",
+        "src": "portraits/capt-kwon.png",
+        "mimeType": "image/png"
+      },
+      "portrait-eng-kang": {
+        "id": "portrait-eng-kang",
+        "type": "image",
+        "src": "portraits/eng-kang.png",
+        "mimeType": "image/png"
+      },
+      "portrait-med-yoon": {
+        "id": "portrait-med-yoon",
+        "type": "image",
+        "src": "portraits/med-yoon.png",
+        "mimeType": "image/png"
+      },
+      "portrait-ai-spec-oh": {
+        "id": "portrait-ai-spec-oh",
+        "type": "image",
+        "src": "portraits/ai-spec-oh.png",
+        "mimeType": "image/png"
+      },
+      "sfx-engine-hum": {
+        "id": "sfx-engine-hum",
+        "type": "audio",
+        "src": "audio/engine-hum.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-medical-ambient": {
+        "id": "sfx-medical-ambient",
+        "type": "audio",
+        "src": "audio/medical-ambient.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-cargo-ambient": {
+        "id": "sfx-cargo-ambient",
+        "type": "audio",
+        "src": "audio/cargo-ambient.mp3",
+        "mimeType": "audio/mpeg"
+      }
+    }
+  },
+  "words": {
+    "word-capt-kwon": {
+      "id": "word-capt-kwon",
+      "display": { "ko": "권 선장", "en": "Captain Kwon" },
+      "category": "person"
+    },
+    "word-eng-kang": {
+      "id": "word-eng-kang",
+      "display": { "ko": "강 엔지니어", "en": "Engineer Kang" },
+      "category": "person",
+      "hint": { "ko": "우주복 조각의 소유자, 불법 화물의 배후", "en": "Owner of the spacesuit fragment, behind the illegal cargo" }
+    },
+    "word-med-yoon": {
+      "id": "word-med-yoon",
+      "display": { "ko": "윤 의무관", "en": "Medical Officer Yoon" },
+      "category": "person",
+      "hint": { "ko": "진정제를 처방한 의무관", "en": "The medical officer who prescribed sedatives" }
+    },
+    "word-ai-spec-oh": {
+      "id": "word-ai-spec-oh",
+      "display": { "ko": "오 AI 전문가", "en": "AI Specialist Oh" },
+      "category": "person",
+      "hint": { "ko": "ARIA 접근 코드를 보유한 AI 전문가", "en": "AI specialist with ARIA access codes" }
+    },
+    "word-spacesuit-fragment": {
+      "id": "word-spacesuit-fragment",
+      "display": { "ko": "우주복 조각", "en": "Spacesuit Fragment" },
+      "category": "evidence",
+      "hint": { "ko": "선장 손에서 발견된 강 엔지니어의 우주복 조각", "en": "Fragment of Engineer Kang's spacesuit found in the captain's hand" }
+    },
+    "word-hidden-cargo": {
+      "id": "word-hidden-cargo",
+      "display": { "ko": "비공식 항로 기록", "en": "Unofficial Route Record" },
+      "category": "evidence",
+      "hint": { "ko": "불법 화물 수령을 위한 항로 이탈 기록", "en": "Route deviation record for illegal cargo pickup" }
+    },
+    "word-sedative": {
+      "id": "word-sedative",
+      "display": { "ko": "진정제 과다투여", "en": "Sedative Overdose" },
+      "category": "evidence",
+      "hint": { "ko": "선장을 무력화하기 위한 3배 과다 투여", "en": "Triple dose to incapacitate the captain" }
+    },
+    "word-illegal-cargo": {
+      "id": "word-illegal-cargo",
+      "display": { "ko": "불법 생물학 샘플", "en": "Illegal Biological Samples" },
+      "category": "evidence",
+      "hint": { "ko": "성간 조약 위반 외계 바이러스 배양체", "en": "Alien virus cultures in violation of Interstellar Treaty" }
+    },
+    "word-motive-profit": {
+      "id": "word-motive-profit",
+      "display": { "ko": "200억 크레딧", "en": "20 Billion Credits" },
+      "category": "motive",
+      "hint": { "ko": "불법 화물 인도의 대가", "en": "Payment for delivering illegal cargo" }
+    }
+  }
+}

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIEngine — 샘플 시나리오 데모 | Sample Scenarios Demo</title>
+  <style>
+    :root {
+      --color-bg: #0d1117;
+      --color-surface: #161b22;
+      --color-border: #30363d;
+      --color-text: #c9d1d9;
+      --color-text-muted: #8b949e;
+      --color-accent: #58a6ff;
+      --color-accent-classic: #d4a017;
+      --color-accent-modern: #1f6feb;
+      --color-accent-sf: #a371f7;
+      --color-success: #3fb950;
+      --color-warning: #f0883e;
+      --radius: 8px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', system-ui, sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-badge {
+      background: linear-gradient(135deg, var(--color-accent), var(--color-accent-sf));
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2em 0.6em;
+      border-radius: 4px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .lang-toggle {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+    }
+
+    .lang-btn.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .intro h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .intro p {
+      color: var(--color-text-muted);
+      font-size: 1rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .scenario-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .scenario-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    .scenario-card.classic { border-top: 3px solid var(--color-accent-classic); }
+    .scenario-card.modern  { border-top: 3px solid var(--color-accent-modern); }
+    .scenario-card.sf      { border-top: 3px solid var(--color-accent-sf); }
+
+    .scenario-card.classic:hover { border-color: var(--color-accent-classic); }
+    .scenario-card.modern:hover  { border-color: var(--color-accent-modern); }
+    .scenario-card.sf:hover      { border-color: var(--color-accent-sf); }
+
+    .card-header {
+      padding: 1.25rem 1.25rem 0.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .card-meta {
+      flex: 1;
+    }
+
+    .card-genre {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .classic .card-genre { color: var(--color-accent-classic); }
+    .modern  .card-genre { color: var(--color-accent-modern); }
+    .sf      .card-genre { color: var(--color-accent-sf); }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .card-body {
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    .card-desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2em 0.6em;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+
+    .classic .tag { color: var(--color-accent-classic); border-color: rgba(212,160,23,0.3); background: rgba(212,160,23,0.08); }
+    .modern  .tag { color: var(--color-accent-modern);  border-color: rgba(31,111,235,0.3);  background: rgba(31,111,235,0.08); }
+    .sf      .tag { color: var(--color-accent-sf);      border-color: rgba(163,113,247,0.3); background: rgba(163,113,247,0.08); }
+
+    .card-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      border-top: 1px solid var(--color-border);
+      padding-top: 0.9rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Detail Panel */
+    .detail-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      display: none;
+    }
+
+    .detail-panel.visible { display: block; }
+
+    .detail-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s;
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.visible { display: block; }
+
+    .scene-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .scene-item {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+
+    .scene-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .scene-info {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .word-chip {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(88,166,255,0.1);
+      border: 1px solid rgba(88,166,255,0.3);
+      color: var(--color-accent);
+    }
+
+    .word-chip.person   { background: rgba(63,185,80,0.1);   border-color: rgba(63,185,80,0.3);   color: var(--color-success); }
+    .word-chip.evidence { background: rgba(240,136,62,0.1);  border-color: rgba(240,136,62,0.3);  color: var(--color-warning); }
+    .word-chip.motive   { background: rgba(163,113,247,0.1); border-color: rgba(163,113,247,0.3); color: var(--color-accent-sf); }
+
+    .puzzle-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .puzzle-section h4 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+    }
+
+    .puzzle-template {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.8;
+    }
+
+    .slot-placeholder {
+      display: inline-block;
+      border-bottom: 2px solid var(--color-accent);
+      color: var(--color-accent);
+      padding: 0 0.25rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      min-width: 4rem;
+      text-align: center;
+    }
+
+    .sub-puzzle-list {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .sub-puzzle-chip {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+
+    /* JSON viewer */
+    .json-viewer {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 1rem;
+      max-height: 400px;
+      overflow: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--color-text-muted);
+    }
+
+    .json-key   { color: #79c0ff; }
+    .json-str   { color: #a5d6ff; }
+    .json-num   { color: #f0883e; }
+    .json-bool  { color: var(--color-accent-sf); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--color-border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+
+    footer a { color: var(--color-accent); text-decoration: none; }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 1.1em;
+      background: var(--color-accent);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <span class="header-badge">GIEngine</span>
+    <h1 class="i18n" data-ko="샘플 시나리오 쇼케이스" data-en="Sample Scenario Showcase"></h1>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('ko')" id="btn-ko">한국어</button>
+    <button class="lang-btn" onclick="setLang('en')" id="btn-en">English</button>
+  </div>
+</header>
+
+<main>
+  <div class="intro">
+    <h2 class="i18n" data-ko="AI Quick Create 예제 시나리오 3종" data-en="3 AI Quick Create Example Scenarios"></h2>
+    <p class="i18n"
+       data-ko="GIEngine의 AI Quick Create로 생성된 세 가지 장르별 추리 시나리오입니다. 각 카드를 클릭하면 씬 구조, 단어 목록, 퍼즐 구성 등 상세 정보를 확인할 수 있습니다."
+       data-en="Three mystery scenarios by genre, created with GIEngine's AI Quick Create. Click any card to view detailed scene structure, word list, and puzzle configuration.">
+    </p>
+  </div>
+
+  <div class="scenario-grid" id="scenario-grid">
+    <!-- Cards injected by JS -->
+  </div>
+
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-title" id="detail-title"></div>
+    <div class="detail-subtitle" id="detail-subtitle"></div>
+
+    <div class="detail-tabs">
+      <button class="tab-btn active" onclick="showTab('scenes')">
+        <span class="i18n" data-ko="씬 구조" data-en="Scene Structure"></span>
+      </button>
+      <button class="tab-btn" onclick="showTab('words')">
+        <span class="i18n" data-ko="단어 목록" data-en="Word List"></span>
+      </button>
+      <button class="tab-btn" onclick="showTab('puzzles')">
+        <span class="i18n" data-ko="퍼즐 구성" data-en="Puzzle Config"></span>
+      </button>
+      <button class="tab-btn" onclick="showTab('json')">JSON</button>
+    </div>
+
+    <div class="tab-content visible" id="tab-scenes"></div>
+    <div class="tab-content" id="tab-words"></div>
+    <div class="tab-content" id="tab-puzzles"></div>
+    <div class="tab-content" id="tab-json"></div>
+  </div>
+
+  <div>
+    <div class="section-title i18n" data-ko="시나리오 비교" data-en="Scenario Comparison"></div>
+    <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--color-border);">
+          <th style="text-align:left; padding:0.6rem 0.75rem; color:var(--color-text-muted);" class="i18n" data-ko="항목" data-en="Item"></th>
+          <th style="text-align:center; padding:0.6rem 0.75rem; color:var(--color-accent-classic);">
+            <span class="i18n" data-ko="클래식" data-en="Classic"></span>
+          </th>
+          <th style="text-align:center; padding:0.6rem 0.75rem; color:var(--color-accent-modern);">
+            <span class="i18n" data-ko="현대" data-en="Modern"></span>
+          </th>
+          <th style="text-align:center; padding:0.6rem 0.75rem; color:var(--color-accent-sf);">SF</th>
+        </tr>
+      </thead>
+      <tbody id="comparison-table">
+        <!-- Injected by JS -->
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <p>
+    <span class="i18n" data-ko="GIEngine Phase C-1 — AI Quick Create 예제 시나리오" data-en="GIEngine Phase C-1 — AI Quick Create Example Scenarios"></span>
+    &nbsp;·&nbsp;
+    <a href="../README.md">README</a>
+  </p>
+</footer>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// i18n
+// ──────────────────────────────────────────────────────────────────────────────
+let currentLang = 'ko';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.i18n').forEach(el => {
+    el.textContent = el.dataset[lang] || el.textContent;
+  });
+  document.getElementById('btn-ko').classList.toggle('active', lang === 'ko');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  // Re-render active detail panel
+  if (activeScenario) renderDetail(activeScenario);
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Scenario data (embedded summaries — full JSON is in respective game.json)
+// ──────────────────────────────────────────────────────────────────────────────
+const scenarios = [
+  {
+    id: 'classic-mystery',
+    type: 'classic',
+    icon: '🏚️',
+    genre: { ko: '클래식 미스터리', en: 'Classic Mystery' },
+    title: { ko: '저택의 독살 사건', en: 'Murder at Blackwood Manor' },
+    era: { ko: '1930년대 영국 시골', en: '1930s English Countryside' },
+    desc: {
+      ko: '황 백작이 만찬 도중 독살됐다. 박 집사, 이 의사, 정 조카 — 세 명이 용의자다. 단어 힌트와 연역 흐름 중심의 전통적 구성.',
+      en: 'Count Hwang was poisoned at dinner. Three suspects: Butler Park, Dr. Lee, and Nephew Jeong. Classic structure focused on word hints and deduction flow.'
+    },
+    stats: {
+      suspects: 3,
+      scenes: 2,
+      words: 7
+    },
+    tags: {
+      ko: ['단어 힌트', '레이어 토글', '타임라인 퍼즐', '3 용의자'],
+      en: ['Word Hints', 'Layer Toggle', 'Timeline Puzzle', '3 Suspects']
+    },
+    scenes: [
+      { id: 'scene-grand-hall', name: { ko: '만찬장', en: 'Dining Hall' }, hotspots: 6 },
+      { id: 'scene-study', name: { ko: '서재', en: 'Study' }, hotspots: 5 }
+    ],
+    wordList: [
+      { id: 'word-butler-park', display: { ko: '박 집사', en: 'Butler Park' }, category: 'person' },
+      { id: 'word-dr-lee', display: { ko: '이 의사', en: 'Dr. Lee' }, category: 'person' },
+      { id: 'word-nephew-jeong', display: { ko: '정 조카', en: 'Nephew Jeong' }, category: 'person' },
+      { id: 'word-count-hwang', display: { ko: '황 백작', en: 'Count Hwang' }, category: 'person' },
+      { id: 'word-poison', display: { ko: '독약', en: 'Poison' }, category: 'evidence' },
+      { id: 'word-inheritance', display: { ko: '유산 삭감', en: 'Reduced Inheritance' }, category: 'motive' },
+      { id: 'word-debt', display: { ko: '채무 청산', en: 'Debt Clearance' }, category: 'motive' }
+    ],
+    mainSlots: [
+      { id: 'culprit', label: { ko: '범인', en: 'culprit' } },
+      { id: 'weapon', label: { ko: '범행 도구', en: 'weapon' } },
+      { id: 'victim', label: { ko: '피해자', en: 'victim' } },
+      { id: 'motive', label: { ko: '동기', en: 'motive' } }
+    ],
+    subPuzzles: [
+      { type: 'character_id', label: { ko: '용의자 식별', en: 'Suspect ID' } },
+      { type: 'timeline', label: { ko: '사건 타임라인', en: 'Event Timeline' } }
+    ],
+    jsonFile: 'classic-mystery/game.json'
+  },
+  {
+    id: 'modern-mystery',
+    type: 'modern',
+    icon: '🏢',
+    genre: { ko: '현대 미스터리', en: 'Modern Mystery' },
+    title: { ko: '기업 기밀 유출 사건', en: 'The Corporate Leak' },
+    era: { ko: '현대 테크 기업', en: 'Modern Tech Company' },
+    desc: {
+      ko: 'TechNova의 AI 알고리즘이 경쟁사로 유출됐다. 5명의 내부 용의자. Timeline + Relationship 복합 퍼즐.',
+      en: "TechNova's AI algorithm leaked to a rival. 5 insider suspects. Complex Timeline + Relationship puzzles."
+    },
+    stats: {
+      suspects: 5,
+      scenes: 4,
+      words: 10
+    },
+    tags: {
+      ko: ['5 용의자', '4개 씬', 'Timeline 퍼즐', 'Relationship 맵'],
+      en: ['5 Suspects', '4 Scenes', 'Timeline Puzzle', 'Relationship Map']
+    },
+    scenes: [
+      { id: 'scene-office', name: { ko: '사무실', en: 'Office' }, hotspots: 4 },
+      { id: 'scene-server-room', name: { ko: '서버실', en: 'Server Room' }, hotspots: 4 },
+      { id: 'scene-conference-room', name: { ko: '회의실', en: 'Conference Room' }, hotspots: 4 },
+      { id: 'scene-parking-lot', name: { ko: '주차장', en: 'Parking Lot' }, hotspots: 2 }
+    ],
+    wordList: [
+      { id: 'word-mgr-choi', display: { ko: '최 팀장', en: 'Team Leader Choi' }, category: 'person' },
+      { id: 'word-dir-park', display: { ko: '박 이사', en: 'Director Park' }, category: 'person' },
+      { id: 'word-researcher-kim', display: { ko: '김 연구원', en: 'Researcher Kim' }, category: 'person' },
+      { id: 'word-intern-han', display: { ko: '한 인턴', en: 'Intern Han' }, category: 'person' },
+      { id: 'word-algorithm', display: { ko: 'AI 알고리즘', en: 'AI Algorithm' }, category: 'evidence' },
+      { id: 'word-rival-tech', display: { ko: 'RivalTech', en: 'RivalTech' }, category: 'evidence' },
+      { id: 'word-usb-trace', display: { ko: 'USB 복사 기록', en: 'USB Copy Record' }, category: 'evidence' },
+      { id: 'word-burner-phone', display: { ko: '대포폰', en: 'Burner Phone' }, category: 'evidence' },
+      { id: 'word-handoff', display: { ko: '직접 전달 현장', en: 'Direct Handoff Scene' }, category: 'evidence' },
+      { id: 'word-bribe', display: { ko: '5억 원 뇌물', en: '500M Won Bribe' }, category: 'motive' }
+    ],
+    mainSlots: [
+      { id: 'leaker', label: { ko: '유출자', en: 'leaker' } },
+      { id: 'asset', label: { ko: '유출 자산', en: 'asset' } },
+      { id: 'receiver', label: { ko: '수신 기업', en: 'receiver' } },
+      { id: 'method', label: { ko: '수단', en: 'method' } },
+      { id: 'motive', label: { ko: '동기', en: 'motive' } }
+    ],
+    subPuzzles: [
+      { type: 'timeline', label: { ko: '유출 타임라인', en: 'Leak Timeline' } },
+      { type: 'relationship', label: { ko: '내부 관계도', en: 'Internal Relationship Map' } }
+    ],
+    jsonFile: 'modern-mystery/game.json'
+  },
+  {
+    id: 'sf-mystery',
+    type: 'sf',
+    icon: '🚀',
+    genre: { ko: 'SF 미스터리', en: 'SF Mystery' },
+    title: { ko: '아리스 III호의 비밀', en: 'The Secret of Aris III' },
+    era: { ko: '2157년, 성간 화물선', en: '2157, Interstellar Freighter' },
+    desc: {
+      ko: '우주선 선장이 살해됐다. AI 분석관 ARIA와 협력하는 SF 설정. examine_image로 다양한 증거 유형 혼합.',
+      en: 'A spaceship captain is murdered. SF setting with AI analyst ARIA cooperation. Mixed evidence types via examine_image.'
+    },
+    stats: {
+      suspects: 3,
+      scenes: 3,
+      words: 9
+    },
+    tags: {
+      ko: ['AI 분석관 ARIA', 'examine_image', '2중 범행 수단', 'Timeline+Relationship'],
+      en: ['AI Analyst ARIA', 'examine_image', 'Dual Methods', 'Timeline+Relationship']
+    },
+    scenes: [
+      { id: 'scene-engine-room', name: { ko: '엔진실', en: 'Engine Room' }, hotspots: 5 },
+      { id: 'scene-medical-bay', name: { ko: '의무실', en: 'Medical Bay' }, hotspots: 4 },
+      { id: 'scene-cargo-hold', name: { ko: '화물칸 C-7', en: 'Cargo Hold C-7' }, hotspots: 4 }
+    ],
+    wordList: [
+      { id: 'word-capt-kwon', display: { ko: '권 선장', en: 'Captain Kwon' }, category: 'person' },
+      { id: 'word-eng-kang', display: { ko: '강 엔지니어', en: 'Engineer Kang' }, category: 'person' },
+      { id: 'word-med-yoon', display: { ko: '윤 의무관', en: 'Medical Officer Yoon' }, category: 'person' },
+      { id: 'word-ai-spec-oh', display: { ko: '오 AI 전문가', en: 'AI Specialist Oh' }, category: 'person' },
+      { id: 'word-spacesuit-fragment', display: { ko: '우주복 조각', en: 'Spacesuit Fragment' }, category: 'evidence' },
+      { id: 'word-hidden-cargo', display: { ko: '비공식 항로 기록', en: 'Unofficial Route Record' }, category: 'evidence' },
+      { id: 'word-sedative', display: { ko: '진정제 과다투여', en: 'Sedative Overdose' }, category: 'evidence' },
+      { id: 'word-illegal-cargo', display: { ko: '불법 생물학 샘플', en: 'Illegal Biological Samples' }, category: 'evidence' },
+      { id: 'word-motive-profit', display: { ko: '200억 크레딧', en: '20 Billion Credits' }, category: 'motive' }
+    ],
+    mainSlots: [
+      { id: 'murderer', label: { ko: '살인자', en: 'murderer' } },
+      { id: 'method1', label: { ko: '1차 수단', en: '1st method' } },
+      { id: 'method2', label: { ko: '2차 수단', en: '2nd method' } },
+      { id: 'motive', label: { ko: '동기', en: 'motive' } },
+      { id: 'cargo', label: { ko: '비밀 화물', en: 'cargo' } }
+    ],
+    subPuzzles: [
+      { type: 'timeline', label: { ko: '범행 타임라인', en: 'Crime Timeline' } },
+      { type: 'relationship', label: { ko: '승무원 관계도', en: 'Crew Relationship Map' } }
+    ],
+    jsonFile: 'sf-mystery/game.json'
+  }
+];
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Render cards
+// ──────────────────────────────────────────────────────────────────────────────
+function renderCards() {
+  const grid = document.getElementById('scenario-grid');
+  grid.innerHTML = scenarios.map(s => `
+    <div class="scenario-card ${s.type}" onclick="selectScenario('${s.id}')">
+      <div class="card-header">
+        <div class="card-icon">${s.icon}</div>
+        <div class="card-meta">
+          <div class="card-genre">${s.genre[currentLang]}</div>
+          <div class="card-title">${s.title[currentLang]}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">${s.desc[currentLang]}</div>
+        <div class="card-tags">
+          ${s.tags[currentLang].map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+        <div class="card-stats">
+          <div class="stat">
+            <span class="stat-val">${s.stats.suspects}</span>
+            <span class="stat-label">${currentLang === 'ko' ? '용의자' : 'Suspects'}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-val">${s.stats.scenes}</span>
+            <span class="stat-label">${currentLang === 'ko' ? '씬' : 'Scenes'}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-val">${s.stats.words}</span>
+            <span class="stat-label">${currentLang === 'ko' ? '단어' : 'Words'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Detail panel
+// ──────────────────────────────────────────────────────────────────────────────
+let activeScenario = null;
+let activeTab = 'scenes';
+
+function selectScenario(id) {
+  activeScenario = scenarios.find(s => s.id === id);
+  renderDetail(activeScenario);
+  document.getElementById('detail-panel').classList.add('visible');
+  document.getElementById('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderDetail(s) {
+  document.getElementById('detail-title').textContent = `${s.icon} ${s.title[currentLang]}`;
+  document.getElementById('detail-subtitle').textContent = `${s.genre[currentLang]} · ${s.era[currentLang]}`;
+
+  // Scenes tab
+  document.getElementById('tab-scenes').innerHTML = `
+    <div class="scene-list">
+      ${s.scenes.map(sc => `
+        <div class="scene-item">
+          <div class="scene-name">${sc.name[currentLang]}</div>
+          <div class="scene-info">${currentLang === 'ko' ? '핫스팟' : 'Hotspots'}: ${sc.hotspots}</div>
+          <div class="scene-info" style="font-size:0.7rem; opacity:0.6; margin-top:2px">${sc.id}</div>
+        </div>
+      `).join('')}
+    </div>`;
+
+  // Words tab
+  document.getElementById('tab-words').innerHTML = `
+    <div class="word-list">
+      ${s.wordList.map(w => `
+        <span class="word-chip ${w.category}" title="${w.id}">${w.display[currentLang]}</span>
+      `).join('')}
+    </div>
+    <div style="margin-top:1rem; font-size:0.75rem; color:var(--color-text-muted);">
+      <span style="margin-right:1rem">
+        <span class="word-chip person" style="font-size:0.7rem">${currentLang === 'ko' ? '인물' : 'Person'}</span>
+        <span class="word-chip evidence" style="font-size:0.7rem">${currentLang === 'ko' ? '증거' : 'Evidence'}</span>
+        <span class="word-chip motive" style="font-size:0.7rem">${currentLang === 'ko' ? '동기' : 'Motive'}</span>
+      </span>
+    </div>`;
+
+  // Puzzles tab
+  document.getElementById('tab-puzzles').innerHTML = `
+    <div class="puzzle-section">
+      <h4>${currentLang === 'ko' ? '메인 퍼즐 슬롯' : 'Main Puzzle Slots'}</h4>
+      <div class="puzzle-template">
+        ${s.mainSlots.map(sl => `<span class="slot-placeholder">[${sl.label[currentLang]}]</span> `).join(' ')}
+      </div>
+    </div>
+    <div class="puzzle-section">
+      <h4>${currentLang === 'ko' ? '서브 퍼즐' : 'Sub Puzzles'}</h4>
+      <div class="sub-puzzle-list">
+        ${s.subPuzzles.map(sp => `
+          <div class="sub-puzzle-chip">${sp.label[currentLang]} <span style="opacity:0.5; font-size:0.7rem">(${sp.type})</span></div>
+        `).join('')}
+      </div>
+    </div>`;
+
+  // JSON tab
+  document.getElementById('tab-json').innerHTML = `
+    <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:0.75rem;">
+      ${currentLang === 'ko'
+        ? `전체 JSON: <code>${s.jsonFile}</code>`
+        : `Full JSON: <code>${s.jsonFile}</code>`}
+    </p>
+    <div class="json-viewer">
+<span class="json-key">"id"</span>: <span class="json-str">"${s.id}"</span>,
+<span class="json-key">"title"</span>: {
+  <span class="json-key">"ko"</span>: <span class="json-str">"${s.title.ko}"</span>,
+  <span class="json-key">"en"</span>: <span class="json-str">"${s.title.en}"</span>
+},
+<span class="json-key">"supportedLocales"</span>: [<span class="json-str">"ko"</span>, <span class="json-str">"en"</span>],
+<span class="json-key">"acts"</span>: [{
+  <span class="json-key">"cases"</span>: [{
+    <span class="json-key">"scenes"</span>: [ <span style="opacity:0.6">// ${s.stats.scenes} ${currentLang === 'ko' ? '개 씬' : 'scenes'}</span>
+      ${s.scenes.map(sc => `{ <span class="json-key">"id"</span>: <span class="json-str">"${sc.id}"</span>, <span class="json-key">"name"</span>: { <span class="json-key">"ko"</span>: <span class="json-str">"${sc.name.ko}"</span> } }`).join(',\n      ')}
+    ],
+    <span class="json-key">"puzzles"</span>: {
+      <span class="json-key">"main"</span>: { <span class="json-key">"type"</span>: <span class="json-str">"fill_in_blank"</span> },
+      <span class="json-key">"sub"</span>: [${s.subPuzzles.map(sp => `{ <span class="json-key">"type"</span>: <span class="json-str">"${sp.type}"</span> }`).join(', ')}]
+    }
+  }]
+}],
+<span class="json-key">"words"</span>: { <span style="opacity:0.6">// ${s.stats.words} ${currentLang === 'ko' ? '개 단어' : 'words'}</span>
+  ${s.wordList.slice(0,3).map(w => `<span class="json-key">"${w.id}"</span>: { <span class="json-key">"display"</span>: { <span class="json-key">"ko"</span>: <span class="json-str">"${w.display.ko}"</span>, <span class="json-key">"en"</span>: <span class="json-str">"${w.display.en}"</span> }, <span class="json-key">"category"</span>: <span class="json-str">"${w.category}"</span> }`).join(',\n  ')}
+  <span style="opacity:0.5">... ${s.stats.words - 3} ${currentLang === 'ko' ? '개 더' : 'more'}</span>
+}
+    </div>`;
+
+  showTab(activeTab);
+}
+
+function showTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab-${tabId}`).classList.add('visible');
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    if (['scenes','words','puzzles','json'][i] === tabId) btn.classList.add('active');
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Comparison table
+// ──────────────────────────────────────────────────────────────────────────────
+function renderComparison() {
+  const rows = [
+    { label: { ko: '배경', en: 'Setting' }, vals: ['1930년대 시골 저택 / 1930s Manor', '현대 테크 기업 / Modern Tech Co.', '2157년 우주선 / 2157 Spaceship'] },
+    { label: { ko: '용의자 수', en: 'Suspects' }, vals: ['3', '5', '3'] },
+    { label: { ko: '씬 수', en: 'Scenes' }, vals: ['2', '4', '3'] },
+    { label: { ko: '단어 수', en: 'Words' }, vals: ['7', '10', '9'] },
+    { label: { ko: '서브 퍼즐', en: 'Sub Puzzles' }, vals: ['character_id + timeline', 'timeline + relationship', 'timeline + relationship'] },
+    { label: { ko: '특수 기능', en: 'Special Feature' }, vals: ['layer_toggle, composite', 'multi-scene, CCTV', 'examine_image (ARIA)'] },
+    { label: { ko: '난이도', en: 'Difficulty' }, vals: ['★★☆☆☆', '★★★★☆', '★★★★☆'] }
+  ];
+
+  document.getElementById('comparison-table').innerHTML = rows.map(r => `
+    <tr style="border-bottom:1px solid var(--color-border);">
+      <td style="padding:0.6rem 0.75rem; color:var(--color-text-muted); font-size:0.8rem;">${r.label[currentLang]}</td>
+      ${r.vals.map(v => `<td style="padding:0.6rem 0.75rem; text-align:center; font-size:0.8rem;">${v}</td>`).join('')}
+    </tr>
+  `).join('');
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Init
+// ──────────────────────────────────────────────────────────────────────────────
+renderCards();
+renderComparison();
+setLang('ko');
+</script>
+</body>
+</html>

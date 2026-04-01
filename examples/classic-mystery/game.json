@@ -1,0 +1,512 @@
+{
+  "id": "classic-mystery-manor",
+  "version": "1.0.0",
+  "title": {
+    "ko": "저택의 독살 사건",
+    "en": "Murder at Blackwood Manor"
+  },
+  "description": {
+    "ko": "1930년대 영국 시골 저택. 황 백작이 만찬 도중 독살된 채 발견되었다. 세 명의 용의자 중 진범을 찾아라.",
+    "en": "1930s English countryside manor. Count Hwang was found poisoned during a dinner party. Find the true culprit among three suspects."
+  },
+  "supportedLocales": ["ko", "en"],
+  "settings": {
+    "validationFeedbackDuration": 2500,
+    "autoSaveInterval": 30000,
+    "debug": false,
+    "unlockMode": "sequential",
+    "cssPrefix": "gi-"
+  },
+  "acts": [
+    {
+      "id": "act-1",
+      "title": {
+        "ko": "제1막: 저택의 비밀",
+        "en": "Act 1: Secrets of the Manor"
+      },
+      "cases": [
+        {
+          "id": "case-manor-murder",
+          "title": {
+            "ko": "황 백작 독살 사건",
+            "en": "The Poisoning of Count Hwang"
+          },
+          "description": {
+            "ko": "황 백작은 만찬 중 갑작스럽게 쓰러졌다. 법의관은 희귀 독약이 원인이라고 했다. 박 집사, 이 의사, 정 조카 — 세 명이 용의자로 지목되었다. 저택 거실과 서재를 조사하여 진실을 밝혀라.",
+            "en": "Count Hwang collapsed suddenly during dinner. The coroner determined a rare poison was the cause. Three suspects: Butler Park, Dr. Lee, and Nephew Jeong. Investigate the manor living room and study to uncover the truth."
+          },
+          "prerequisites": [],
+          "thumbnail": "thumb-manor",
+          "scenes": [
+            {
+              "id": "scene-grand-hall",
+              "name": {
+                "ko": "만찬장",
+                "en": "Dining Hall"
+              },
+              "background": "bg-dining-hall",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-wine-glass-close",
+                  "image": "img-wine-glass-close",
+                  "position": { "x": 900, "y": 500 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-manor-ambient" },
+                { "type": "delay", "duration": 600 }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-examine-victim",
+                  "area": { "type": "circle", "cx": 960, "cy": 620, "radius": 90 },
+                  "action": {
+                    "type": "examine",
+                    "title": { "ko": "황 백작의 시신", "en": "Count Hwang's Body" },
+                    "content": {
+                      "ko": "황 백작은 만찬 테이블 앞에 쓰러져 있다. 입술이 파랗게 변색되어 있고 손에 와인 잔을 쥔 채로 발견되었다. 독약이 와인에 섞인 것으로 보인다.",
+                      "en": "Count Hwang lies slumped at the dinner table. His lips are discolored blue, and he was found still holding a wine glass. The poison appears to have been mixed into the wine."
+                    },
+                    "highlightedWords": ["word-count-hwang", "word-poison"]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "황 백작 시신 조사", "en": "Examine Count Hwang's body" }
+                },
+                {
+                  "id": "hs-wine-glass-toggle",
+                  "area": { "type": "rect", "x": 880, "y": 460, "width": 120, "height": 100 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-wine-glass-close",
+                    "visible": true
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "와인 잔 자세히 보기", "en": "Examine wine glass closely" }
+                },
+                {
+                  "id": "hs-collect-poison-residue",
+                  "area": { "type": "rect", "x": 900, "y": 510, "width": 120, "height": 90 },
+                  "action": {
+                    "type": "word_reveal",
+                    "wordIds": ["word-poison"],
+                    "feedback": {
+                      "ko": "와인 잔 바닥에 흰색 침전물을 발견했다. 독약의 잔여물이다.",
+                      "en": "Found white residue at the bottom of the wine glass. Remnants of the poison."
+                    }
+                  },
+                  "cursor": "pointer",
+                  "condition": { "type": "layer_visible", "layerId": "layer-wine-glass-close" },
+                  "ariaLabel": { "ko": "와인 잔 잔여물 채취", "en": "Collect wine glass residue" }
+                },
+                {
+                  "id": "hs-examine-place-card",
+                  "area": { "type": "rect", "x": 300, "y": 500, "width": 160, "height": 80 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-butler-park"],
+                        "feedback": {
+                          "ko": "좌석 배치도에서 박 집사가 서빙 담당이었음을 확인했다.",
+                          "en": "The seating chart confirms Butler Park was serving during the dinner."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "좌석 배치도", "en": "Seating Chart" },
+                        "content": {
+                          "ko": "만찬 좌석 배치도다. 황 백작 옆자리에는 정 조카가 앉았고, 박 집사가 와인 서빙을 전담했다. 박 집사만이 와인 잔에 접근할 기회가 있었다.",
+                          "en": "The dinner seating chart. Nephew Jeong sat beside Count Hwang, and Butler Park handled all wine service. Only Butler Park had the opportunity to access the wine glass."
+                        },
+                        "highlightedWords": ["word-butler-park", "word-nephew-jeong"]
+                      }
+                    ],
+                    "delayBetween": 300
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "좌석 배치도 조사", "en": "Examine seating chart" }
+                },
+                {
+                  "id": "hs-collect-dr-lee-vial",
+                  "area": { "type": "rect", "x": 1600, "y": 700, "width": 100, "height": 80 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-dr-lee"],
+                        "feedback": {
+                          "ko": "만찬장 구석에서 이 의사의 의사 가방을 발견했다.",
+                          "en": "Found Dr. Lee's medical bag in the corner of the dining hall."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "의사 가방", "en": "Medical Bag" },
+                        "content": {
+                          "ko": "이 의사의 가방이다. 안에는 다양한 의약품이 들어 있는데, 그 중 하나가 비어 있다. 독약과 화학 성분이 유사한 약품이다.",
+                          "en": "Dr. Lee's bag. Inside are various medications, one of which is empty. The chemical composition is similar to the poison used."
+                        },
+                        "highlightedWords": ["word-dr-lee", "word-poison"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "의사 가방 조사", "en": "Examine medical bag" }
+                },
+                {
+                  "id": "hs-navigate-study",
+                  "area": { "type": "rect", "x": 1720, "y": 300, "width": 160, "height": 300 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-study",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서재로 이동", "en": "Go to the study" }
+                }
+              ],
+              "audio": "sfx-manor-ambient"
+            },
+            {
+              "id": "scene-study",
+              "name": {
+                "ko": "서재",
+                "en": "Study"
+              },
+              "background": "bg-study",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-safe-open",
+                  "image": "img-safe-open",
+                  "position": { "x": 1500, "y": 400 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-door-creak" }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-will",
+                  "area": { "type": "rect", "x": 600, "y": 350, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-inheritance", "word-nephew-jeong"],
+                        "feedback": {
+                          "ko": "황 백작의 유언장을 발견했다. 전 재산을 조카 정씨에게 넘기는 대신 박 집사를 상속 집행인으로 지정했다.",
+                          "en": "Found Count Hwang's will. It bequeaths the entire estate to Nephew Jeong but names Butler Park as the executor."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "유언장", "en": "Last Will and Testament" },
+                        "content": {
+                          "ko": "황 백작의 최근 유언장이다. 놀랍게도 박 집사에게 주기로 했던 유산이 대폭 삭감되어 있다. 바로 이틀 전에 수정된 것으로 보인다. 박 집사에게는 분명 큰 충격이었을 것이다.",
+                          "en": "Count Hwang's recent will. Surprisingly, the inheritance previously promised to Butler Park has been drastically reduced. It appears to have been amended just two days ago. This must have been a devastating blow for Butler Park."
+                        },
+                        "highlightedWords": ["word-butler-park", "word-inheritance"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "유언장 조사", "en": "Examine the will" }
+                },
+                {
+                  "id": "hs-open-safe",
+                  "area": { "type": "rect", "x": 1480, "y": 380, "width": 150, "height": 130 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-safe-open",
+                    "visible": true
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "금고 열기", "en": "Open the safe" }
+                },
+                {
+                  "id": "hs-collect-debt-letter",
+                  "area": { "type": "rect", "x": 1510, "y": 410, "width": 110, "height": 90 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-debt"],
+                        "feedback": {
+                          "ko": "금고 안에서 이 의사에 관한 차용증서를 발견했다.",
+                          "en": "Found a promissory note about Dr. Lee in the safe."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "차용증서", "en": "Promissory Note" },
+                        "content": {
+                          "ko": "이 의사가 황 백작에게 빌린 거액의 차용증서다. 6개월 이내에 상환하지 않으면 의사 면허를 취소하겠다는 조항이 붙어 있다. 이 의사에게는 충분한 동기가 있다.",
+                          "en": "A promissory note for a large debt Dr. Lee owes Count Hwang. A clause states that failure to repay within 6 months will result in his medical license being revoked. Dr. Lee had ample motive."
+                        },
+                        "highlightedWords": ["word-dr-lee", "word-debt"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "pointer",
+                  "condition": { "type": "layer_visible", "layerId": "layer-safe-open" },
+                  "ariaLabel": { "ko": "금고 내용물 조사", "en": "Examine safe contents" }
+                },
+                {
+                  "id": "hs-examine-photo",
+                  "area": { "type": "rect", "x": 200, "y": 150, "width": 160, "height": 200 },
+                  "action": {
+                    "type": "examine",
+                    "title": { "ko": "가족 사진", "en": "Family Portrait" },
+                    "content": {
+                      "ko": "황 백작 가족 사진이다. 조카 정씨가 아주 어릴 때 찍은 사진이다. 사진 뒤에는 '정에게 모든 것을'이라는 글귀가 적혀 있다. 황 백작은 조카에게 재산을 물려줄 의지가 있었지만, 박 집사는 그렇게 생각하지 않았다.",
+                      "en": "A family portrait of Count Hwang. Nephew Jeong appears very young in this photo. On the back, it reads 'Everything for Jeong.' The Count intended to leave his estate to his nephew, but Butler Park had other ideas."
+                    },
+                    "highlightedWords": ["word-nephew-jeong", "word-butler-park"]
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "가족 사진 조사", "en": "Examine family portrait" }
+                },
+                {
+                  "id": "hs-navigate-dining",
+                  "area": { "type": "rect", "x": 40, "y": 350, "width": 150, "height": 300 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-grand-hall",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "만찬장으로 돌아가기", "en": "Return to dining hall" }
+                }
+              ]
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-manor-main",
+              "title": {
+                "ko": "독살 사건의 진실",
+                "en": "The Truth of the Poisoning"
+              },
+              "description": {
+                "ko": "수집한 단서를 바탕으로 사건의 진실을 밝혀라.",
+                "en": "Reveal the truth of the case based on collected clues."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "slot", "slotId": "culprit", "placeholder": { "ko": "범인", "en": "culprit" }, "acceptCategory": "person" },
+                  { "type": "text", "content": { "ko": "이(가) ", "en": " used " } },
+                  { "type": "slot", "slotId": "weapon", "placeholder": { "ko": "범행 도구", "en": "weapon" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "으로 ", "en": " to poison " } },
+                  { "type": "slot", "slotId": "victim", "placeholder": { "ko": "피해자", "en": "victim" }, "acceptCategory": "person" },
+                  { "type": "text", "content": { "ko": "을(를) 살해했다.", "en": ". The motive was " } },
+                  { "type": "line_break" },
+                  { "type": "text", "content": { "ko": "동기는 ", "en": "" } },
+                  { "type": "slot", "slotId": "motive", "placeholder": { "ko": "동기", "en": "motive" }, "acceptCategory": "motive" },
+                  { "type": "text", "content": { "ko": "이다.", "en": "." } }
+                ]
+              },
+              "answers": {
+                "culprit": {
+                  "correctWordId": "word-butler-park",
+                  "partiallyCorrectWordIds": ["word-dr-lee", "word-nephew-jeong"]
+                },
+                "weapon": {
+                  "correctWordId": "word-poison"
+                },
+                "victim": {
+                  "correctWordId": "word-count-hwang"
+                },
+                "motive": {
+                  "correctWordId": "word-inheritance",
+                  "partiallyCorrectWordIds": ["word-debt"]
+                }
+              }
+            },
+            "sub": [
+              {
+                "id": "puzzle-manor-charid",
+                "title": {
+                  "ko": "용의자 식별",
+                  "en": "Suspect Identification"
+                },
+                "type": "character_id",
+                "characters": [
+                  {
+                    "portrait": "portrait-butler-park",
+                    "nameSlotId": "charid-butler",
+                    "answerId": "word-butler-park"
+                  },
+                  {
+                    "portrait": "portrait-dr-lee",
+                    "nameSlotId": "charid-doctor",
+                    "answerId": "word-dr-lee"
+                  },
+                  {
+                    "portrait": "portrait-nephew-jeong",
+                    "nameSlotId": "charid-nephew",
+                    "answerId": "word-nephew-jeong"
+                  }
+                ]
+              },
+              {
+                "id": "puzzle-manor-timeline",
+                "title": {
+                  "ko": "사건 타임라인",
+                  "en": "Event Timeline"
+                },
+                "type": "timeline",
+                "slots": [
+                  {
+                    "slotId": "timeline-1",
+                    "label": {
+                      "ko": "오후 7시: 만찬 시작, 와인 서빙",
+                      "en": "7 PM: Dinner begins, wine service"
+                    },
+                    "answerId": "word-butler-park"
+                  },
+                  {
+                    "slotId": "timeline-2",
+                    "label": {
+                      "ko": "오후 8시 30분: 황 백작 이상 증세 호소",
+                      "en": "8:30 PM: Count Hwang reports feeling ill"
+                    },
+                    "answerId": "word-count-hwang"
+                  },
+                  {
+                    "slotId": "timeline-3",
+                    "label": {
+                      "ko": "오후 9시: 황 백작 사망 확인",
+                      "en": "9 PM: Count Hwang pronounced dead"
+                    },
+                    "answerId": "word-poison"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "items": {
+      "bg-dining-hall": {
+        "id": "bg-dining-hall",
+        "type": "image",
+        "src": "backgrounds/dining-hall.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-study": {
+        "id": "bg-study",
+        "type": "image",
+        "src": "backgrounds/study.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "thumb-manor": {
+        "id": "thumb-manor",
+        "type": "image",
+        "src": "thumbnails/manor-thumb.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "img-wine-glass-close": {
+        "id": "img-wine-glass-close",
+        "type": "image",
+        "src": "scenes/wine-glass-close.png",
+        "mimeType": "image/png"
+      },
+      "img-safe-open": {
+        "id": "img-safe-open",
+        "type": "image",
+        "src": "scenes/safe-open.png",
+        "mimeType": "image/png"
+      },
+      "portrait-butler-park": {
+        "id": "portrait-butler-park",
+        "type": "image",
+        "src": "portraits/butler-park.png",
+        "mimeType": "image/png"
+      },
+      "portrait-dr-lee": {
+        "id": "portrait-dr-lee",
+        "type": "image",
+        "src": "portraits/dr-lee.png",
+        "mimeType": "image/png"
+      },
+      "portrait-nephew-jeong": {
+        "id": "portrait-nephew-jeong",
+        "type": "image",
+        "src": "portraits/nephew-jeong.png",
+        "mimeType": "image/png"
+      },
+      "sfx-manor-ambient": {
+        "id": "sfx-manor-ambient",
+        "type": "audio",
+        "src": "audio/manor-ambient.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-door-creak": {
+        "id": "sfx-door-creak",
+        "type": "audio",
+        "src": "audio/door-creak.mp3",
+        "mimeType": "audio/mpeg"
+      }
+    }
+  },
+  "words": {
+    "word-count-hwang": {
+      "id": "word-count-hwang",
+      "display": { "ko": "황 백작", "en": "Count Hwang" },
+      "category": "person"
+    },
+    "word-butler-park": {
+      "id": "word-butler-park",
+      "display": { "ko": "박 집사", "en": "Butler Park" },
+      "category": "person",
+      "hint": { "ko": "와인 서빙을 담당한 집사", "en": "The butler who served the wine" }
+    },
+    "word-dr-lee": {
+      "id": "word-dr-lee",
+      "display": { "ko": "이 의사", "en": "Dr. Lee" },
+      "category": "person",
+      "hint": { "ko": "채무를 지고 있는 의사", "en": "The doctor with a debt" }
+    },
+    "word-nephew-jeong": {
+      "id": "word-nephew-jeong",
+      "display": { "ko": "정 조카", "en": "Nephew Jeong" },
+      "category": "person",
+      "hint": { "ko": "유산의 유일한 상속자", "en": "The sole heir to the estate" }
+    },
+    "word-poison": {
+      "id": "word-poison",
+      "display": { "ko": "독약", "en": "Poison" },
+      "category": "evidence",
+      "hint": { "ko": "와인에 섞인 희귀 독약", "en": "A rare poison mixed into the wine" }
+    },
+    "word-inheritance": {
+      "id": "word-inheritance",
+      "display": { "ko": "유산 삭감", "en": "Reduced Inheritance" },
+      "category": "motive",
+      "hint": { "ko": "유언장 수정으로 삭감된 박 집사의 유산", "en": "Butler Park's inheritance cut by the amended will" }
+    },
+    "word-debt": {
+      "id": "word-debt",
+      "display": { "ko": "채무 청산", "en": "Debt Clearance" },
+      "category": "motive",
+      "hint": { "ko": "이 의사의 거액 채무", "en": "Dr. Lee's massive debt" }
+    }
+  }
+}

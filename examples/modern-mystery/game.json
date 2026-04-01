@@ -1,0 +1,732 @@
+{
+  "id": "modern-mystery-leak",
+  "version": "1.0.0",
+  "title": {
+    "ko": "기업 기밀 유출 사건",
+    "en": "The Corporate Leak"
+  },
+  "description": {
+    "ko": "첨단 기술 기업 TechNova의 핵심 AI 알고리즘이 유출되었다. 다섯 명의 내부 용의자 중 진범을 추적하라.",
+    "en": "TechNova's core AI algorithm has been leaked. Track down the insider among five suspects."
+  },
+  "supportedLocales": ["ko", "en"],
+  "settings": {
+    "validationFeedbackDuration": 2500,
+    "autoSaveInterval": 30000,
+    "debug": false,
+    "unlockMode": "sequential",
+    "cssPrefix": "gi-"
+  },
+  "acts": [
+    {
+      "id": "act-1",
+      "title": {
+        "ko": "제1막: 내부의 적",
+        "en": "Act 1: Enemy Within"
+      },
+      "cases": [
+        {
+          "id": "case-corporate-leak",
+          "title": {
+            "ko": "TechNova AI 알고리즘 유출 사건",
+            "en": "TechNova AI Algorithm Leak"
+          },
+          "description": {
+            "ko": "TechNova의 차세대 AI 알고리즘 설계도가 경쟁사 RivalTech에 넘어갔다. 보안팀의 조사 결과 내부 직원이 배후임이 확실하다. 사무실, 서버실, 회의실, 주차장 — 네 곳을 조사하여 진범을 찾아라.",
+            "en": "TechNova's next-generation AI algorithm blueprints have been passed to rival RivalTech. Security team investigation confirms an insider is behind this. Investigate four locations — the office, server room, conference room, and parking lot — to find the culprit."
+          },
+          "prerequisites": [],
+          "thumbnail": "thumb-techcorp",
+          "scenes": [
+            {
+              "id": "scene-office",
+              "name": {
+                "ko": "사무실",
+                "en": "Office"
+              },
+              "background": "bg-office",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [
+                {
+                  "id": "layer-desk-drawer-open",
+                  "image": "img-desk-drawer",
+                  "position": { "x": 700, "y": 600 },
+                  "zIndex": 10,
+                  "visible": false
+                }
+              ],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-office-ambient" },
+                { "type": "delay", "duration": 500 }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-access-log",
+                  "area": { "type": "rect", "x": 400, "y": 350, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-mgr-choi"],
+                        "feedback": {
+                          "ko": "출입 로그에서 유출 당일 최 팀장이 야간에 혼자 사무실에 있었음을 확인했다.",
+                          "en": "The access log confirms Team Leader Choi was alone in the office late at night on the day of the leak."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "출입 기록", "en": "Access Log" },
+                        "content": {
+                          "ko": "보안 시스템 출입 기록이다. 유출 발생일 오전 2시, 최 팀장의 출입 카드가 사용되었다. 다른 직원의 기록은 없다. 이 시간대에 최 팀장만이 건물 안에 있었다.",
+                          "en": "Security system access records. At 2 AM on the day of the leak, Team Leader Choi's access card was used. No other employee records exist. Only Choi was in the building during this time."
+                        },
+                        "highlightedWords": ["word-mgr-choi", "word-rival-tech"]
+                      }
+                    ],
+                    "delayBetween": 250
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "출입 기록 조사", "en": "Examine access log" }
+                },
+                {
+                  "id": "hs-open-drawer",
+                  "area": { "type": "rect", "x": 680, "y": 580, "width": 180, "height": 100 },
+                  "action": {
+                    "type": "toggle_layer",
+                    "layerId": "layer-desk-drawer-open",
+                    "visible": true
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서랍 열기", "en": "Open desk drawer" }
+                },
+                {
+                  "id": "hs-collect-burner-phone",
+                  "area": { "type": "rect", "x": 710, "y": 610, "width": 140, "height": 80 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-burner-phone", "word-rival-tech"],
+                        "feedback": {
+                          "ko": "서랍 안에서 대포폰을 발견했다. RivalTech 번호로 여러 번 발신한 기록이 있다.",
+                          "en": "Found a burner phone in the drawer. Multiple calls were made to a RivalTech number."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "대포폰", "en": "Burner Phone" },
+                        "content": {
+                          "ko": "익명으로 구입한 대포폰이다. 통화 기록에는 RivalTech의 보안 담당 번호가 있고, 유출 이틀 전부터 수차례 연락한 흔적이 있다. 최 팀장의 서랍 안에서 발견되었다.",
+                          "en": "An anonymously purchased burner phone. Call records include RivalTech's security contact number, with multiple calls starting two days before the leak. Found in Team Leader Choi's desk drawer."
+                        },
+                        "highlightedWords": ["word-mgr-choi", "word-rival-tech", "word-burner-phone"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "pointer",
+                  "condition": { "type": "layer_visible", "layerId": "layer-desk-drawer-open" },
+                  "ariaLabel": { "ko": "대포폰 수거", "en": "Collect burner phone" }
+                },
+                {
+                  "id": "hs-collect-intern-han",
+                  "area": { "type": "circle", "cx": 1400, "cy": 400, "radius": 70 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-intern-han"],
+                        "feedback": {
+                          "ko": "인턴 한씨의 자리에서 알고리즘 관련 메모를 발견했다.",
+                          "en": "Found algorithm-related notes at Intern Han's workstation."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "인턴 메모", "en": "Intern's Notes" },
+                        "content": {
+                          "ko": "인턴 한씨의 메모다. 핵심 알고리즘 파라미터 일부가 적혀 있는데, 접근 권한 없이는 볼 수 없는 내용이다. 누군가 한씨를 이용했거나, 한씨 스스로 정보를 빼낸 것일 수 있다.",
+                          "en": "Intern Han's notes. They contain some core algorithm parameters that would be inaccessible without proper clearance. Someone may have used Han, or Han extracted the information independently."
+                        },
+                        "highlightedWords": ["word-intern-han", "word-algorithm"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "인턴 자리 조사", "en": "Examine intern's workstation" }
+                },
+                {
+                  "id": "hs-navigate-server",
+                  "area": { "type": "rect", "x": 1720, "y": 350, "width": 160, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-server-room",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서버실로 이동", "en": "Go to server room" }
+                }
+              ],
+              "audio": "sfx-office-ambient"
+            },
+            {
+              "id": "scene-server-room",
+              "name": {
+                "ko": "서버실",
+                "en": "Server Room"
+              },
+              "background": "bg-server-room",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-server-hum" }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-usb-trace",
+                  "area": { "type": "rect", "x": 800, "y": 450, "width": 200, "height": 150 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-usb-trace", "word-algorithm"],
+                        "feedback": {
+                          "ko": "서버 로그에서 핵심 알고리즘 파일이 외부 저장장치로 복사된 기록을 발견했다.",
+                          "en": "Found server logs showing core algorithm files were copied to an external storage device."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "서버 접근 로그", "en": "Server Access Log" },
+                        "content": {
+                          "ko": "서버 접근 기록이다. 유출일 새벽 2시 17분, 계정 'choi_tl'로 AI 알고리즘 저장소에 접근해 외부 USB로 전체 파일을 복사했다. 전송 용량은 47.3GB. 명백한 증거다.",
+                          "en": "Server access records. At 2:17 AM on the day of the leak, account 'choi_tl' accessed the AI algorithm repository and copied all files to an external USB. Transfer size: 47.3GB. Clear evidence."
+                        },
+                        "highlightedWords": ["word-mgr-choi", "word-algorithm", "word-usb-trace"]
+                      }
+                    ],
+                    "delayBetween": 300
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "서버 로그 분석", "en": "Analyze server logs" }
+                },
+                {
+                  "id": "hs-collect-dir-park",
+                  "area": { "type": "rect", "x": 1400, "y": 300, "width": 180, "height": 130 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-dir-park"],
+                        "feedback": {
+                          "ko": "서버실 CCTV에서 이사 박씨가 서버실을 배회하는 모습을 확인했다.",
+                          "en": "CCTV footage from the server room shows Director Park wandering near the servers."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "서버실 CCTV", "en": "Server Room CCTV" },
+                        "content": {
+                          "ko": "서버실 CCTV 영상이다. 이사 박씨가 유출 전날 밤 서버실을 돌아다니는 모습이 찍혀 있다. 다만 서버 터미널에는 접근하지 않았다. 무엇을 확인하러 온 것인지 의심스럽다.",
+                          "en": "Server room CCTV footage. Director Park is seen walking around the server room the night before the leak. However, he did not approach the server terminals. His purpose here is suspicious."
+                        },
+                        "highlightedWords": ["word-dir-park"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "서버실 CCTV 확인", "en": "Check server room CCTV" }
+                },
+                {
+                  "id": "hs-navigate-conference",
+                  "area": { "type": "rect", "x": 40, "y": 400, "width": 150, "height": 250 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-conference-room",
+                    "transition": "slide_left"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "회의실로 이동", "en": "Go to conference room" }
+                },
+                {
+                  "id": "hs-navigate-office-back",
+                  "area": { "type": "rect", "x": 1720, "y": 400, "width": 150, "height": 250 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-office",
+                    "transition": "slide_right"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "사무실로 돌아가기", "en": "Return to office" }
+                }
+              ],
+              "audio": "sfx-server-hum"
+            },
+            {
+              "id": "scene-conference-room",
+              "name": {
+                "ko": "회의실",
+                "en": "Conference Room"
+              },
+              "background": "bg-conference-room",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-door" }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-contract-draft",
+                  "area": { "type": "rect", "x": 500, "y": 300, "width": 250, "height": 200 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-rival-tech", "word-bribe"],
+                        "feedback": {
+                          "ko": "쓰레기통에서 찢어진 계약서 초안을 발견했다. RivalTech와의 거래 내역이 담겨 있다.",
+                          "en": "Found a torn contract draft in the trash. It contains details of dealings with RivalTech."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "계약서 초안", "en": "Draft Contract" },
+                        "content": {
+                          "ko": "찢어진 계약서 조각들을 맞춰보니 TechNova와 RivalTech 간의 거래 내역이다. '알고리즘 설계도 제공 시 5억 원 지급'이라는 조항이 보인다. 계약 당사자 서명란에는 최 팀장 이름이 있다.",
+                          "en": "Piecing together the torn contract reveals a deal between TechNova and RivalTech. A clause reads '500 million won upon delivery of algorithm blueprints.' Team Leader Choi's name appears in the signatory line."
+                        },
+                        "highlightedWords": ["word-mgr-choi", "word-rival-tech", "word-bribe"]
+                      }
+                    ],
+                    "delayBetween": 300
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "계약서 조각 수집", "en": "Collect contract fragments" }
+                },
+                {
+                  "id": "hs-collect-researcher-kim",
+                  "area": { "type": "circle", "cx": 1350, "cy": 500, "radius": 75 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-researcher-kim"],
+                        "feedback": {
+                          "ko": "회의실 화이트보드에 김 연구원의 메모가 남아 있다.",
+                          "en": "Researcher Kim's notes remain on the conference room whiteboard."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "화이트보드 메모", "en": "Whiteboard Notes" },
+                        "content": {
+                          "ko": "화이트보드에 김 연구원의 필적으로 알고리즘 일부 수식이 적혀 있다. 내부 검토 회의에서 쓴 것으로 보이나, 이 내용이 그대로 유출된 자료에 포함되어 있었다는 점이 의심스럽다.",
+                          "en": "Whiteboard shows algorithm equations in Researcher Kim's handwriting. Appears to be from an internal review meeting, but these exact equations were found in the leaked materials — suspicious."
+                        },
+                        "highlightedWords": ["word-researcher-kim", "word-algorithm"]
+                      }
+                    ],
+                    "delayBetween": 200
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "화이트보드 조사", "en": "Examine whiteboard" }
+                },
+                {
+                  "id": "hs-navigate-parking",
+                  "area": { "type": "rect", "x": 40, "y": 400, "width": 150, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-parking-lot",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "주차장으로 이동", "en": "Go to parking lot" }
+                },
+                {
+                  "id": "hs-navigate-server-back",
+                  "area": { "type": "rect", "x": 1720, "y": 400, "width": 150, "height": 250 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-server-room",
+                    "transition": "slide_right"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "서버실로 돌아가기", "en": "Return to server room" }
+                }
+              ]
+            },
+            {
+              "id": "scene-parking-lot",
+              "name": {
+                "ko": "주차장",
+                "en": "Parking Lot"
+              },
+              "background": "bg-parking-lot",
+              "dimensions": { "width": 1920, "height": 1080 },
+              "layers": [],
+              "onEnter": [
+                { "type": "play_sound", "assetRef": "sfx-night-ambient" }
+              ],
+              "hotspots": [
+                {
+                  "id": "hs-collect-parking-cctv",
+                  "area": { "type": "circle", "cx": 960, "cy": 300, "radius": 80 },
+                  "action": {
+                    "type": "composite",
+                    "actions": [
+                      {
+                        "type": "word_reveal",
+                        "wordIds": ["word-handoff"],
+                        "feedback": {
+                          "ko": "주차장 CCTV에서 유출 당일 새벽 최 팀장이 낯선 남성과 만나는 장면을 포착했다.",
+                          "en": "Parking lot CCTV captured Team Leader Choi meeting an unknown man in the early morning of the leak day."
+                        }
+                      },
+                      {
+                        "type": "examine",
+                        "title": { "ko": "주차장 CCTV", "en": "Parking Lot CCTV" },
+                        "content": {
+                          "ko": "주차장 CCTV 영상이다. 오전 3시 40분, 최 팀장이 지하 주차장에서 정장 차림의 남성을 만나 USB를 건네는 장면이 찍혀 있다. 상대방 차량 번호판을 추적하면 RivalTech 임원 차량임을 확인할 수 있다.",
+                          "en": "Parking lot CCTV footage. At 3:40 AM, Team Leader Choi is seen meeting a suited man in the underground lot and handing over a USB drive. The vehicle license plate traces back to a RivalTech executive."
+                        },
+                        "highlightedWords": ["word-mgr-choi", "word-rival-tech", "word-handoff"]
+                      }
+                    ],
+                    "delayBetween": 300
+                  },
+                  "cursor": "magnifier",
+                  "ariaLabel": { "ko": "주차장 CCTV 확인", "en": "Check parking lot CCTV" }
+                },
+                {
+                  "id": "hs-navigate-conference-back",
+                  "area": { "type": "rect", "x": 1720, "y": 400, "width": 150, "height": 280 },
+                  "action": {
+                    "type": "navigate",
+                    "targetSceneId": "scene-conference-room",
+                    "transition": "fade"
+                  },
+                  "cursor": "pointer",
+                  "ariaLabel": { "ko": "회의실로 돌아가기", "en": "Return to conference room" }
+                }
+              ],
+              "audio": "sfx-night-ambient"
+            }
+          ],
+          "puzzles": {
+            "main": {
+              "id": "puzzle-leak-main",
+              "title": {
+                "ko": "유출 사건의 전말",
+                "en": "The Full Story of the Leak"
+              },
+              "description": {
+                "ko": "증거를 바탕으로 유출 사건의 전말을 밝혀라.",
+                "en": "Reveal the full story of the leak based on the evidence."
+              },
+              "type": "fill_in_blank",
+              "template": {
+                "segments": [
+                  { "type": "slot", "slotId": "leaker", "placeholder": { "ko": "유출자", "en": "leaker" }, "acceptCategory": "person" },
+                  { "type": "text", "content": { "ko": "이(가) ", "en": " leaked " } },
+                  { "type": "slot", "slotId": "asset", "placeholder": { "ko": "유출 자산", "en": "leaked asset" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "을(를) ", "en": " to " } },
+                  { "type": "slot", "slotId": "receiver", "placeholder": { "ko": "수신 기업", "en": "receiving company" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "에 넘겼다.", "en": ". The method used was " } },
+                  { "type": "line_break" },
+                  { "type": "text", "content": { "ko": "이 때 사용한 수단은 ", "en": "" } },
+                  { "type": "slot", "slotId": "method", "placeholder": { "ko": "수단", "en": "method" }, "acceptCategory": "evidence" },
+                  { "type": "text", "content": { "ko": "이며, 동기는 ", "en": " and the motive was " } },
+                  { "type": "slot", "slotId": "motive", "placeholder": { "ko": "동기", "en": "motive" }, "acceptCategory": "motive" },
+                  { "type": "text", "content": { "ko": "이다.", "en": "." } }
+                ]
+              },
+              "answers": {
+                "leaker": {
+                  "correctWordId": "word-mgr-choi",
+                  "partiallyCorrectWordIds": ["word-dir-park", "word-researcher-kim", "word-intern-han"]
+                },
+                "asset": {
+                  "correctWordId": "word-algorithm"
+                },
+                "receiver": {
+                  "correctWordId": "word-rival-tech"
+                },
+                "method": {
+                  "correctWordId": "word-usb-trace",
+                  "partiallyCorrectWordIds": ["word-burner-phone"]
+                },
+                "motive": {
+                  "correctWordId": "word-bribe"
+                }
+              }
+            },
+            "sub": [
+              {
+                "id": "puzzle-leak-timeline",
+                "title": {
+                  "ko": "유출 타임라인",
+                  "en": "Leak Timeline"
+                },
+                "type": "timeline",
+                "slots": [
+                  {
+                    "slotId": "leak-time-1",
+                    "label": {
+                      "ko": "D-2일: 대포폰으로 RivalTech에 연락",
+                      "en": "D-2: Contacted RivalTech via burner phone"
+                    },
+                    "answerId": "word-mgr-choi"
+                  },
+                  {
+                    "slotId": "leak-time-2",
+                    "label": {
+                      "ko": "D-Day 오전 2시: 서버 접근, USB 복사",
+                      "en": "D-Day 2 AM: Server access, USB copy"
+                    },
+                    "answerId": "word-usb-trace"
+                  },
+                  {
+                    "slotId": "leak-time-3",
+                    "label": {
+                      "ko": "D-Day 오전 3시 40분: 주차장 USB 직접 전달",
+                      "en": "D-Day 3:40 AM: Direct USB handoff in parking lot"
+                    },
+                    "answerId": "word-handoff"
+                  },
+                  {
+                    "slotId": "leak-time-4",
+                    "label": {
+                      "ko": "D+1일: 보안팀 유출 감지 및 수사 시작",
+                      "en": "D+1: Security team detects leak, investigation begins"
+                    },
+                    "answerId": "word-algorithm"
+                  }
+                ]
+              },
+              {
+                "id": "puzzle-leak-relationship",
+                "title": {
+                  "ko": "내부 관계도",
+                  "en": "Internal Relationship Map"
+                },
+                "type": "relationship",
+                "nodes": [
+                  {
+                    "id": "node-ceo-shin",
+                    "label": { "ko": "신 대표", "en": "CEO Shin" },
+                    "portrait": "portrait-ceo-shin"
+                  },
+                  {
+                    "id": "node-mgr-choi",
+                    "label": { "ko": "최 팀장", "en": "Team Leader Choi" },
+                    "portrait": "portrait-mgr-choi"
+                  },
+                  {
+                    "id": "node-dir-park",
+                    "label": { "ko": "박 이사", "en": "Director Park" },
+                    "portrait": "portrait-dir-park"
+                  },
+                  {
+                    "id": "node-researcher-kim",
+                    "label": { "ko": "김 연구원", "en": "Researcher Kim" },
+                    "portrait": "portrait-researcher-kim"
+                  },
+                  {
+                    "id": "node-intern-han",
+                    "label": { "ko": "한 인턴", "en": "Intern Han" },
+                    "portrait": "portrait-intern-han"
+                  }
+                ],
+                "edges": [
+                  {
+                    "fromNodeId": "node-mgr-choi",
+                    "toNodeId": "node-ceo-shin",
+                    "slotId": "rel-choi-ceo",
+                    "answerId": "word-bribe"
+                  },
+                  {
+                    "fromNodeId": "node-dir-park",
+                    "toNodeId": "node-mgr-choi",
+                    "slotId": "rel-park-choi",
+                    "answerId": "word-rival-tech"
+                  },
+                  {
+                    "fromNodeId": "node-mgr-choi",
+                    "toNodeId": "node-intern-han",
+                    "slotId": "rel-choi-han",
+                    "answerId": "word-algorithm"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "items": {
+      "bg-office": {
+        "id": "bg-office",
+        "type": "image",
+        "src": "backgrounds/office.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-server-room": {
+        "id": "bg-server-room",
+        "type": "image",
+        "src": "backgrounds/server-room.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-conference-room": {
+        "id": "bg-conference-room",
+        "type": "image",
+        "src": "backgrounds/conference-room.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "bg-parking-lot": {
+        "id": "bg-parking-lot",
+        "type": "image",
+        "src": "backgrounds/parking-lot.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "thumb-techcorp": {
+        "id": "thumb-techcorp",
+        "type": "image",
+        "src": "thumbnails/techcorp-thumb.jpg",
+        "mimeType": "image/jpeg"
+      },
+      "img-desk-drawer": {
+        "id": "img-desk-drawer",
+        "type": "image",
+        "src": "scenes/desk-drawer-open.png",
+        "mimeType": "image/png"
+      },
+      "portrait-ceo-shin": {
+        "id": "portrait-ceo-shin",
+        "type": "image",
+        "src": "portraits/ceo-shin.png",
+        "mimeType": "image/png"
+      },
+      "portrait-mgr-choi": {
+        "id": "portrait-mgr-choi",
+        "type": "image",
+        "src": "portraits/mgr-choi.png",
+        "mimeType": "image/png"
+      },
+      "portrait-dir-park": {
+        "id": "portrait-dir-park",
+        "type": "image",
+        "src": "portraits/dir-park.png",
+        "mimeType": "image/png"
+      },
+      "portrait-researcher-kim": {
+        "id": "portrait-researcher-kim",
+        "type": "image",
+        "src": "portraits/researcher-kim.png",
+        "mimeType": "image/png"
+      },
+      "portrait-intern-han": {
+        "id": "portrait-intern-han",
+        "type": "image",
+        "src": "portraits/intern-han.png",
+        "mimeType": "image/png"
+      },
+      "sfx-office-ambient": {
+        "id": "sfx-office-ambient",
+        "type": "audio",
+        "src": "audio/office-ambient.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-server-hum": {
+        "id": "sfx-server-hum",
+        "type": "audio",
+        "src": "audio/server-hum.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-door": {
+        "id": "sfx-door",
+        "type": "audio",
+        "src": "audio/door.mp3",
+        "mimeType": "audio/mpeg"
+      },
+      "sfx-night-ambient": {
+        "id": "sfx-night-ambient",
+        "type": "audio",
+        "src": "audio/night-ambient.mp3",
+        "mimeType": "audio/mpeg"
+      }
+    }
+  },
+  "words": {
+    "word-mgr-choi": {
+      "id": "word-mgr-choi",
+      "display": { "ko": "최 팀장", "en": "Team Leader Choi" },
+      "category": "person",
+      "hint": { "ko": "야간에 혼자 서버에 접근한 팀장", "en": "The team leader who accessed servers alone at night" }
+    },
+    "word-dir-park": {
+      "id": "word-dir-park",
+      "display": { "ko": "박 이사", "en": "Director Park" },
+      "category": "person",
+      "hint": { "ko": "서버실을 배회한 이사", "en": "The director seen wandering the server room" }
+    },
+    "word-researcher-kim": {
+      "id": "word-researcher-kim",
+      "display": { "ko": "김 연구원", "en": "Researcher Kim" },
+      "category": "person",
+      "hint": { "ko": "알고리즘 담당 연구원", "en": "The algorithm researcher" }
+    },
+    "word-intern-han": {
+      "id": "word-intern-han",
+      "display": { "ko": "한 인턴", "en": "Intern Han" },
+      "category": "person",
+      "hint": { "ko": "알고리즘 메모가 발견된 인턴", "en": "The intern with algorithm notes" }
+    },
+    "word-algorithm": {
+      "id": "word-algorithm",
+      "display": { "ko": "AI 알고리즘", "en": "AI Algorithm" },
+      "category": "evidence",
+      "hint": { "ko": "유출된 핵심 기술 자산", "en": "The core technology asset that was leaked" }
+    },
+    "word-rival-tech": {
+      "id": "word-rival-tech",
+      "display": { "ko": "RivalTech", "en": "RivalTech" },
+      "category": "evidence",
+      "hint": { "ko": "알고리즘을 매수한 경쟁사", "en": "The rival company that purchased the algorithm" }
+    },
+    "word-usb-trace": {
+      "id": "word-usb-trace",
+      "display": { "ko": "USB 복사 기록", "en": "USB Copy Record" },
+      "category": "evidence",
+      "hint": { "ko": "서버에서 외부 USB로 복사한 흔적", "en": "Trace of files copied from server to external USB" }
+    },
+    "word-burner-phone": {
+      "id": "word-burner-phone",
+      "display": { "ko": "대포폰", "en": "Burner Phone" },
+      "category": "evidence",
+      "hint": { "ko": "RivalTech 연락에 사용된 익명 전화기", "en": "Anonymous phone used to contact RivalTech" }
+    },
+    "word-handoff": {
+      "id": "word-handoff",
+      "display": { "ko": "직접 전달 현장", "en": "Direct Handoff Scene" },
+      "category": "evidence",
+      "hint": { "ko": "주차장에서 USB를 건네는 CCTV 영상", "en": "CCTV footage of USB handoff in parking lot" }
+    },
+    "word-bribe": {
+      "id": "word-bribe",
+      "display": { "ko": "5억 원 뇌물", "en": "500M Won Bribe" },
+      "category": "motive",
+      "hint": { "ko": "알고리즘 유출 대가로 받은 뇌물", "en": "Bribe received in exchange for leaking the algorithm" }
+    }
+  }
+}
