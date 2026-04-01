@@ -64,10 +64,10 @@ export function Toolbar(): React.ReactElement {
       <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
 
       {/* Actions */}
-      <button onClick={newProject} style={btnStyle} title="새 프로젝트 (Ctrl+N)">
+      <button onClick={newProject} style={btnStyle} title="새 프로젝트 (Ctrl+N)" aria-label="새 프로젝트 만들기 (Ctrl+N)">
         ＋ 새 프로젝트
       </button>
-      <button onClick={handleOpen} style={btnStyle} title="열기">
+      <button onClick={handleOpen} style={btnStyle} title="열기" aria-label="프로젝트 파일 열기">
         📂 열기
       </button>
       <button
@@ -75,6 +75,7 @@ export function Toolbar(): React.ReactElement {
         disabled={!project}
         style={{ ...btnStyle, color: meta.isDirty ? 'var(--accent)' : undefined }}
         title="저장 (Ctrl+S)"
+        aria-label={`프로젝트 저장 (Ctrl+S)${meta.isDirty ? ' — 저장되지 않은 변경사항 있음' : ''}`}
       >
         💾 저장{meta.isDirty ? ' *' : ''}
       </button>
@@ -83,11 +84,12 @@ export function Toolbar(): React.ReactElement {
         disabled={!project}
         style={{ ...btnStyle, opacity: !project ? 0.5 : 1 }}
         title="HTML 파일로 익스포트"
+        aria-label="HTML 파일로 익스포트"
       >
         📤 익스포트
       </button>
 
-      <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
+      <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} aria-hidden="true" />
 
       {/* Undo/Redo */}
       <button
@@ -95,6 +97,8 @@ export function Toolbar(): React.ReactElement {
         disabled={!canUndo}
         style={{ ...btnStyle, opacity: canUndo ? 1 : 0.4 }}
         title="실행 취소 (Ctrl+Z)"
+        aria-label="실행 취소 (Ctrl+Z)"
+        aria-disabled={!canUndo}
       >
         ↩ 취소
       </button>
@@ -103,6 +107,8 @@ export function Toolbar(): React.ReactElement {
         disabled={!canRedo}
         style={{ ...btnStyle, opacity: canRedo ? 1 : 0.4 }}
         title="다시 실행 (Ctrl+Y)"
+        aria-label="다시 실행 (Ctrl+Y)"
+        aria-disabled={!canRedo}
       >
         ↪ 복구
       </button>
@@ -127,6 +133,7 @@ export function Toolbar(): React.ReactElement {
           fontWeight: 600,
         }}
         title="1문장으로 빠르게 사건 생성"
+        aria-label="Quick Create — 1문장으로 빠르게 사건 생성"
       >
         ⚡ Quick Create
       </button>
@@ -141,6 +148,7 @@ export function Toolbar(): React.ReactElement {
           color: 'var(--accent)',
         }}
         title="AI 인터뷰로 새 사건 생성 (상세)"
+        aria-label="AI 인터뷰로 새 사건 생성"
       >
         🕵️ AI 인터뷰
       </button>
@@ -150,6 +158,7 @@ export function Toolbar(): React.ReactElement {
         onClick={() => setAiSettingsOpen(true)}
         style={btnStyle}
         title="AI 모델 설정"
+        aria-label="AI 모델 설정"
       >
         AI 설정
       </button>
@@ -157,9 +166,11 @@ export function Toolbar(): React.ReactElement {
       <div style={{ width: 1, height: 24, background: 'var(--border-color)' }} />
 
       {/* Locale toggle */}
-      <div style={{ display: 'flex', gap: 4 }}>
+      <div role="group" aria-label="편집 언어 선택" style={{ display: 'flex', gap: 4 }}>
         <button
           onClick={() => setEditorLocale('ko')}
+          aria-label="한국어로 편집"
+          aria-pressed={ui.editorLocale === 'ko'}
           style={{
             ...btnStyle,
             background: ui.editorLocale === 'ko' ? 'var(--accent)' : 'transparent',
@@ -170,6 +181,8 @@ export function Toolbar(): React.ReactElement {
         </button>
         <button
           onClick={() => setEditorLocale('en')}
+          aria-label="영어로 편집"
+          aria-pressed={ui.editorLocale === 'en'}
           style={{
             ...btnStyle,
             background: ui.editorLocale === 'en' ? 'var(--accent)' : 'transparent',

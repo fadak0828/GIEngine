@@ -54,6 +54,7 @@ export function MainAreaTabBar(): React.ReactElement {
     border: 'none',
     borderBottom: '3px solid transparent',
     cursor: 'pointer',
+    outline: 'none',
   };
 
   const tabActiveStyle: React.CSSProperties = {
@@ -78,43 +79,73 @@ export function MainAreaTabBar(): React.ReactElement {
   };
 
   return (
-    <div style={containerStyle}>
+    <div role="tablist" aria-label="에디터 패널" style={containerStyle}>
       <button
+        role="tab"
+        aria-selected={isSceneActive}
+        aria-controls="panel-scene"
         style={isSceneActive ? tabActiveStyle : tabBaseStyle}
         onClick={() => setActivePanel('scene')}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px var(--accent)'; }}
+        onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         씬 편집
       </button>
       <button
+        role="tab"
+        aria-selected={isAssetsActive}
+        aria-controls="panel-assets"
         style={isAssetsActive ? tabActiveStyle : tabBaseStyle}
         onClick={() => setActivePanel('assets')}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px var(--accent)'; }}
+        onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         에셋 관리
-        <span style={badgeStyle}>{assetCount}</span>
+        <span style={badgeStyle} aria-label={`에셋 ${assetCount}개`}>{assetCount}</span>
       </button>
       <button
+        role="tab"
+        aria-selected={isWordsActive}
+        aria-controls="panel-words"
         style={isWordsActive ? tabActiveStyle : tabBaseStyle}
         onClick={() => setActivePanel('words')}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px var(--accent)'; }}
+        onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         단어 관리
-        <span style={badgeStyle}>{wordCount}</span>
+        <span style={badgeStyle} aria-label={`단어 ${wordCount}개`}>{wordCount}</span>
       </button>
       <button
+        role="tab"
+        aria-selected={isPuzzleActive}
+        aria-controls="panel-puzzle"
         style={isPuzzleActive ? tabActiveStyle : tabBaseStyle}
         onClick={() => setActivePanel('puzzle')}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px var(--accent)'; }}
+        onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         퍼즐 편집
       </button>
       <button
+        role="tab"
+        aria-selected={isSubPuzzleActive}
+        aria-controls="panel-subpuzzle"
         style={isSubPuzzleActive ? tabActiveStyle : tabBaseStyle}
         onClick={() => setActivePanel('subPuzzle')}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px var(--accent)'; }}
+        onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         서브 퍼즐
-        <span style={badgeStyle}>{subPuzzleCount}</span>
+        <span style={badgeStyle} aria-label={`서브 퍼즐 ${subPuzzleCount}개`}>{subPuzzleCount}</span>
       </button>
       <button
+        role="tab"
+        aria-selected={isValidationActive}
+        aria-controls="panel-validation"
         style={isValidationActive ? tabActiveStyle : tabBaseStyle}
         onClick={() => setActivePanel('validation')}
+        onFocus={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px var(--accent)'; }}
+        onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         검증
       </button>

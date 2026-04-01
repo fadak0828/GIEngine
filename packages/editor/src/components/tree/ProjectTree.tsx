@@ -161,11 +161,13 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
       >
         <button
           onClick={onToggle}
+          aria-label={isExpanded ? '사건 접기' : '사건 펼치기'}
+          aria-expanded={isExpanded}
           style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 10, padding: 0, cursor: 'pointer', width: 14 }}
         >
           {isExpanded ? '▼' : '▶'}
         </button>
-        <span style={{ marginRight: 2 }}>🔍</span>
+        <span style={{ marginRight: 2 }} aria-hidden="true">🔍</span>
         {isEditing ? (
           <input
             ref={inputRef}
@@ -212,6 +214,7 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
           onClick={e => { e.stopPropagation(); addScene(caseData.id); }}
           style={iconBtn}
           title="씬 추가"
+          aria-label="씬 추가"
         >
           +
         </button>
@@ -219,6 +222,7 @@ function CaseNode({ caseData, actId, isSelected, isExpanded, onSelect, onToggle 
           onClick={e => { e.stopPropagation(); if (window.confirm('사건을 삭제하시겠습니까?')) deleteCase(actId, caseData.id); }}
           style={{ ...iconBtn, color: '#ef4444' }}
           title="사건 삭제"
+          aria-label="사건 삭제"
         >
           ×
         </button>
@@ -308,11 +312,13 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
       >
         <button
           onClick={onToggle}
+          aria-label={isExpanded ? '막 접기' : '막 펼치기'}
+          aria-expanded={isExpanded}
           style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 10, padding: 0, cursor: 'pointer', width: 14 }}
         >
           {isExpanded ? '▼' : '▶'}
         </button>
-        <span style={{ marginRight: 2 }}>📚</span>
+        <span style={{ marginRight: 2 }} aria-hidden="true">📚</span>
         {isEditing ? (
           <input
             ref={inputRef}
@@ -361,6 +367,7 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
           onClick={e => { e.stopPropagation(); addCase(act.id); }}
           style={iconBtn}
           title="사건 추가"
+          aria-label="사건 추가"
         >
           +
         </button>
@@ -368,6 +375,7 @@ function ActNode({ act, isExpanded, onToggle }: ActNodeProps): React.ReactElemen
           onClick={e => { e.stopPropagation(); if (window.confirm('막을 삭제하시겠습니까?')) deleteAct(act.id); }}
           style={{ ...iconBtn, color: '#ef4444' }}
           title="막 삭제"
+          aria-label="막 삭제"
         >
           ×
         </button>
@@ -418,7 +426,7 @@ export function ProjectTree(): React.ReactElement {
     <div style={{ padding: 8, overflow: 'auto', height: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid var(--border-color)' }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>막/사건/씬</span>
-        <button onClick={addAct} style={{ ...iconBtn, fontSize: 13, padding: '2px 8px' }}>
+        <button onClick={addAct} style={{ ...iconBtn, fontSize: 13, padding: '2px 8px' }} aria-label="새 막 추가">
           + 막 추가
         </button>
       </div>
