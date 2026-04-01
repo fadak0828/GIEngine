@@ -665,7 +665,7 @@ function OnEnterActionRow({
             cursor: 'pointer',
             flexShrink: 0,
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
         >
           ✕
