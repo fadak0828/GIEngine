@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { validateProjectDefinition } from '@gi-engine/core';
 import { ItchPublishModal } from './ItchPublishModal.js';
+import { useDialogFocusTrap } from '@/hooks/useDialogFocusTrap';
 import '@/styles/primitives.css';
 
 // Inline type to avoid compile-time dependency on @gi-engine/exporter
@@ -37,6 +38,8 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
   const [copiedHtml, setCopiedHtml] = useState(false);
   const [itchModalOpen, setItchModalOpen] = useState(false);
   const embedRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocusTrap(open, dialogRef, handleClose);
 
   const validation = useMemo(() => {
     if (!project) return null;
@@ -113,16 +116,25 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
       />
 
       {/* Modal */}
-      <div className="modal-shell" style={{ width: 480, maxHeight: '90vh', overflowY: 'auto', padding: 20, zIndex: 1001 }}>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-modal-title"
+        aria-label="HTML 내보내기"
+        className="modal-shell"
+        style={{ width: 480, maxHeight: '90vh', overflowY: 'auto', padding: 20, zIndex: 1001 }}
+      >
         {/* Header */}
         <div className="modal-header">
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+          <div id="export-modal-title" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             📤 HTML 익스포트
           </div>
           <button
             onClick={handleClose}
             disabled={isExporting}
             className="modal-close"
+            aria-label="HTML 내보내기 닫기"
             style={{ cursor: isExporting ? 'not-allowed' : undefined }}
           >
             ×

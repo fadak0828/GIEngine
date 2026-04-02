@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AssetDefinition } from '@gi-engine/core';
+import { useDialogFocusTrap } from '@/hooks/useDialogFocusTrap';
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -62,6 +63,8 @@ export function ImageEditorModal({ asset, onSave, onClose }: ImageEditorModalPro
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef    = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocusTrap(true, dialogRef, onClose);
 
   const [imgLoaded,  setImgLoaded]  = useState(false);
   const [rotation,   setRotation]   = useState<RotationDeg>(0);
@@ -404,17 +407,24 @@ export function ImageEditorModal({ asset, onSave, onClose }: ImageEditorModalPro
       style={{ zIndex: 9000, background: 'rgba(0,0,0,0.7)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div style={{
-        width: 'min(92vw, 900px)',
-        height: 'min(90vh, 680px)',
-        background: 'var(--bg-panel)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
-      }}>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="image-editor-title"
+        aria-label="이미지 편집기"
+        style={{
+          width: 'min(92vw, 900px)',
+          height: 'min(90vh, 680px)',
+          background: 'var(--bg-panel)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-lg)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+        }}
+      >
         {/* Header */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -423,8 +433,8 @@ export function ImageEditorModal({ asset, onSave, onClose }: ImageEditorModalPro
           background: 'var(--bg-secondary)',
           flexShrink: 0,
         }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>이미지 편집</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 18, cursor: 'pointer', padding: '0 4px' }}>✕</button>
+          <span id="image-editor-title" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>이미지 편집</span>
+          <button onClick={onClose} aria-label="이미지 편집기 닫기" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 18, cursor: 'pointer', padding: '0 4px' }}>✕</button>
         </div>
 
         {/* Body */}

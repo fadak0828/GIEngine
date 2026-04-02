@@ -41,7 +41,7 @@
 - **Border Light:** `--border-light: #4d4438` — lighter border for hover/focus
 - **Text Primary:** `--text-primary: #e8e0d4` — warm parchment white
 - **Text Secondary:** `--text-secondary: #a89880` — parchment muted
-- **Text Muted:** `--text-muted: #6d6050` — warm gray for labels
+- **Text Muted:** `--text-muted: #9c8c77` — warm gray for labels (WCAG AA compliant ≥4.5:1 on bg-primary)
 - **Accent:** `--accent: #d4963a` — refined deep amber
 - **Accent Hover:** `--accent-hover: #e0a84a` — lighter amber on hover
 - **Accent Dim:** `--accent-dim: #5c3d14` — dark amber for backgrounds

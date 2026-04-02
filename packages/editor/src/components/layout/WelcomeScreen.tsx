@@ -110,12 +110,14 @@ export function WelcomeScreen(): React.ReactElement {
           <button
             onClick={handleNewProject}
             className={styles.primaryBtn}
+            aria-label="새 프로젝트 시작"
           >
             Start New Project
           </button>
           <button
             onClick={handleTryDemo}
             className={styles.ghostBtn}
+            aria-label="데모 케이스 체험하기"
           >
             Try Demo Case
           </button>

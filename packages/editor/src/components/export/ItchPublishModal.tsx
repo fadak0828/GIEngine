@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import type { GameDefinition } from '@gi-engine/core';
+import { useDialogFocusTrap } from '@/hooks/useDialogFocusTrap';
 
 interface ItchPublishModalProps {
   open: boolean;
@@ -29,6 +30,8 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
   const [itchTxtContent, setItchTxtContent] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const embedRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocusTrap(open, dialogRef, handleClose);
 
   // Pre-fill from stored config
   useEffect(() => {
@@ -200,13 +203,20 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
         style={{ zIndex: 1000 }}
       />
 
-      <div style={modalStyle}>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="itch-publish-title"
+        aria-label="itch.io 게임 배포"
+        style={modalStyle}
+      >
         {/* Header */}
         <div className="modal-header">
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+          <div id="itch-publish-title" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             🎮 itch.io 发布
           </div>
-          <button onClick={handleClose} className="modal-close">
+          <button onClick={handleClose} className="modal-close" aria-label="itch.io 배포 닫기">
             ×
           </button>
         </div>

@@ -40,6 +40,7 @@ export function ShortcutHelpModal(): React.ReactElement | null {
     <div
       role="dialog"
       aria-modal="true"
+      aria-labelledby="shortcut-help-title"
       aria-label="키보드 단축키 도움말"
       className="modal-backdrop"
       style={{ zIndex: 10000 }}
@@ -56,7 +57,7 @@ export function ShortcutHelpModal(): React.ReactElement | null {
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <h2 id="shortcut-help-title" style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
             ⌨ 키보드 단축키
           </h2>
           <button
