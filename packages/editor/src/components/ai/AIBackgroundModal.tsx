@@ -216,8 +216,9 @@ function buildRichPromptInline(
       negative_prompt: [
         'text', 'letters', 'words', 'readable writing', 'UI elements',
         'human characters', 'human figures', 'people',
+        'labels', 'names', 'coordinates', 'position numbers',
       ],
-      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment.',
+      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment. Do NOT render any text, coordinate numbers, or object names in the image.',
     },
   };
 
@@ -234,7 +235,6 @@ function buildRichPromptInline(
   if (gameContext.hotspots.length > 0) {
     prompt.interactive_objects = gameContext.hotspots.map(h => ({
       id: h.id,
-      label: h.label,
       properties: {
         position_zone: h.positionZone,
         relative_size: h.relativeSize,
