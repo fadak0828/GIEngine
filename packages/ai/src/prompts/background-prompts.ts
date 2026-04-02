@@ -175,6 +175,91 @@ function describeHotspotVisual(h: HotspotPromptInfo): string {
   }
 }
 
+// ── Spatial relationship hint builder ─────────────────────────────
+
+const ZONE_LABELS: Record<string, string> = {
+  'left-top':    'upper-left corner',
+  'left-middle': 'left side, vertically centered',
+  'left-bottom': 'lower-left corner',
+  'center-top':  'upper-center',
+  'center-middle': 'center of the scene',
+  'center-bottom': 'lower-center',
+  'right-top':   'upper-right corner',
+  'right-middle':'right side, vertically centered',
+  'right-bottom':'lower-right corner',
+};
+
+function buildSpatialHints(hotspots: HotspotPromptInfo[]): Map<string, string> {
+  const hints = new Map<string, string>();
+
+  if (hotspots.length === 0) return hints;
+
+  // Group by zone
+  const byZone = new Map<string, HotspotPromptInfo[]>();
+  for (const h of hotspots) {
+    const list = byZone.get(h.positionZone) ?? [];
+    list.push(h);
+    byZone.set(h.positionZone, list);
+  }
+
+  for (const h of hotspots) {
+    const parts: string[] = [];
+
+    // 1. Zone quadrant description
+    const zoneDesc = ZONE_LABELS[h.positionZone];
+    if (zoneDesc) parts.push(`Positioned in the ${zoneDesc} of the scene.`);
+
+    // 2. Ordering within the same zone (left/right/top/bottom)
+    const zoneMates = byZone.get(h.positionZone) ?? [];
+    if (zoneMates.length > 1) {
+      // Sort by x (left→right)
+      const sorted = [...zoneMates].sort((a, b) => a.position.x - b.position.x);
+      const idx = sorted.findIndex(x => x.id === h.id);
+
+      // Sort by y (top→bottom)
+      const sortedY = [...zoneMates].sort((a, b) => a.position.y - b.position.y);
+      const idxY = sortedY.findIndex(x => x.id === h.id);
+
+      if (sorted.length > 1) {
+        if (idx === 0) parts.push('It is the leftmost object in this area.');
+        else if (idx === sorted.length - 1) parts.push('It is the rightmost object in this area.');
+        else parts.push(`There are objects to both its left and right in this area.`);
+      }
+
+      if (sortedY.length > 1 && idxY !== idx) {
+        if (idxY === 0) parts.push('It is the topmost object in this area.');
+        else if (idxY === sortedY.length - 1) parts.push('It is the bottommost object in this area.');
+      }
+    }
+
+    // 3. Spatial relationships with hotspots in different zones
+    const otherZones = [...byZone.entries()].filter(([zone]) => zone !== h.positionZone);
+    for (const [otherZone, others] of otherZones) {
+      if (others.length === 0) continue;
+      // Use first hotspot in the other zone as anchor
+      const anchor = others[0];
+      const [myCol] = h.positionZone.split('-');
+      const [otherCol] = otherZone.split('-');
+
+      const colOrder = ['left', 'center', 'right'];
+      const myColIdx = colOrder.indexOf(myCol);
+      const otherColIdx = colOrder.indexOf(otherCol);
+
+      if (myColIdx < otherColIdx) {
+        parts.push(`It should be to the LEFT of the ${ZONE_LABELS[otherZone] ?? otherZone} area.`);
+      } else if (myColIdx > otherColIdx) {
+        parts.push(`It should be to the RIGHT of the ${ZONE_LABELS[otherZone] ?? otherZone} area.`);
+      }
+    }
+
+    if (parts.length > 0) {
+      hints.set(h.id, parts.join(' '));
+    }
+  }
+
+  return hints;
+}
+
 interface StructuredPrompt {
   role: string;
   metadata: {
@@ -215,6 +300,7 @@ interface StructuredPrompt {
     details: {
       action: string;
       visual_description: string;
+      spatial_hint?: string;
     };
   }>;
 }
@@ -298,8 +384,9 @@ export function buildRichBackgroundPrompt(
     };
   }
 
-  // Interactive objects with pixel-precise coordinates
+  // Interactive objects with pixel-precise coordinates + spatial hints
   if (gameContext.hotspots.length > 0) {
+    const spatialHints = buildSpatialHints(gameContext.hotspots);
     prompt.interactive_objects = gameContext.hotspots.map(h => ({
       id: h.id,
       properties: {
@@ -311,6 +398,7 @@ export function buildRichBackgroundPrompt(
       details: {
         action: h.actionType,
         visual_description: describeHotspotVisual(h),
+        spatial_hint: spatialHints.get(h.id),
       },
     }));
   }
