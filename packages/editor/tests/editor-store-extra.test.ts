@@ -13,6 +13,7 @@ function resetStore() {
       activePanel: 'scene',
       editorLocale: 'ko',
       previewLocale: 'ko',
+      isFullscreen: false,
       zoom: 1.0,
       previewVisible: false,
       previewHeight: 280,
@@ -415,6 +416,16 @@ describe('EditorStore — additional coverage', () => {
     it('changes preview locale', () => {
       useEditorStore.getState().setPreviewLocale('en');
       expect(useEditorStore.getState().ui.previewLocale).toBe('en');
+    });
+  });
+
+  describe('setFullscreen', () => {
+    it('updates fullscreen UI state', () => {
+      useEditorStore.getState().setFullscreen(true);
+      expect(useEditorStore.getState().ui.isFullscreen).toBe(true);
+
+      useEditorStore.getState().setFullscreen(false);
+      expect(useEditorStore.getState().ui.isFullscreen).toBe(false);
     });
   });
 

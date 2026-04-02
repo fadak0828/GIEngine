@@ -21,6 +21,7 @@ export const defaultUI: UIState = {
   activePanel: 'scene',
   editorLocale: 'ko',
   previewLocale: 'ko',
+  isFullscreen: false,
   zoom: 1.0,
   previewVisible: false,
   previewHeight: 280,
@@ -49,6 +50,7 @@ export type SelectionSlice = {
   setActivePanel: (panel: ActivePanel) => void;
   setEditorLocale: (locale: Locale) => void;
   setPreviewLocale: (locale: Locale) => void;
+  setFullscreen: (fullscreen: boolean) => void;
   setZoom: (zoom: number) => void;
   setPreviewVisible: (visible: boolean) => void;
   setPreviewHeight: (height: number) => void;
@@ -99,6 +101,10 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   setPreviewLocale: (locale) => {
     set(state => ({ ui: { ...state.ui, previewLocale: locale } }));
+  },
+
+  setFullscreen: (fullscreen) => {
+    set(state => ({ ui: { ...state.ui, isFullscreen: fullscreen } }));
   },
 
   setZoom: (zoom) => {

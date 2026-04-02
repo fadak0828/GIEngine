@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEditorStore, useCanUndo, useCanRedo } from '@/store/editor-store';
 import { ExportModal } from '@/components/export/ExportModal';
 import { AISettingsModal } from '@/components/ai/AISettings';
@@ -10,12 +10,23 @@ export function Toolbar(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const meta = useEditorStore(s => s.meta);
   const ui = useEditorStore(s => s.ui);
-  const { newProject, saveProject, setEditorLocale, undo, redo, openInterview, openQuickCreate } = useEditorStore();
+  const { newProject, saveProject, setEditorLocale, undo, redo, openInterview, openQuickCreate, setFullscreen, showNotification } = useEditorStore();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
+  const fullscreenSupported = document.fullscreenEnabled && typeof document.documentElement.requestFullscreen === 'function';
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      setFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    syncFullscreenState();
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreenState);
+  }, [setFullscreen]);
 
   const handleOpen = () => {
     const input = document.createElement('input');
@@ -37,6 +48,19 @@ export function Toolbar(): React.ReactElement {
       }
     };
     input.click();
+  };
+
+  const handleToggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        return;
+      }
+
+      await document.documentElement.requestFullscreen();
+    } catch {
+      showNotification('Failed to switch fullscreen mode.', 'error');
+    }
   };
 
   return (
@@ -111,6 +135,17 @@ export function Toolbar(): React.ReactElement {
         aria-disabled={!canRedo}
       >
         ↪ 복구
+      </button>
+
+      <button
+        onClick={handleToggleFullscreen}
+        disabled={!fullscreenSupported}
+        style={{ ...btnStyle, opacity: fullscreenSupported ? 1 : 0.4 }}
+        title={ui.isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        aria-label={ui.isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        aria-pressed={ui.isFullscreen}
+      >
+        {ui.isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
       </button>
 
       <div style={{ flex: 1 }} />

@@ -619,6 +619,53 @@ export class Renderer {
     const right = document.createElement('div');
     right.className = 'gi-controls-right';
 
+    // Fullscreen toggle button (mobile-friendly)
+    const fullscreenBtn = document.createElement('button');
+    fullscreenBtn.className = 'gi-hud-btn gi-hud-btn--fullscreen';
+    fullscreenBtn.setAttribute('aria-label', 'Toggle fullscreen');
+    fullscreenBtn.title = '전체화면';
+
+    // Fullscreen icon (expand arrows)
+    fullscreenBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        const target = document.fullscreenEnabled
+          ? document.documentElement
+          : this.container.parentElement ?? document.documentElement;
+        if (target.requestFullscreen) {
+          target.requestFullscreen().catch(() => {
+            // Fallback: scale to fill window when fullscreen API unavailable
+            this.container.style.position = 'fixed';
+            this.container.style.top = '0';
+            this.container.style.left = '0';
+            this.container.style.width = '100vw';
+            this.container.style.height = '100vh';
+            this.container.style.zIndex = '9999';
+          });
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    });
+
+    // Update icon based on current fullscreen state
+    const updateFullscreenIcon = () => {
+      if (document.fullscreenElement) {
+        fullscreenBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`;
+        fullscreenBtn.title = '전체화면 종료';
+      } else {
+        fullscreenBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+        fullscreenBtn.title = '전체화면';
+      }
+    };
+
+    updateFullscreenIcon();
+    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+    right.appendChild(fullscreenBtn);
     controls.appendChild(right);
 
     this.controlsEl = controls;

@@ -21,6 +21,7 @@ function resetStore() {
       activePanel: 'scene',
       editorLocale: 'ko',
       previewLocale: 'ko',
+      isFullscreen: false,
       zoom: 1.0,
       previewVisible: false,
       previewHeight: 280,

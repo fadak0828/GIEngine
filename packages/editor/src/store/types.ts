@@ -77,6 +77,7 @@ export interface UIState {
   activePanel: ActivePanel;
   editorLocale: Locale;
   previewLocale: Locale;
+  isFullscreen: boolean;
   zoom: number;
   previewVisible: boolean;
   previewHeight: number;
@@ -202,6 +203,7 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice, ItchSlice
   setActivePanel: (panel: ActivePanel) => void;
   setEditorLocale: (locale: Locale) => void;
   setPreviewLocale: (locale: Locale) => void;
+  setFullscreen: (fullscreen: boolean) => void;
   setZoom: (zoom: number) => void;
   setPreviewVisible: (visible: boolean) => void;
   setPreviewHeight: (height: number) => void;
