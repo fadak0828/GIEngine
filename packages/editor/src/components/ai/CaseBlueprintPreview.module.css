@@ -1,0 +1,453 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1003;
+  width: min(680px, 96vw);
+  height: min(85vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+}
+
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.headerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  margin-top: var(--space-2xs);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.closeButton {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.closeButton:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+}
+
+.progressCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.progressStep {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.progressPercent {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressTrack {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--bg-secondary);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width var(--duration-medium) var(--ease-move);
+}
+
+.errorBox {
+  margin-bottom: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  background: rgba(196, 64, 64, 0.12);
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.metaBlock {
+  margin-bottom: 14px;
+}
+
+.blueprintTitle {
+  margin-bottom: var(--space-xs);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Instrument Serif', serif;
+}
+
+.blueprintDescription {
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.metaBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.accentBadge {
+  border-color: var(--accent-dim);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.section {
+  margin-bottom: var(--space-sm);
+  padding: 10px var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+}
+
+.sectionTitle {
+  margin-bottom: var(--space-sm);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.characterList,
+.sceneList,
+.puzzleList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wordList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mainPuzzleTitle {
+  margin-bottom: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.mainPuzzleDescription {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.requiredWords {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.puzzleItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-lg) var(--space-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.backgroundOption {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 11px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.backgroundCheckbox {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.ghostButton,
+.primaryButton {
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  transition: background var(--duration-short) var(--ease-enter);
+}
+
+.ghostButton {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.ghostButton:hover:not(:disabled) {
+  background: var(--bg-card);
+}
+
+.primaryButton {
+  min-width: 100px;
+  border: 0;
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  padding: 7px 18px;
+  cursor: pointer;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.buttonDisabled,
+.ghostButton:disabled,
+.primaryButton:disabled,
+.closeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.characterRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.characterBody {
+  flex: 1;
+}
+
+.characterTitle {
+  margin-bottom: var(--space-2xs);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.roleLabel {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.characterDescription {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.alibi {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.roleDot {
+  width: 6px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.roleCulprit {
+  color: var(--danger);
+  background: var(--danger);
+}
+
+.roleVictim {
+  color: var(--warning);
+  background: var(--warning);
+}
+
+.roleSuspect {
+  color: var(--partial);
+  background: var(--partial);
+}
+
+.roleWitness {
+  color: var(--success);
+  background: var(--success);
+}
+
+.roleDefault {
+  color: var(--text-muted);
+  background: var(--text-muted);
+}
+
+.sceneCard {
+  padding: 7px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+}
+
+.sceneToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sceneArrow {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.sceneName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sceneMetaBadge {
+  margin-left: auto;
+}
+
+.sceneExpanded {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.sceneDescription {
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.sceneConnections {
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.hotspotList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.hotspotRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.hotspotType {
+  font-size: 9px;
+}
+
+.hotspotHint {
+  color: var(--text-muted);
+}
+
+.wordTag {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.wordDisplay {
+  font-weight: 500;
+}
+
+.wordCategory {
+  font-size: 9px;
+  color: var(--text-muted);
+}
