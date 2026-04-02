@@ -14,8 +14,13 @@ export type {
   PuzzleGenerateRequest,
   PuzzleGenerateResult,
 } from './types.js';
+export type {
+  HotspotImageGenerateRequest,
+  HotspotImageGenerateResult,
+} from './generators/hotspot-generator.js';
 
 export { generateBackground } from './generators/background-generator.js';
+export { generateHotspotImage } from './generators/hotspot-generator.js';
 export { generateStory } from './generators/story-generator.js';
 export { generatePuzzle } from './generators/puzzle-generator.js';
 
