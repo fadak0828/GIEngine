@@ -1,0 +1,60 @@
+name: Create Issue on CI Failure
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-issue:
+    name: Create Issue on CI Failure
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - name: Download workflow run data
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowRun = context.payload.workflow_run;
+            const workflowName = workflowRun.name;
+            const runId = workflowRun.id;
+            const runUrl = workflowRun.html_url;
+            const sha = workflowRun.head_sha;
+            const actor = workflowRun.actor.login;
+            const branch = workflowRun.head_branch;
+            const event = workflowRun.event;
+
+            // Extract job failures from the run
+            const jobsUrl = workflowRun.jobs_url;
+
+            // Build issue body
+            const body = `## CI/CD 파이프라인 실패 알림
+
+### 실행 정보
+- **Workflow**: ${workflowName}
+- **Branch**: ${branch}
+- **Trigger**: ${event}
+- **시작한 사람**: @${actor}
+- **Run URL**: [Run #${runId}](${runUrl})
+- **Commit SHA**: \`${sha}\`
+
+### 조치 필요
+CI 파이프라인이 실패했습니다. 위 Run URL에서 실패 원인을 확인하고 수정해주세요.
+
+### 자동 등록
+이 이슈는 GitHub Actions CI 워크플로우 실패 시 자동으로 생성되었습니다.`;
+
+            // Create issue
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔴 CI 실패: ${workflowName} (${branch})`,
+              body: body,
+              labels: ["ci-failure", "automated"]
+            });
+
+            console.log(`Created issue #${created.data.number}: ${created.data.html_url}`);
