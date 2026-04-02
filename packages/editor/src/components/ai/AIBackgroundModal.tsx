@@ -497,8 +497,6 @@ export function AIBackgroundModal({
     }
   }, [autoPrompt, isPromptManuallyEdited]);
 
-  if (!open) return null;
-
   // Reset new state when modal closes
   useEffect(() => {
     return () => {
@@ -506,6 +504,8 @@ export function AIBackgroundModal({
       setHotspotGenProgress(null);
     };
   }, []);
+
+  if (!open) return null;
 
   const hotspotContexts = computeHotspotContextsInline(sceneDimensions, hotspots, locale);
 
