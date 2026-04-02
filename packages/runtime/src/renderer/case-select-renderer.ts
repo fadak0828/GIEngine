@@ -41,6 +41,11 @@ export class CaseSelectRenderer {
     title.textContent = this.i18n.resolveKey('ui.case_select');
     root.appendChild(title);
 
+    const subtitle = document.createElement('p');
+    subtitle.className = 'gi-case-select-subtitle';
+    subtitle.textContent = this.i18n.resolveKey('ui.welcome_subtitle');
+    root.appendChild(subtitle);
+
     const grid = document.createElement('div');
     grid.className = 'gi-case-grid';
 

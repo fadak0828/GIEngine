@@ -33,6 +33,8 @@ const ENGINE_TEXTS: Record<string, LocalizedText> = {
   'ui.puzzle_tab_scenario': { ko: '시나리오', en: 'Scenario' },
   'ui.close_overlay': { ko: '닫기', en: 'Close' },
   'ui.close_puzzle_confirm': { ko: '풀이 중인 내용이 있습니다. 정말 닫으시겠습니까?', en: 'You have unsaved progress. Close anyway?' },
+  'ui.welcome_title': { ko: '추리 게임 엔진', en: 'Detective Game Engine' },
+  'ui.welcome_subtitle': { ko: '탐색하고, 추리하고, 사건을 해결하세요', en: 'Explore, deduce, and solve the case' },
 };
 
 export class I18nManager {
