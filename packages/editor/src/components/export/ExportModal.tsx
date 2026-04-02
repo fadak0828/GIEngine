@@ -45,9 +45,6 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
     return validateProjectDefinition(project, words);
   }, [project, words]);
 
-  if (!open) return null;
-
-  const fileName = `${project?.id ?? 'game'}.html`;
   const isExporting = phase === 'exporting';
 
   const handleClose = () => {
@@ -61,6 +58,10 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
   };
 
   useDialogFocusTrap(open, dialogRef, handleClose);
+
+  if (!open) return null;
+
+  const fileName = `${project?.id ?? 'game'}.html`;
 
   const handleExport = async () => {
     if (!project) return;

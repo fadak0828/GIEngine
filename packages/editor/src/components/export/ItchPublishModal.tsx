@@ -48,6 +48,14 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
     }
   }, [open, itch.credentials, itch.publishConfig]);
 
+  const handleClose = () => {
+    setPhase('config');
+    setErrorMessage(null);
+    onClose();
+  };
+
+  useDialogFocusTrap(open, dialogRef, handleClose);
+
   if (!open || !project) return null;
 
   const gameDef = project as GameDefinition;
@@ -170,14 +178,6 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
       setTimeout(() => setCopied(null), 2000);
     });
   };
-
-  const handleClose = () => {
-    setPhase('config');
-    setErrorMessage(null);
-    onClose();
-  };
-
-  useDialogFocusTrap(open, dialogRef, handleClose);
 
   const modalStyle: React.CSSProperties = {
     position: 'fixed',

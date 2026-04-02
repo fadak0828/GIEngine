@@ -12,9 +12,11 @@ import { WordManagerPanel } from '@/components/words/WordManagerPanel';
 import { ValidationPanel } from '@/components/validation/ValidationPanel';
 import { AssetManagerPanel } from '@/components/assets/AssetManagerPanel';
 import { useEditorStore } from '@/store/editor-store';
+import { useViewportBreakpoint } from '@/hooks/useViewportBreakpoint';
 
 export function MainLayout(): React.ReactElement {
   const ui = useEditorStore(s => s.ui);
+  const { isMobile } = useViewportBreakpoint();
 
   const panelId = ui.activePanel === 'assets' ? 'panel-assets'
     : ui.activePanel === 'words' ? 'panel-words'
@@ -38,19 +40,21 @@ export function MainLayout(): React.ReactElement {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <Toolbar />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-        {/* Left panel */}
-        <div style={{
-          width: ui.leftPanelWidth,
-          minWidth: 180,
-          background: 'var(--bg-panel)',
-          borderRight: '1px solid var(--border-color)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }}>
-          <ProjectTree />
-        </div>
+        {/* Left panel — hidden on mobile */}
+        {!isMobile && (
+          <div style={{
+            width: ui.leftPanelWidth,
+            minWidth: 180,
+            background: 'var(--bg-panel)',
+            borderRight: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}>
+            <ProjectTree />
+          </div>
+        )}
 
         {/* Center panel */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
@@ -61,19 +65,21 @@ export function MainLayout(): React.ReactElement {
           <PreviewPane />
         </div>
 
-        {/* Right panel */}
-        <div style={{
-          width: ui.rightPanelWidth,
-          minWidth: 240,
-          background: 'var(--bg-panel)',
-          borderLeft: '1px solid var(--border-color)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }}>
-          <PropertiesPanel />
-        </div>
+        {/* Right panel — hidden on mobile */}
+        {!isMobile && (
+          <div style={{
+            width: ui.rightPanelWidth,
+            minWidth: 240,
+            background: 'var(--bg-panel)',
+            borderLeft: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}>
+            <PropertiesPanel />
+          </div>
+        )}
       </div>
       <ShortcutHelpModal />
     </div>

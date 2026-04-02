@@ -942,6 +942,95 @@
   }
 }
 
+/* --- Mobile UI Adjustments (≤599px) --- */
+@media (max-width: 599px) {
+  /* Puzzle Bar: tighter spacing, icon-only on very small screens */
+  .gi-puzzle-bar {
+    padding: 0.35rem 0.5rem;
+    gap: 0.3rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .gi-puzzle-tab {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.7rem;
+    gap: 0.25rem;
+  }
+
+  .gi-puzzle-tab-label {
+    max-width: 60px;
+  }
+
+  /* Word Bank: tighter padding, better wrapping */
+  .gi-word-bank {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .gi-word {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.8rem;
+  }
+
+  /* Case Select: tighter padding */
+  .gi-case-select {
+    padding: 1rem;
+  }
+
+  .gi-case-select-title {
+    font-size: 1.25rem;
+  }
+
+  .gi-case-grid {
+    gap: 0.5rem;
+  }
+
+  /* Case Card: tighter padding */
+  .gi-case-card {
+    padding: 0.75rem;
+  }
+
+  /* Puzzle Overlay: smaller padding, narrower max-width */
+  .gi-puzzle-overlay {
+    padding: 0.75rem;
+  }
+
+  .gi-puzzle-overlay-close {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  /* Popup: smaller padding */
+  .gi-popup {
+    padding: 0.75rem;
+    max-width: calc(100vw - 2rem);
+  }
+
+  /* Sub-puzzle: tighter padding */
+  .gi-sub-puzzle {
+    padding: 0.75rem;
+  }
+}
+
+/* --- Very Small Phones (≤374px) --- */
+@media (max-width: 374px) {
+  .gi-puzzle-tab-label {
+    display: none;
+  }
+
+  .gi-puzzle-tab {
+    padding: 0.5rem 0.55rem;
+    min-width: 36px;
+    justify-content: center;
+  }
+
+  .gi-word {
+    padding: 0.25rem 0.45rem;
+    font-size: 0.75rem;
+  }
+}
+
 /* --- Validation Result Banner --- */
 .gi-validation-banner {
   text-align: center;
