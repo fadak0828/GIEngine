@@ -332,7 +332,7 @@ export function LayerPanel({
                         flexShrink: 0,
                       }}
                       onMouseEnter={e =>
-                        (e.currentTarget.style.color = 'var(--danger)')
+                        (e.currentTarget.style.color = 'var(--danger-text)')
                       }
                       onMouseLeave={e =>
                         (e.currentTarget.style.color = 'var(--text-muted)')

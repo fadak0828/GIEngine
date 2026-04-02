@@ -289,7 +289,7 @@ export function SceneProperties({
                     padding: '5px 8px',
                     fontSize: 11,
                     background: 'transparent',
-                    color: 'var(--danger)',
+                    color: 'var(--danger-text)',
                     border: '1px solid var(--danger)',
                     borderRadius: 3,
                     cursor: 'pointer',
@@ -403,7 +403,7 @@ export function SceneProperties({
                     padding: '5px 8px',
                     fontSize: 11,
                     background: 'transparent',
-                    color: 'var(--danger)',
+                    color: 'var(--danger-text)',
                     border: '1px solid var(--danger)',
                     borderRadius: 3,
                     cursor: 'pointer',
@@ -665,7 +665,7 @@ function OnEnterActionRow({
             cursor: 'pointer',
             flexShrink: 0,
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger-text)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
         >
           ✕

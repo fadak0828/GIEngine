@@ -220,7 +220,7 @@ export function AISettingsModal({ open, onClose }: AISettingsModalProps): React.
                 padding: '5px 12px',
                 fontSize: 11,
                 background: 'transparent',
-                color: '#ef4444',
+                color: 'var(--danger-text)',
                 border: '1px solid rgba(239,68,68,0.3)',
                 borderRadius: 3,
                 cursor: 'pointer',

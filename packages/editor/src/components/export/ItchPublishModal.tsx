@@ -260,7 +260,7 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
             {/* Page ID */}
             <div style={{ marginBottom: 12 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-                itch.io Page ID <span style={{ color: 'var(--danger)' }}>*</span>
+                itch.io Page ID <span style={{ color: 'var(--danger-text)' }}>*</span>
               </label>
               <input
                 type="text"

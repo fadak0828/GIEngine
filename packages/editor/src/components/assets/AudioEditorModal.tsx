@@ -381,7 +381,7 @@ export function AudioEditorModal({ asset, onSave, onClose }: AudioEditorModalPro
             </div>
           )}
           {error && (
-            <div style={{ padding: 16, color: 'var(--danger)', fontSize: 12, background: 'rgba(196,64,64,0.1)', borderRadius: 4 }}>
+            <div style={{ padding: 16, color: 'var(--danger-text)', fontSize: 12, background: 'rgba(196,64,64,0.1)', borderRadius: 4 }}>
               {error}
             </div>
           )}
@@ -474,7 +474,7 @@ export function AudioEditorModal({ asset, onSave, onClose }: AudioEditorModalPro
                   style={{
                     padding: '6px 16px', fontSize: 13, fontWeight: 600,
                     background: isPlaying ? 'rgba(196,64,64,0.15)' : 'var(--accent-dim)',
-                    color: isPlaying ? 'var(--danger)' : 'var(--accent)',
+                    color: isPlaying ? 'var(--danger-text)' : 'var(--accent)',
                     border: `1px solid ${isPlaying ? 'var(--danger)' : 'var(--accent)'}`,
                     borderRadius: 4, cursor: 'pointer',
                   }}

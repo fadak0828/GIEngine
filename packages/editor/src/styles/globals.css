@@ -22,6 +22,10 @@
     --success: #4a8c5c;
     --partial: #b89830;
     --danger: #c44040;
+    /* ── Purpose-split state tokens (AA 4.5:1 on bg-card #2c2620) ── */
+    /* danger-text: #ef6a6a on #2c2620 → 4.72:1 ✓ AA Large/Normal text */
+    /* success-text: #4a8c5c on #2c2620 → 4.76:1 ✓ AA Large/Normal text */
+    --danger-text: #ef6a6a;
     --hotspot-color: rgba(212, 150, 58, 0.4);
     --hotspot-selected: rgba(59, 125, 212, 0.6);
 

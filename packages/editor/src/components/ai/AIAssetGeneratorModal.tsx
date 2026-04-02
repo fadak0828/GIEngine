@@ -451,7 +451,7 @@ export function AIAssetGeneratorModal({
             marginBottom: 12, padding: '8px 10px',
             background: 'rgba(239,68,68,0.1)',
             border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: 3, fontSize: 12, color: '#ef4444',
+            borderRadius: 3, fontSize: 12, color: 'var(--danger-text)',
           }}>
             {error}
           </div>

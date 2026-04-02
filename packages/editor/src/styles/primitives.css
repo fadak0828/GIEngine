@@ -55,7 +55,7 @@
   border: 1px solid rgba(196, 64, 64, 0.3);
   border-radius: var(--radius-sm);
   font-size: 12px;
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .alert-warning {
@@ -193,7 +193,7 @@
 
 .chip-danger {
   border-color: var(--danger);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .chip-multi {

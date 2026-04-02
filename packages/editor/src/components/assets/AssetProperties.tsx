@@ -387,7 +387,7 @@ export function AssetProperties(): React.ReactElement | null {
             background: 'transparent',
             border: '1px solid var(--danger)',
             borderRadius: 3,
-            color: 'var(--danger)',
+            color: 'var(--danger-text)',
             cursor: 'pointer',
             fontWeight: 600,
           }}

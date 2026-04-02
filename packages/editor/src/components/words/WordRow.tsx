@@ -228,7 +228,7 @@ export function WordRow({ word, connectionCount }: WordRowProps): React.ReactEle
           padding: '2px 5px',
           fontSize: 11,
           background: 'transparent',
-          color: connectionCount > 0 ? 'var(--text-muted)' : 'var(--danger)',
+          color: connectionCount > 0 ? 'var(--text-muted)' : 'var(--danger-text)',
           border: '1px solid var(--border-color)',
           borderRadius: 'var(--radius-sm)',
           cursor: 'pointer',

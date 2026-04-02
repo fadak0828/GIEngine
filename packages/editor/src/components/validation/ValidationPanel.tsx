@@ -51,7 +51,7 @@ export function ValidationPanel(): React.ReactElement {
           padding: '1px 6px',
           borderRadius: 10,
           background: result.isValid ? 'rgba(74,222,128,0.15)' : 'rgba(196,64,64,0.15)',
-          color: result.isValid ? 'var(--success)' : 'var(--danger)',
+          color: result.isValid ? 'var(--success-text)' : 'var(--danger-text)',
           fontWeight: 600,
         }}>
           {result.isValid ? '✓ 정상' : `오류 ${result.errorCount}`}
@@ -99,7 +99,7 @@ export function ValidationPanel(): React.ReactElement {
               <span style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: issue.severity === 'error' ? 'var(--danger)' : 'var(--partial)',
+                color: issue.severity === 'error' ? 'var(--danger-text)' : 'var(--partial)',
                 flexShrink: 0,
                 marginTop: 1,
               }}>

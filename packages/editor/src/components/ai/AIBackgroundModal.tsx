@@ -690,7 +690,7 @@ export function AIBackgroundModal({
             border: '1px solid rgba(239,68,68,0.3)',
             borderRadius: 3,
             fontSize: 12,
-            color: '#ef4444',
+            color: 'var(--danger-text)',
           }}>
             {error}
           </div>

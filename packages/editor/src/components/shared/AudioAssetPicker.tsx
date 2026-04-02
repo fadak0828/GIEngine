@@ -152,7 +152,7 @@ export function AudioAssetPicker({ assetId, onChange }: AudioAssetPickerProps): 
       </div>
 
       {uploadError && (
-        <div style={{ fontSize: 10, color: 'var(--danger)', marginTop: 2 }}>
+        <div style={{ fontSize: 10, color: 'var(--danger-text)', marginTop: 2 }}>
           {uploadError}
         </div>
       )}

@@ -104,7 +104,7 @@ export function AIPuzzleGenerator({ caseId, caseTitle, caseDescription }: AIPuzz
           border: '1px solid rgba(196,64,64,0.3)',
           borderRadius: 'var(--radius-sm)',
           fontSize: 12,
-          color: 'var(--danger)',
+          color: 'var(--danger-text)',
         }}>
           {errorMessage}
         </div>

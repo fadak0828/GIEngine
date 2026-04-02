@@ -26,7 +26,7 @@ const smallBtnStyle: React.CSSProperties = {
 
 const dangerBtnStyle: React.CSSProperties = {
   ...smallBtnStyle,
-  color: 'var(--danger)',
+  color: 'var(--danger-text)',
   borderColor: 'var(--danger)',
 };
 

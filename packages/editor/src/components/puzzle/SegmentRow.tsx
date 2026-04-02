@@ -49,7 +49,7 @@ const iconBtn: React.CSSProperties = {
 
 const deleteBtn: React.CSSProperties = {
   ...iconBtn,
-  color: 'var(--danger)',
+  color: 'var(--danger-text)',
   border: '1px solid rgba(196,64,64,0.4)',
 };
 
