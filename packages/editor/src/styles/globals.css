@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./primitives.css";
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap");
 
 @layer base {
@@ -12,7 +13,7 @@
     --border-light: #4d4438;
     --text-primary: #e8e0d4;
     --text-secondary: #a89880;
-    --text-muted: #6d6050;
+    --text-muted: #9c8c77;
     --accent: #d4963a;
     --accent-hover: #e0a84a;
     --accent-dim: #5c3d14;

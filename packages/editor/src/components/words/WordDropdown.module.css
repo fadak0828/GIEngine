@@ -1,0 +1,53 @@
+/* WordDropdown.module.css — primitives.css imported globally via globals.css */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.optionText {
+  font-weight: 500;
+}
+
+.optionSub {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.optionBadge {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+}
+
+.optionCheck {
+  composes: dropdown-option-check from '@/styles/primitives.css';
+}
+
+.multiTrigger {
+  composes: dropdown-trigger from '@/styles/primitives.css';
+  flex-wrap: wrap;
+  min-height: 34px;
+}
+
+.addWordBtn {
+  padding: 3px 8px;
+  font-size: 11px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.warning {
+  font-size: 11px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}

@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/shallow';
 import { useEditorStore } from '@/store/editor-store';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import type { Scene } from '@gi-engine/core';
+import s from './SceneDropdown.module.css';
 
 interface SceneDropdownProps {
   caseId: string;
@@ -102,62 +103,31 @@ export function SceneDropdown(props: SceneDropdownProps): React.ReactElement {
   };
 
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: 6, position: 'relative' }}>
+    <div ref={containerRef} className={s.root}>
       {props.label && (
-        <label
-          id={labelId}
-          style={{
-            fontSize: 11,
-            color: 'var(--text-secondary)',
-            fontWeight: 500,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}
-        >
+        <label id={labelId} className="field-label">
           {props.label}
         </label>
       )}
 
-        <div
-          ref={triggerRef}
-          onClick={() => setIsOpen(prev => !prev)}
-          onKeyDown={handleTriggerKeyDown}
-          tabIndex={0}
-          role="combobox"
-          aria-expanded={isOpen}
-          aria-haspopup="listbox"
-          aria-controls={listboxId}
-          aria-labelledby={props.label ? labelId : undefined}
-          aria-label={props.label ? undefined : '씬 선택'}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-          gap: 4,
-          padding: 6,
-          border: '1px solid var(--border-color)',
-          borderRadius: 4,
-          background: 'var(--bg-card)',
-          minHeight: 34,
-          cursor: 'pointer',
-        }}
+      <div
+        ref={triggerRef}
+        onClick={() => setIsOpen(prev => !prev)}
+        onKeyDown={handleTriggerKeyDown}
+        tabIndex={0}
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-labelledby={props.label ? labelId : undefined}
+        aria-label={props.label ? undefined : '씬 선택'}
+        className="dropdown-trigger"
       >
         {props.sceneId === '' ? (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', userSelect: 'none' }}>
-            Select scene...
-          </span>
+          <span className="dropdown-placeholder">Select scene...</span>
         ) : (
           <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '2px 6px',
-              borderRadius: 3,
-              fontSize: 11,
-              border: `1px solid ${isDangling ? 'var(--danger)' : 'var(--accent)'}`,
-              color: isDangling ? 'var(--danger)' : 'var(--text-primary)',
-              background: 'transparent',
-            }}
+            className={`chip${isDangling ? ' danger' : ''}`}
           >
             {selectedScene ? getSceneName(selectedScene) : `(Unknown - ${props.sceneId})`}
             {selectedScene && (
@@ -168,16 +138,7 @@ export function SceneDropdown(props: SceneDropdownProps): React.ReactElement {
             <button
               type="button"
               onClick={handleClear}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: isDangling ? 'var(--danger)' : 'var(--text-muted)',
-                padding: 0,
-                lineHeight: 1,
-                fontSize: 12,
-                fontWeight: 700,
-              }}
+              className="chip-clear"
               title="Clear"
               aria-label="선택된 씬 제거"
             >
@@ -192,24 +153,9 @@ export function SceneDropdown(props: SceneDropdownProps): React.ReactElement {
           id={listboxId}
           role="listbox"
           aria-label="씬 목록"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 50,
-            marginTop: 2,
-            border: '1px solid var(--border-color)',
-            borderRadius: 4,
-            background: 'var(--bg-card)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            maxHeight: 240,
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
+          className="dropdown-panel"
         >
-          <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border-color)' }}>
+          <div className="dropdown-search-row">
             <input
               ref={searchRef}
               type="text"
@@ -230,28 +176,14 @@ export function SceneDropdown(props: SceneDropdownProps): React.ReactElement {
               }}
               placeholder="Search scene..."
               autoFocus
-              style={{
-                width: '100%',
-                padding: '3px 6px',
-                fontSize: 11,
-                background: 'var(--bg-primary)',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 3,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              className="dropdown-search"
             />
           </div>
 
           {caseScenes.length === 0 ? (
-            <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
-              No scenes found in this case.
-            </div>
+            <div className="dropdown-empty">No scenes found in this case.</div>
           ) : filteredScenes.length === 0 ? (
-            <div style={{ padding: '8px 12px', fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>
-              No matching scenes.
-            </div>
+            <div className="dropdown-empty">No matching scenes.</div>
           ) : (
             filteredScenes.map((scene, optionIndex) => {
               const isSelected = props.sceneId === scene.id;
@@ -288,29 +220,13 @@ export function SceneDropdown(props: SceneDropdownProps): React.ReactElement {
                   }}
                   role="option"
                   aria-selected={isSelected}
-                  style={{
-                    width: '100%',
-                    padding: '6px 10px',
-                    border: 'none',
-                    borderBottom: '1px solid var(--border-color)',
-                    background: isSelected ? 'var(--accent-dim)' : 'transparent',
-                    color: 'var(--text-primary)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
+                  className={`dropdown-option${isSelected ? ' dropdown-option-selected' : ''}`}
                 >
                   {isSelected && (
-                    <span style={{ color: 'var(--accent)', fontWeight: 700, flexShrink: 0 }}>
-                      *
-                    </span>
+                    <span className={s.optionCheck}>*</span>
                   )}
-                  <span style={{ fontWeight: 500 }}>{getSceneName(scene)}</span>
-                  <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>
-                    [{scene.id}]
-                  </span>
+                  <span className={s.optionText}>{getSceneName(scene)}</span>
+                  <span className={s.optionId}>[{scene.id}]</span>
                 </button>
               );
             })
