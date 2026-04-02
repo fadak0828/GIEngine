@@ -189,8 +189,8 @@ export function SubPuzzlePanel(): React.ReactElement {
                         onClick={e => { e.stopPropagation(); handleDelete(puzzle.id); }}
                         style={{
                           padding: '1px 5px', fontSize: 10, cursor: 'pointer',
-                          background: 'transparent', color: '#ef4444',
-                          border: '1px solid #ef4444', borderRadius: 2,
+                          background: 'transparent', color: 'var(--danger)',
+                          border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)',
                         }}
                       >
                         확인

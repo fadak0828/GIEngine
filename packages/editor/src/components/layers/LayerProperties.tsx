@@ -117,9 +117,9 @@ export function LayerProperties({ layer, caseId, sceneId }: LayerPropertiesProps
                 padding: '4px 8px',
                 fontSize: 11,
                 background: 'transparent',
-                color: '#ef4444',
-                border: '1px solid #ef4444',
-                borderRadius: 3,
+                color: 'var(--danger)',
+                border: '1px solid var(--danger)',
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
               }}
             >

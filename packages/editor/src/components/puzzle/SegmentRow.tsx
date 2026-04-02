@@ -49,8 +49,8 @@ const iconBtn: React.CSSProperties = {
 
 const deleteBtn: React.CSSProperties = {
   ...iconBtn,
-  color: '#ef4444',
-  border: '1px solid rgba(239,68,68,0.4)',
+  color: 'var(--danger)',
+  border: '1px solid rgba(196,64,64,0.4)',
 };
 
 export function SegmentRow({

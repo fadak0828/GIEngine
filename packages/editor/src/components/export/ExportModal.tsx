@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { validateProjectDefinition } from '@gi-engine/core';
 import { ItchPublishModal } from './ItchPublishModal.js';
+import '@/styles/primitives.css';
 
 // Inline type to avoid compile-time dependency on @gi-engine/exporter
 interface BrowserExportResult {
@@ -107,48 +108,22 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
       {/* Backdrop */}
       <div
         onClick={handleClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.6)',
-          zIndex: 1000,
-          cursor: isExporting ? 'not-allowed' : 'pointer',
-        }}
+        className="modal-backdrop"
+        style={{ cursor: isExporting ? 'not-allowed' : 'pointer' }}
       />
 
       {/* Modal */}
-      <div style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 480,
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        background: 'var(--bg-panel)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 8,
-        padding: 20,
-        zIndex: 1001,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      }}>
+      <div className="modal-shell" style={{ width: 480, maxHeight: '90vh', overflowY: 'auto', padding: 20, zIndex: 1001 }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div className="modal-header">
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             📤 HTML 익스포트
           </div>
           <button
             onClick={handleClose}
             disabled={isExporting}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: isExporting ? 'not-allowed' : 'pointer',
-              fontSize: 18,
-              padding: 0,
-              lineHeight: 1,
-            }}
+            className="modal-close"
+            style={{ cursor: isExporting ? 'not-allowed' : undefined }}
           >
             ×
           </button>
@@ -165,7 +140,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
             background: 'var(--bg-card)',
             color: 'var(--text-secondary)',
             border: '1px solid var(--border-color)',
-            borderRadius: 3,
+            borderRadius: 'var(--radius-sm)',
           }}>
             {fileName}
           </div>
@@ -173,29 +148,13 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
 
         {/* Validation summary */}
         {validation && !validation.isValid && (
-          <div style={{
-            marginBottom: 12,
-            padding: '8px 10px',
-            background: 'rgba(239,68,68,0.1)',
-            border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: 3,
-            fontSize: 12,
-            color: '#ef4444',
-          }}>
+          <div className="alert-error" style={{ marginBottom: 12 }}>
             ⚠ 프로젝트에 오류 {validation.errorCount}개가 있습니다.
             익스포트 전 검증 탭에서 확인하세요.
           </div>
         )}
         {validation && validation.isValid && validation.warningCount > 0 && (
-          <div style={{
-            marginBottom: 12,
-            padding: '8px 10px',
-            background: 'rgba(251,191,36,0.1)',
-            border: '1px solid rgba(251,191,36,0.3)',
-            borderRadius: 3,
-            fontSize: 12,
-            color: '#fbbf24',
-          }}>
+          <div className="alert-warning" style={{ marginBottom: 12 }}>
             ⚠ 경고 {validation.warningCount}개가 있습니다. 확인 후 익스포트하세요.
           </div>
         )}
@@ -218,7 +177,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
               background: 'var(--bg-card)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
-              borderRadius: 3,
+              borderRadius: 'var(--radius-sm)',
               outline: 'none',
               boxSizing: 'border-box',
             }}
@@ -241,7 +200,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
               background: 'var(--bg-card)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
-              borderRadius: 3,
+              borderRadius: 'var(--radius-sm)',
               outline: 'none',
               cursor: isExporting ? 'not-allowed' : 'pointer',
             }}
@@ -254,7 +213,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
         {/* Success: size breakdown + share tools */}
         {phase === 'success' && result && (
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 12, color: '#4ade80', marginBottom: 8, fontWeight: 600 }}>
+            <div style={{ fontSize: 12, color: 'var(--success)', marginBottom: 8, fontWeight: 600 }}>
               ✅ 다운로드 완료
             </div>
             <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse', marginBottom: 12 }}>
@@ -290,9 +249,9 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                 padding: '6px 10px',
                 fontSize: 12,
                 background: 'var(--bg-card)',
-                color: copiedHtml ? '#4ade80' : 'var(--text-secondary)',
+                color: copiedHtml ? 'var(--success)' : 'var(--text-secondary)',
                 border: '1px solid var(--border-color)',
-                borderRadius: 3,
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
                 marginBottom: 10,
                 textAlign: 'left',
@@ -312,6 +271,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                 rows={3}
                 value={`<iframe src="YOUR_HOSTED_URL/${result.fileName}" width="960" height="540" frameborder="0" allowfullscreen></iframe>`}
                 onClick={() => embedRef.current?.select()}
+                className="font-mono"
                 style={{
                   width: '100%',
                   padding: '6px 8px',
@@ -319,9 +279,8 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                   background: 'var(--bg-card)',
                   color: 'var(--text-secondary)',
                   border: '1px solid var(--border-color)',
-                  borderRadius: 3,
+                  borderRadius: 'var(--radius-sm)',
                   resize: 'none',
-                  fontFamily: 'monospace',
                   boxSizing: 'border-box',
                 }}
               />
@@ -334,13 +293,14 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                 width: '100%',
                 padding: '6px 10px',
                 fontSize: 12,
-                background: '#ff2449',
-                color: '#fff',
+                background: 'var(--accent)',
+                color: '#000',
                 border: 'none',
-                borderRadius: 3,
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
                 marginTop: 10,
                 textAlign: 'center',
+                fontWeight: 600,
               }}
             >
               🎮 itch.io로 发布하기
@@ -350,15 +310,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
 
         {/* Error */}
         {phase === 'error' && errorMessage && (
-          <div style={{
-            marginBottom: 12,
-            padding: '8px 10px',
-            background: 'rgba(239,68,68,0.1)',
-            border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: 3,
-            fontSize: 12,
-            color: '#ef4444',
-          }}>
+          <div className="alert-error" style={{ marginBottom: 12 }}>
             {errorMessage}
           </div>
         )}
@@ -375,7 +327,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
               background: 'transparent',
               color: 'var(--text-secondary)',
               border: '1px solid var(--border-color)',
-              borderRadius: 3,
+              borderRadius: 'var(--radius-sm)',
               cursor: isExporting ? 'not-allowed' : 'pointer',
             }}
           >
@@ -393,7 +345,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
                 background: !isExporting && project ? 'var(--accent)' : 'var(--bg-card)',
                 color: !isExporting && project ? '#000' : 'var(--text-muted)',
                 border: 'none',
-                borderRadius: 3,
+                borderRadius: 'var(--radius-sm)',
                 cursor: !isExporting && project ? 'pointer' : 'not-allowed',
               }}
             >

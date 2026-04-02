@@ -50,8 +50,8 @@ export function ValidationPanel(): React.ReactElement {
           fontSize: 11,
           padding: '1px 6px',
           borderRadius: 10,
-          background: result.isValid ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)',
-          color: result.isValid ? '#4ade80' : '#ef4444',
+          background: result.isValid ? 'rgba(74,222,128,0.15)' : 'rgba(196,64,64,0.15)',
+          color: result.isValid ? 'var(--success)' : 'var(--danger)',
           fontWeight: 600,
         }}>
           {result.isValid ? '✓ 정상' : `오류 ${result.errorCount}`}
@@ -62,7 +62,7 @@ export function ValidationPanel(): React.ReactElement {
             padding: '1px 6px',
             borderRadius: 10,
             background: 'rgba(251,191,36,0.15)',
-            color: '#fbbf24',
+            color: 'var(--partial)',
             fontWeight: 600,
           }}>
             경고 {result.warningCount}
@@ -99,7 +99,7 @@ export function ValidationPanel(): React.ReactElement {
               <span style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: issue.severity === 'error' ? '#ef4444' : '#fbbf24',
+                color: issue.severity === 'error' ? 'var(--danger)' : 'var(--partial)',
                 flexShrink: 0,
                 marginTop: 1,
               }}>

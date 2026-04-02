@@ -100,11 +100,11 @@ export function AIPuzzleGenerator({ caseId, caseTitle, caseDescription }: AIPuzz
         <div style={{
           marginBottom: 10,
           padding: '6px 8px',
-          background: 'rgba(239,68,68,0.1)',
-          border: '1px solid rgba(239,68,68,0.3)',
-          borderRadius: 3,
+          background: 'rgba(196,64,64,0.1)',
+          border: '1px solid rgba(196,64,64,0.3)',
+          borderRadius: 'var(--radius-sm)',
           fontSize: 12,
-          color: '#ef4444',
+          color: 'var(--danger)',
         }}>
           {errorMessage}
         </div>

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useEditorStore } from '@/store/editor-store';
+import '@/styles/primitives.css';
 
 const SHORTCUTS: { key: string; label: string }[][] = [
   [
@@ -40,45 +41,28 @@ export function ShortcutHelpModal(): React.ReactElement | null {
       role="dialog"
       aria-modal="true"
       aria-label="키보드 단축키 도움말"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10000,
-      }}
+      className="modal-backdrop"
+      style={{ zIndex: 10000 }}
       onClick={() => setShortcutHelpOpen(false)}
     >
       <div
+        className="modal-shell"
         style={{
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 10,
           padding: '24px 28px',
           minWidth: 400,
           maxWidth: 520,
-          boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+          zIndex: 10001,
         }}
         onClick={e => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div className="modal-header">
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
             ⌨ 키보드 단축키
           </h2>
           <button
             aria-label="닫기"
             onClick={() => setShortcutHelpOpen(false)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-muted)',
-              fontSize: 18,
-              cursor: 'pointer',
-              lineHeight: 1,
-              padding: '2px 6px',
-            }}
+            className="modal-close"
           >
             ✕
           </button>
@@ -91,16 +75,18 @@ export function ShortcutHelpModal(): React.ReactElement | null {
                 {group.map(({ key, label }) => (
                   <tr key={key}>
                     <td style={{ paddingBottom: 8, width: '55%' }}>
-                      <kbd style={{
-                        display: 'inline-block',
-                        padding: '2px 8px',
-                        fontSize: 12,
-                        fontFamily: 'JetBrains Mono, monospace',
-                        background: 'var(--bg-card)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: 4,
-                        color: 'var(--accent)',
-                      }}>
+                      <kbd
+                        className="font-mono"
+                        style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          fontSize: 12,
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: 'var(--radius-sm)',
+                          color: 'var(--accent)',
+                        }}
+                      >
                         {key}
                       </kbd>
                     </td>

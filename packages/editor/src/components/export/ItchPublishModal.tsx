@@ -185,10 +185,10 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
     overflowY: 'auto',
     background: 'var(--bg-panel)',
     border: '1px solid var(--border-color)',
-    borderRadius: 8,
+    borderRadius: 'var(--radius-lg)',
     padding: 20,
     zIndex: 1001,
-    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+    boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
   };
 
   return (
@@ -196,22 +196,23 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
       {/* Backdrop */}
       <div
         onClick={handleClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000 }}
+        className="modal-backdrop"
+        style={{ zIndex: 1000 }}
       />
 
       <div style={modalStyle}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div className="modal-header">
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             🎮 itch.io 发布
           </div>
-          <button onClick={handleClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 18 }}>
+          <button onClick={handleClose} className="modal-close">
             ×
           </button>
         </div>
 
         {/* Game info */}
-        <div style={{ marginBottom: 16, padding: '8px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 3, fontSize: 12 }}>
+        <div style={{ marginBottom: 16, padding: '8px 10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', fontSize: 12 }}>
           <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{title}</div>
           <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>
             예상 슬러그: <code style={{ color: 'var(--accent)' }}>{username ? `${username}/` : ''}{slug}</code>
@@ -220,7 +221,7 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
 
         {/* Error */}
         {phase === 'error' && errorMessage && (
-          <div style={{ marginBottom: 12, padding: '8px 10px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 3, fontSize: 12, color: '#ef4444' }}>
+          <div className="alert-error" style={{ marginBottom: 12 }}>
             ⚠️ {errorMessage}
           </div>
         )}
@@ -238,7 +239,7 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                 value={apiKey}
                 onChange={e => setApiKey(e.target.value)}
                 placeholder="••••••••••••••••••••••"
-                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 3, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
@@ -252,21 +253,21 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 placeholder="your-username"
-                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 3, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
             {/* Page ID */}
             <div style={{ marginBottom: 12 }}>
               <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-                itch.io Page ID <span style={{ color: '#ef4444' }}>*</span>
+                itch.io Page ID <span style={{ color: 'var(--danger)' }}>*</span>
               </label>
               <input
                 type="text"
                 value={pageId}
                 onChange={e => setPageId(e.target.value)}
                 placeholder="username/my-game"
-                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 3, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
@@ -280,13 +281,13 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                 value={tags}
                 onChange={e => setTags(e.target.value)}
                 placeholder="gi-engine, mystery, interactive-fiction"
-                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 3, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '6px 8px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
             <button
               onClick={handleValidateAndPreview}
-              style={{ width: '100%', padding: '8px 12px', fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 3, cursor: 'pointer' }}
+              style={{ width: '100%', padding: '8px 12px', fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
             >
               검증 및 미리보기
             </button>
@@ -315,7 +316,7 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                     📥 다운로드
                   </button>
                 </div>
-                <pre style={{ margin: 0, padding: '6px 8px', fontSize: 11, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 3, maxHeight: 120, overflowY: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                <pre style={{ margin: 0, padding: '6px 8px', fontSize: 11, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', maxHeight: 120, overflowY: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                   {itchTxtContent}
                 </pre>
               </div>
@@ -333,11 +334,12 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                     readOnly
                     value={butlerCommand}
                     onClick={() => copyToClipboard(butlerCommand, 'butler')}
-                    style={{ flex: 1, padding: '6px 8px', fontSize: 11, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 3, fontFamily: 'monospace' }}
+                    className="font-mono"
+                    style={{ flex: 1, padding: '6px 8px', fontSize: 11, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
                   />
                   <button
                     onClick={() => copyToClipboard(butlerCommand, 'butler')}
-                    style={{ padding: '6px 10px', fontSize: 11, background: 'var(--bg-card)', color: copied === 'butler' ? '#4ade80' : 'var(--text-muted)', border: '1px solid var(--border-color)', borderRadius: 3, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    style={{ padding: '6px 10px', fontSize: 11, background: 'var(--bg-card)', color: copied === 'butler' ? 'var(--success)' : 'var(--text-muted)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     {copied === 'butler' ? '✅' : '📋'}
                   </button>
@@ -357,7 +359,7 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
               <div style={{ marginBottom: 12 }}>
                 <button
                   onClick={handleDownloadHtml}
-                  style={{ width: '100%', padding: '8px 12px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 3, cursor: 'pointer' }}
+                  style={{ width: '100%', padding: '8px 12px', fontSize: 12, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
                 >
                   📦 HTML 파일 다운로드 ({exportFileName})
                 </button>
@@ -371,7 +373,7 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                   <label style={{ fontSize: 11, color: 'var(--text-muted)' }}>임베드 코드</label>
                   <button
                     onClick={() => copyToClipboard(embedSnippet, 'embed')}
-                    style={{ fontSize: 10, color: copied === 'embed' ? '#4ade80' : 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
+                    style={{ fontSize: 10, color: copied === 'embed' ? 'var(--success)' : 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     {copied === 'embed' ? '✅ 복사됨' : '📋 복사'}
                   </button>
@@ -382,20 +384,21 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
                   rows={4}
                   value={embedSnippet}
                   onClick={() => embedRef.current?.select()}
-                  style={{ width: '100%', padding: '6px 8px', fontSize: 11, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 3, resize: 'none', fontFamily: 'monospace', boxSizing: 'border-box' }}
+                  className="font-mono"
+                  style={{ width: '100%', padding: '6px 8px', fontSize: 11, background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', resize: 'none', boxSizing: 'border-box' }}
                 />
               </div>
             )}
 
             {/* Butler not installed warning */}
-            <div style={{ marginBottom: 16, padding: '8px 10px', background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 3, fontSize: 11, color: '#fbbf24' }}>
+            <div className="alert-warning" style={{ marginBottom: 16 }}>
               💡 Butler CLI가 설치되어 있어야 자동 푸시가 가능합니다.{' '}
-              <a href="https://itch.io/butler" target="_blank" rel="noopener noreferrer" style={{ color: '#fbbf24' }}>butler 설치하기 →</a>
+              <a href="https://itch.io/butler" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--partial)' }}>butler 설치하기 →</a>
             </div>
 
             <button
               onClick={handleClose}
-              style={{ width: '100%', padding: '8px 12px', fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 3, cursor: 'pointer' }}
+              style={{ width: '100%', padding: '8px 12px', fontSize: 12, fontWeight: 600, background: 'var(--accent)', color: '#000', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
             >
               완료
             </button>

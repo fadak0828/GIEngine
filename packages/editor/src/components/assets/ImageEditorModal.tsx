@@ -399,11 +399,9 @@ export function ImageEditorModal({ asset, onSave, onClose }: ImageEditorModalPro
 
   // ── Render ─────────────────────────────────────────────────────
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9000,
-      background: 'rgba(0,0,0,0.7)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}
+    <div
+      className="modal-backdrop"
+      style={{ zIndex: 9000, background: 'rgba(0,0,0,0.7)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
@@ -411,7 +409,7 @@ export function ImageEditorModal({ asset, onSave, onClose }: ImageEditorModalPro
         height: 'min(90vh, 680px)',
         background: 'var(--bg-panel)',
         border: '1px solid var(--border-color)',
-        borderRadius: 10,
+        borderRadius: 'var(--radius-lg)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -620,7 +618,7 @@ function CtrlBtn({
         background: active ? 'var(--accent-dim)' : 'var(--bg-card)',
         color: active ? 'var(--accent)' : 'var(--text-secondary)',
         border: `1px solid ${active ? 'var(--accent)' : 'var(--border-color)'}`,
-        borderRadius: 3, cursor: 'pointer', fontWeight: active ? 600 : 400,
+        borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: active ? 600 : 400,
       }}
     >
       {children}
@@ -631,7 +629,7 @@ function CtrlBtn({
 const numInputStyle: React.CSSProperties = {
   width: '100%', padding: '3px 5px', fontSize: 11,
   background: 'var(--bg-primary)', border: '1px solid var(--border-color)',
-  borderRadius: 3, color: 'var(--text-primary)', outline: 'none',
+  borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', outline: 'none',
   boxSizing: 'border-box',
 };
 
@@ -644,11 +642,11 @@ const linkBtnStyle: React.CSSProperties = {
 const cancelBtnStyle: React.CSSProperties = {
   padding: '6px 18px', fontSize: 12,
   background: 'var(--bg-card)', color: 'var(--text-secondary)',
-  border: '1px solid var(--border-color)', borderRadius: 4, cursor: 'pointer',
+  border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
 };
 
 const applyBtnStyle: React.CSSProperties = {
   padding: '6px 22px', fontSize: 12, fontWeight: 600,
   background: 'var(--accent-dim)', color: 'var(--accent)',
-  border: '1px solid var(--accent)', borderRadius: 4, cursor: 'pointer',
+  border: '1px solid var(--accent)', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
 };

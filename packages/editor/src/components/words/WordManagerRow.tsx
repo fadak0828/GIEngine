@@ -134,7 +134,7 @@ export function WordManagerRow({
         {/* Hotspot chips */}
         <td style={{ ...cellStyle, flex: 1 }}>
           {connectionChips.length === 0 ? (
-            <span style={{ color: '#ef4444', fontSize: 11 }}>미연결</span>
+            <span style={{ color: 'var(--danger)', fontSize: 11 }}>미연결</span>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
               {connectionChips.map((chip, i) => (
@@ -181,9 +181,9 @@ export function WordManagerRow({
               padding: '2px 5px',
               fontSize: 11,
               background: 'transparent',
-              color: '#ef4444',
+              color: 'var(--danger)',
               border: '1px solid var(--border-color)',
-              borderRadius: 3,
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
             }}
           >

@@ -332,10 +332,10 @@ export function WordManagerPanel(): React.ReactElement {
               padding: '4px 12px',
               fontSize: 12,
               fontWeight: 600,
-              background: '#ef4444',
+              background: 'var(--danger)',
               color: '#fff',
               border: 'none',
-              borderRadius: 3,
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
             }}
           >

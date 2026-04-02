@@ -231,7 +231,7 @@ const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isE
         </button>
         <button
           onClick={handleDeleteCase}
-          style={{ ...iconBtn, color: '#ef4444' }}
+          style={{ ...iconBtn, color: 'var(--danger)' }}
           title="사건 삭제"
           aria-label="사건 삭제"
         >
@@ -403,7 +403,7 @@ const ActNode = React.memo(function ActNode({ act, isExpanded, selectedCaseId, s
         </button>
         <button
           onClick={handleDeleteAct}
-          style={{ ...iconBtn, color: '#ef4444' }}
+          style={{ ...iconBtn, color: 'var(--danger)' }}
           title="막 삭제"
           aria-label="막 삭제"
         >
