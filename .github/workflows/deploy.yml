@@ -34,11 +34,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline=false
 
-      - name: Build ai
-        run: npm run build --workspace=packages/ai
-
       - name: Build core
         run: npm run build --workspace=packages/core
+
+      - name: Build ai
+        run: npm run build --workspace=packages/ai
 
       - name: Build exporter
         run: npm run build --workspace=packages/exporter
