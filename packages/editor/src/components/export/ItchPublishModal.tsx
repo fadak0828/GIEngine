@@ -31,7 +31,6 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
   const [copied, setCopied] = useState<string | null>(null);
   const embedRef = useRef<HTMLTextAreaElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  useDialogFocusTrap(open, dialogRef, handleClose);
 
   // Pre-fill from stored config
   useEffect(() => {
@@ -177,6 +176,8 @@ export function ItchPublishModal({ open, onClose, exportHtml, exportFileName }: 
     setErrorMessage(null);
     onClose();
   };
+
+  useDialogFocusTrap(open, dialogRef, handleClose);
 
   const modalStyle: React.CSSProperties = {
     position: 'fixed',

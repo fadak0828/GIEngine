@@ -39,7 +39,6 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
   const [itchModalOpen, setItchModalOpen] = useState(false);
   const embedRef = useRef<HTMLTextAreaElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  useDialogFocusTrap(open, dialogRef, handleClose);
 
   const validation = useMemo(() => {
     if (!project) return null;
@@ -60,6 +59,8 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
     setCopiedHtml(false);
     onClose();
   };
+
+  useDialogFocusTrap(open, dialogRef, handleClose);
 
   const handleExport = async () => {
     if (!project) return;
