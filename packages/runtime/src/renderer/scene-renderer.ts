@@ -141,7 +141,7 @@ export class SceneRenderer {
       if (hotspot.condition && !this.evaluateCondition(hotspot.condition, caseState)) {
         continue;
       }
-      const hsEl = this.createHotspot(hotspot, scene);
+      const hsEl = this.createHotspot(hotspot, scene, caseState);
       el.appendChild(hsEl);
     }
   }
@@ -241,9 +241,12 @@ export class SceneRenderer {
     return el;
   }
 
-  private createHotspot(hotspot: Hotspot, scene: Scene): HTMLElement {
+  private createHotspot(hotspot: Hotspot, scene: Scene, caseState: CaseState): HTMLElement {
     const el = document.createElement('button');
     el.className = 'gi-hotspot';
+    if (caseState.visitedHotspotIds.includes(hotspot.id)) {
+      el.classList.add('gi-hotspot--visited');
+    }
     el.dataset.hotspotId = hotspot.id;
     el.setAttribute('role', 'button');
     el.setAttribute('aria-label', this.i18n.resolveText(hotspot.ariaLabel));

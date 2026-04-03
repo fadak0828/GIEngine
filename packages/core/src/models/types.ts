@@ -341,6 +341,7 @@ export interface CaseState {
   collectedWordIds: string[];
   puzzleStates: Record<string, PuzzleState>;
   visitedSceneIds: string[];
+  visitedHotspotIds: string[];
   layerVisibility: Record<string, boolean>;
 }
 

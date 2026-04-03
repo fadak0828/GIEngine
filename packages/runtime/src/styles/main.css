@@ -169,6 +169,16 @@
   animation: gi-hotspot-pulse 2.5s ease-in-out infinite;
 }
 
+/* visited hotspot state */
+.gi-hotspot--visited {
+  background: rgba(139, 110, 60, 0.25);
+  box-shadow: none;
+}
+
+.gi-hotspot--visited:hover {
+  background: rgba(139, 110, 60, 0.35);
+}
+
 /* --- Puzzle / Deduction View --- */
 .gi-deduction {
   position: absolute;

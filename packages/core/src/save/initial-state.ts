@@ -34,6 +34,7 @@ export function createInitialSaveState(def: GameDefinition): SaveState {
       collectedWordIds: [],
       puzzleStates,
       visitedSceneIds: [],
+      visitedHotspotIds: [],
       layerVisibility: {},
     };
   }

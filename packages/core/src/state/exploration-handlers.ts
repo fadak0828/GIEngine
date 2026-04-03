@@ -83,7 +83,27 @@ export function handleExploring(
       const hotspot = scene.hotspots.find(h => h.id === event.hotspotId);
       if (!hotspot) return noTransition(state);
 
-      return handleHotspotAction(state, save, def, hotspot, caseState);
+      const result = handleHotspotAction(state, save, def, hotspot, caseState);
+
+      if (caseState.visitedHotspotIds.includes(event.hotspotId)) {
+        return result;
+      }
+
+      const updatedCaseState: CaseState = {
+        ...caseState,
+        visitedHotspotIds: [...caseState.visitedHotspotIds, event.hotspotId],
+      };
+
+      return {
+        ...result,
+        saveState: {
+          ...result.saveState,
+          caseStates: {
+            ...result.saveState?.caseStates,
+            [state.caseId]: updatedCaseState,
+          },
+        },
+      };
     }
 
     case 'COLLECT_WORD': {
