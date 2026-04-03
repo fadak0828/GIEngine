@@ -28,6 +28,32 @@ function parseBoundingBoxes(
 ): Map<string, { x: number; y: number; width: number; height: number }> {
   const result = new Map<string, { x: number; y: number; width: number; height: number }>();
 
+  // JSON 형식 파싱 우선 시도 (float 정규화 좌표 지원)
+  try {
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]) as {
+        detections?: Array<{ hotspotId: string; bbox: number[] }>;
+      };
+      if (parsed.detections && Array.isArray(parsed.detections)) {
+        for (const detection of parsed.detections) {
+          if (
+            detection.hotspotId &&
+            Array.isArray(detection.bbox) &&
+            detection.bbox.length === 4
+          ) {
+            const [x, y, width, height] = detection.bbox.map(Number);
+            result.set(detection.hotspotId, { x, y, width, height });
+          }
+        }
+        return result;
+      }
+    }
+  } catch {
+    // JSON 파싱 실패 시 regex로 폴백
+  }
+
+  // Regex 기반 파싱 (정수 픽셀 좌표 형식)
   for (const id of hotspotIds) {
     const patterns = [
       new RegExp(`${id}[^\\n]*?(\\d+)[^\\d]+(\\d+)[^\\d]+(\\d+)[^\\d]+(\\d+)`, 'i'),
