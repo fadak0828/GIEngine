@@ -40,6 +40,13 @@ export class SceneRenderer {
    */
   private didPanDrag = false;
 
+  // Zoom state (for non-scrollable scenes)
+  private zoom = 1;
+  private zoomPanX = 0;
+  private zoomPanY = 0;
+  private zoomIndicatorEl: HTMLElement | null = null;
+  private zoomIndicatorTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(opts: SceneRendererOptions) {
     this.container = opts.container;
     this.i18n = opts.i18n;
@@ -50,6 +57,11 @@ export class SceneRenderer {
   render(scene: Scene, caseState: CaseState): void {
     this.destroy();
     this.currentScene = scene;
+
+    // Reset zoom state
+    this.zoom = 1;
+    this.zoomPanX = 0;
+    this.zoomPanY = 0;
 
     const el = document.createElement('div');
     el.className = 'gi-scene';
@@ -74,8 +86,138 @@ export class SceneRenderer {
       this.container.appendChild(viewport);
       this.setupPanHandlers(viewport, el, scene);
     } else {
-      this.container.appendChild(el);
+      // Zoom mode for non-scrollable scenes
+      const zoomWrapper = document.createElement('div');
+      zoomWrapper.className = 'gi-scene-zoom-wrapper';
+      zoomWrapper.style.position = 'relative';
+      zoomWrapper.style.overflow = 'hidden';
+      zoomWrapper.style.cursor = 'zoom-in';
+
+      // Zoom indicator
+      this.zoomIndicatorEl = document.createElement('div');
+      this.zoomIndicatorEl.className = 'gi-scene-zoom-indicator';
+      this.zoomIndicatorEl.style.cssText = [
+        'position:absolute',
+        'bottom:8px',
+        'right:8px',
+        'background:rgba(0,0,0,0.55)',
+        'color:#fff',
+        'font-size:11px',
+        'padding:2px 6px',
+        'border-radius:3px',
+        'pointer-events:none',
+        'opacity:0',
+        'transition:opacity 0.2s',
+        'z-index:10',
+      ].join(';');
+      zoomWrapper.appendChild(this.zoomIndicatorEl);
+
+      zoomWrapper.appendChild(el);
+      this.container.appendChild(zoomWrapper);
+      this.setupZoomHandlers(zoomWrapper, el, scene);
     }
+  }
+
+  private showZoomIndicator(): void {
+    if (!this.zoomIndicatorEl) return;
+    this.zoomIndicatorEl.textContent = `${Math.round(this.zoom * 100)}%`;
+    this.zoomIndicatorEl.style.opacity = '1';
+    if (this.zoomIndicatorTimer) clearTimeout(this.zoomIndicatorTimer);
+    this.zoomIndicatorTimer = setTimeout(() => {
+      if (this.zoomIndicatorEl) this.zoomIndicatorEl.style.opacity = '0';
+    }, 1200);
+  }
+
+  private setupZoomHandlers(zoomWrapper: HTMLElement, sceneContent: HTMLElement, scene: Scene): void {
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 2.5;
+
+    const applyZoomTransform = () => {
+      sceneContent.style.transform = `translate(${this.zoomPanX}px, ${this.zoomPanY}px) scale(${this.zoom})`;
+      sceneContent.style.transformOrigin = '0 0';
+      zoomWrapper.style.cursor = this.zoom > 1 ? 'grab' : 'zoom-in';
+    };
+
+    const clampZoomPan = () => {
+      const wrapperW = zoomWrapper.clientWidth;
+      const wrapperH = zoomWrapper.clientHeight;
+      const sceneW = scene.dimensions.width;
+      const sceneH = scene.dimensions.height;
+      const scaledW = sceneW * this.zoom;
+      const scaledH = sceneH * this.zoom;
+      const maxPanX = 0;
+      const minPanX = Math.min(0, wrapperW - scaledW);
+      const maxPanY = 0;
+      const minPanY = Math.min(0, wrapperH - scaledH);
+      this.zoomPanX = Math.max(minPanX, Math.min(maxPanX, this.zoomPanX));
+      this.zoomPanY = Math.max(minPanY, Math.min(maxPanY, this.zoomPanY));
+    };
+
+    // Wheel: zoom around cursor position
+    zoomWrapper.addEventListener('wheel', (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = zoomWrapper.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const delta = e.deltaY < 0 ? 0.15 : -0.15;
+      const prevZoom = this.zoom;
+      this.zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, this.zoom + delta));
+
+      if (this.zoom !== prevZoom) {
+        const ratio = this.zoom / prevZoom;
+        this.zoomPanX = mouseX - ratio * (mouseX - this.zoomPanX);
+        this.zoomPanY = mouseY - ratio * (mouseY - this.zoomPanY);
+        clampZoomPan();
+        applyZoomTransform();
+        this.showZoomIndicator();
+      }
+    }, { passive: false });
+
+    // Double-click: reset to 1x
+    zoomWrapper.addEventListener('dblclick', () => {
+      this.zoom = 1;
+      this.zoomPanX = 0;
+      this.zoomPanY = 0;
+      applyZoomTransform();
+      this.showZoomIndicator();
+    });
+
+    // Drag panning when zoomed
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let panStartX = 0;
+    let panStartY = 0;
+
+    zoomWrapper.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (this.zoom <= 1) return;
+      e.preventDefault();
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      panStartX = this.zoomPanX;
+      panStartY = this.zoomPanY;
+      zoomWrapper.setPointerCapture(e.pointerId);
+      zoomWrapper.style.cursor = 'grabbing';
+    });
+
+    zoomWrapper.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!isDragging) return;
+      this.zoomPanX = panStartX + (e.clientX - dragStartX);
+      this.zoomPanY = panStartY + (e.clientY - dragStartY);
+      clampZoomPan();
+      applyZoomTransform();
+    });
+
+    const stopDrag = (e: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      zoomWrapper.style.cursor = this.zoom > 1 ? 'grab' : 'zoom-in';
+    };
+
+    zoomWrapper.addEventListener('pointerup', stopDrag);
+    zoomWrapper.addEventListener('pointercancel', stopDrag);
   }
 
   applyTransition(type: 'fade' | 'slide_left' | 'slide_right' | 'instant' | 'dissolve' | 'wipe_left' | 'wipe_right'): void {
