@@ -40,7 +40,10 @@ export interface BundleResult {
  */
 async function loadRuntimeJs(mode: 'development' | 'production'): Promise<string> {
   // Try to find the runtime dist relative to this package
+  // Must use IIFE format (index.iife.js) — the ES module (index.js) has `export {}` statements
+  // which cause SyntaxError when embedded in a plain <script> block, preventing __giEngineBoot__.
   const runtimeDistPaths = [
+    path.resolve(__dirname, '../../runtime/dist/index.iife.js'),
     path.resolve(__dirname, '../../runtime/dist/gi-runtime.js'),
     path.resolve(__dirname, '../../runtime/dist/gi-runtime.min.js'),
     path.resolve(__dirname, '../../runtime/dist/index.js'),
@@ -54,8 +57,10 @@ async function loadRuntimeJs(mode: 'development' | 'production'): Promise<string
     }
   }
 
-  // Also try via process.cwd()-based paths
+  // Also try via process.cwd()-based paths (IIFE format first)
   const cwdPaths = [
+    path.resolve(process.cwd(), '../runtime/dist/index.iife.js'),
+    path.resolve(process.cwd(), '../../packages/runtime/dist/index.iife.js'),
     path.resolve(process.cwd(), '../runtime/dist/gi-runtime.js'),
     path.resolve(process.cwd(), '../../packages/runtime/dist/gi-runtime.js'),
   ];
