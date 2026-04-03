@@ -37,11 +37,18 @@ export function Toolbar(): React.ReactElement {
       if (!file) return;
       try {
         const text = await file.text();
-        const data = JSON.parse(text) as { definition: unknown; words?: unknown[] };
-        const { loadProject } = useEditorStore.getState();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = JSON.parse(text) as any;
+        const { loadProject, showNotification } = useEditorStore.getState();
         if (data.definition) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          loadProject(data.definition as any, (data.words ?? []) as any, file.name);
+          // .gi-project format: { definition: GameDefinition, words: Word[] }
+          loadProject(data.definition, data.words ?? [], file.name);
+        } else if (data.id && data.acts) {
+          // game.json format: GameDefinition directly (no words)
+          loadProject(data, [], file.name);
+          showNotification('game.json 임포트 완료 (단어 데이터 없음)', 'success');
+        } else {
+          showNotification('지원하지 않는 파일 형식입니다.', 'error');
         }
       } catch {
         alert('파일을 읽을 수 없습니다.');
