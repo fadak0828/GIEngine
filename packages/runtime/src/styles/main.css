@@ -339,6 +339,82 @@
   animation: gi-shake 0.45s ease, gi-flash-red 0.5s ease;
 }
 
+/* X icon for incorrect slots */
+.gi-slot-x-icon {
+  position: absolute;
+  top: -0.3em;
+  right: -0.3em;
+  font-size: 0.6em;
+  color: var(--gi-incorrect);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Enhanced partial styling */
+.gi-slot--partial-strong {
+  border-color: var(--gi-partial);
+  background: rgba(184, 152, 48, 0.25);
+  box-shadow: 0 0 8px rgba(184, 152, 48, 0.3);
+}
+
+/* Lock animation */
+@keyframes gi-lock {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.9) rotate(-3deg); }
+  60% { transform: scale(1.05) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes gi-lock-color {
+  0% { border-color: var(--gi-accent); }
+  50% { border-color: var(--gi-correct); box-shadow: 0 0 12px rgba(74, 140, 92, 0.5); }
+  100% { border-color: var(--gi-correct); box-shadow: none; }
+}
+
+.gi-slot--locked {
+  animation: gi-lock 0.4s ease forwards, gi-lock-color 0.4s ease forwards;
+}
+
+/* Segment badges */
+.gi-puzzle-section {
+  position: relative;
+  display: inline;
+}
+
+.gi-puzzle-section-label {
+  font-size: 0.75em;
+  color: var(--gi-text-dim);
+  margin-right: 0.25em;
+  font-style: italic;
+}
+
+.gi-segment-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.8em;
+  padding: 0.1em 0.4em;
+  margin-left: 0.25em;
+  font-family: var(--gi-font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--gi-radius);
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+.gi-segment-badge--correct {
+  background: var(--gi-correct-bg);
+  color: #7cd694;
+  border: 1px solid var(--gi-correct);
+}
+
+.gi-segment-badge--partial {
+  background: var(--gi-partial-bg);
+  color: #e8c44a;
+  border: 1px solid var(--gi-partial);
+}
+
 /* --- Word Bank --- */
 .gi-word-bank {
   padding: 1rem 1.5rem;

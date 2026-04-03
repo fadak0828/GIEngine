@@ -7,6 +7,7 @@ import type {
   ScenarioPuzzle,
   ValidationResult,
   AnswerDefinition,
+  PuzzleTemplate,
 } from '../models/types.js';
 
 export type { ValidationResult };
@@ -17,7 +18,8 @@ export type { ValidationResult };
  */
 export function validateFillInBlank(
   answers: Record<string, AnswerDefinition>,
-  assignments: Record<string, string | null>
+  assignments: Record<string, string | null>,
+  template?: PuzzleTemplate
 ): ValidationResult {
   const slotResults: Record<string, 'correct' | 'partial' | 'incorrect'> = {};
 
@@ -37,7 +39,20 @@ export function validateFillInBlank(
 
   const allCorrect = Object.values(slotResults).every(r => r === 'correct');
 
-  return { allCorrect, slotResults };
+  const result: ValidationResult = { allCorrect, slotResults };
+
+  if (template?.sections?.length && template.segments) {
+    result.segmentResults = {};
+    for (const section of template.sections) {
+      const slotIds = template.segments
+        .filter((s): s is { type: 'slot'; slotId: string; sectionId: string } => s.type === 'slot' && s.sectionId === section.id)
+        .map(s => s.slotId);
+      const correct = slotIds.filter(id => slotResults[id] === 'correct').length;
+      result.segmentResults[section.id] = { correct, total: slotIds.length };
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -47,7 +62,7 @@ export function validatePuzzle(
   puzzle: Puzzle,
   assignments: Record<string, string | null>
 ): ValidationResult {
-  return validateFillInBlank(puzzle.answers, assignments);
+  return validateFillInBlank(puzzle.answers, assignments, puzzle.template);
 }
 
 /**

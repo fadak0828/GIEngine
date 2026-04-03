@@ -107,13 +107,16 @@ export class DeductionRenderer {
       if (!slotEl) continue;
 
       // Remove old result classes
-      slotEl.classList.remove('gi-slot--correct', 'gi-slot--partial', 'gi-slot--incorrect', 'gi-slot--animate');
+      slotEl.classList.remove('gi-slot--correct', 'gi-slot--partial', 'gi-slot--incorrect', 'gi-slot--animate', 'gi-slot--locked');
 
       slotEl.classList.add(`gi-slot--${result}`);
       if (result === 'incorrect') {
         slotEl.classList.add('gi-slot--animate');
       }
     }
+
+    // Show segment result badges
+    this.showSegmentBadges(results.segmentResults);
 
     // Show banner
     if (this.rootEl) {
@@ -127,6 +130,37 @@ export class DeductionRenderer {
         : this.i18n.resolveKey('ui.try_again');
       this.rootEl.appendChild(banner);
     }
+
+    // Lock animation if all correct
+    if (results.allCorrect) {
+      this.playLockAnimation();
+    }
+  }
+
+  private showSegmentBadges(segmentResults?: Record<string, { correct: number; total: number }>): void {
+    if (!segmentResults || !this.rootEl) return;
+
+    for (const [segmentId, result] of Object.entries(segmentResults)) {
+      const sectionEl = this.rootEl.querySelector(`[data-section-id="${segmentId}"]`);
+      if (!sectionEl) continue;
+
+      const existingBadge = sectionEl.querySelector('.gi-segment-badge');
+      if (existingBadge) existingBadge.remove();
+
+      const badge = document.createElement('span');
+      badge.className = `gi-segment-badge ${result.correct === result.total ? 'gi-segment-badge--correct' : 'gi-segment-badge--partial'}`;
+      badge.textContent = `${result.correct}/${result.total}`;
+      sectionEl.appendChild(badge);
+    }
+  }
+
+  private playLockAnimation(): void {
+    const slots = Array.from(this.slotElements.entries());
+    slots.forEach(([slotId, slotEl], index) => {
+      setTimeout(() => {
+        slotEl.classList.add('gi-slot--locked');
+      }, index * 100);
+    });
   }
 
   getSlotElement(slotId: string): HTMLElement | undefined {
@@ -237,25 +271,82 @@ export class DeductionRenderer {
     const el = document.createElement('div');
     el.className = 'gi-puzzle-template';
 
+    // Group segments by section for badge display
+    const sections = new Map<string, { segments: typeof template.segments; sectionLabel?: string }>();
+    if (template.sections?.length) {
+      for (const section of template.sections) {
+        sections.set(section.id, { segments: [], sectionLabel: section.label ? this.i18n.resolveText(section.label) : undefined });
+      }
+    }
+
     for (const segment of template.segments) {
-      switch (segment.type) {
-        case 'text': {
-          const span = document.createElement('span');
-          span.className = 'gi-text-segment';
-          span.textContent = this.i18n.resolveText(segment.content);
-          el.appendChild(span);
-          break;
+      if (segment.type === 'slot' && template.sections?.length && segment.sectionId) {
+        const sectionId = segment.sectionId;
+        if (!sections.has(sectionId)) {
+          sections.set(sectionId, { segments: [] });
         }
-        case 'slot': {
-          const slotEl = this.createSlot(segment, puzzleState, words);
-          el.appendChild(slotEl);
-          break;
+        sections.get(sectionId)!.segments.push(segment);
+      } else {
+        // Non-sectioned content goes into a default group
+        if (!sections.has('_default')) {
+          sections.set('_default', { segments: [] });
         }
-        case 'line_break': {
-          const br = document.createElement('span');
-          br.className = 'gi-line-break';
-          el.appendChild(br);
-          break;
+        sections.get('_default')!.segments.push(segment);
+      }
+    }
+
+    for (const [sectionId, sectionData] of sections) {
+      if (sectionId !== '_default' && sectionData.segments.some(s => s.type === 'slot')) {
+        const sectionEl = document.createElement('div');
+        sectionEl.className = 'gi-puzzle-section';
+        sectionEl.dataset.sectionId = sectionId;
+
+        if (sectionData.sectionLabel) {
+          const label = document.createElement('span');
+          label.className = 'gi-puzzle-section-label';
+          label.textContent = sectionData.sectionLabel;
+          sectionEl.appendChild(label);
+        }
+
+        for (const segment of sectionData.segments) {
+          if (segment.type === 'text') {
+            const span = document.createElement('span');
+            span.className = 'gi-text-segment';
+            span.textContent = this.i18n.resolveText(segment.content);
+            sectionEl.appendChild(span);
+          } else if (segment.type === 'slot') {
+            const slotEl = this.createSlot(segment, puzzleState, words);
+            sectionEl.appendChild(slotEl);
+          } else if (segment.type === 'line_break') {
+            const br = document.createElement('span');
+            br.className = 'gi-line-break';
+            sectionEl.appendChild(br);
+          }
+        }
+
+        el.appendChild(sectionEl);
+      } else {
+        for (const segment of sectionData.segments) {
+          switch (segment.type) {
+            case 'text': {
+              const span = document.createElement('span');
+              span.className = 'gi-text-segment';
+              span.textContent = this.i18n.resolveText(segment.content);
+              el.appendChild(span);
+              break;
+            }
+            case 'slot': {
+              const slotEl = this.createSlot(segment, puzzleState, words);
+              el.appendChild(slotEl);
+              break;
+            }
+            case 'line_break': {
+              const br = document.createElement('span');
+              br.className = 'gi-line-break';
+              el.appendChild(br);
+              break;
+            }
+          }
         }
       }
     }
@@ -309,6 +400,14 @@ export class DeductionRenderer {
       const lastResult = puzzleState.lastValidation?.[segment.slotId];
       if (lastResult) {
         el.classList.add(`gi-slot--${lastResult}`);
+        if (lastResult === 'incorrect') {
+          const xIcon = document.createElement('span');
+          xIcon.className = 'gi-slot-x-icon';
+          xIcon.textContent = '\u2715';
+          el.appendChild(xIcon);
+        } else if (lastResult === 'partial') {
+          el.classList.add('gi-slot--partial-strong');
+        }
       }
     } else {
       el.textContent = placeholder;

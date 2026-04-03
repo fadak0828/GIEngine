@@ -277,12 +277,18 @@ export interface RelationshipPuzzle {
 }
 
 export interface PuzzleTemplate {
+  sections?: PuzzleSection[];
   segments: PuzzleSegment[];
+}
+
+export interface PuzzleSection {
+  id: string;
+  label?: LocalizedText;
 }
 
 export type PuzzleSegment =
   | { type: 'text'; content: LocalizedText }
-  | { type: 'slot'; slotId: string; placeholder?: LocalizedText; acceptCategory?: WordCategory }
+  | { type: 'slot'; slotId: string; sectionId?: string; placeholder?: LocalizedText; acceptCategory?: WordCategory }
   | { type: 'line_break' };
 
 export interface AnswerDefinition {
@@ -435,6 +441,7 @@ export interface PopupContent {
 export interface ValidationResult {
   allCorrect: boolean;
   slotResults: Record<string, 'correct' | 'partial' | 'incorrect'>;
+  segmentResults?: Record<string, { correct: number; total: number }>;
 }
 
 // --- Common Types ---
