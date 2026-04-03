@@ -11,7 +11,7 @@ function resetStore() {
     project: null,
     words: [],
     meta: { filePath: null, isDirty: false, lastSavedAt: null },
-    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, puzzleId: null, subPuzzleId: null, layerId: null, assetId: null },
+    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, hotspotIds: [], puzzleId: null, subPuzzleId: null, layerId: null, assetId: null },
   });
 }
 
