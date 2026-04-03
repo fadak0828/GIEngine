@@ -346,8 +346,10 @@ export const createSceneSlice: StateCreator<EditorStore, [], [], SceneSlice> = (
         project: produce(state.project, draft => {
           const scene = findSceneInDraft(draft, caseId, sceneId);
           if (scene) {
-            const hotspot = scene.hotspots.find(h => h.id === hotspotId);
-            if (hotspot) Object.assign(hotspot, patch);
+            const idx = scene.hotspots.findIndex(h => h.id === hotspotId);
+            if (idx !== -1) {
+              scene.hotspots[idx] = { ...scene.hotspots[idx], ...patch };
+            }
           }
         }),
         meta: { ...state.meta, isDirty: true },

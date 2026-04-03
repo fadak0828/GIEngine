@@ -26,6 +26,7 @@ export function SceneCanvas(): React.ReactElement {
   const [polyCursor, setPolyCursor] = useState<{ x: number; y: number } | null>(null);
 
   const [dragPreview, setDragPreview] = useState<{ hotspotId: string; area: HotspotArea } | null>(null);
+  const [ghostArea, setGhostArea] = useState<{ hotspotId: string; area: HotspotArea } | null>(null);
 
   // polygon vertex drag state
   const [polyVertexDrag, setPolyVertexDrag] = useState<{ hotspotId: string; vertexIndex: number } | null>(null);
@@ -132,6 +133,15 @@ export function SceneCanvas(): React.ReactElement {
     canvasRectRef,
     sceneDimensions: scene?.dimensions ?? { width: 1280, height: 720 },
 
+    onDragStart: useCallback((_sceneX: number, _sceneY: number, _mode: DragMode) => {
+      const hotspotId = dragHotspotIdRef.current;
+      if (!hotspotId || !scene) return;
+      const hotspot = scene.hotspots.find(h => h.id === hotspotId);
+      if (hotspot) {
+        setGhostArea({ hotspotId, area: hotspot.area });
+      }
+    }, [scene]),
+
     onDragMove: useCallback((dragState: DragState, mode: DragMode) => {
       const hotspotId = dragHotspotIdRef.current;
       if (!hotspotId || !scene) return;
@@ -146,6 +156,7 @@ export function SceneCanvas(): React.ReactElement {
       const hotspotId = dragHotspotIdRef.current;
       if (!hotspotId || !scene || !selection.caseId || !selection.sceneId) {
         setDragPreview(null);
+        setGhostArea(null);
         dragHotspotIdRef.current = null;
         return;
       }
@@ -156,6 +167,7 @@ export function SceneCanvas(): React.ReactElement {
         updateHotspotArea(selection.caseId, selection.sceneId, hotspotId, finalArea);
       }
       setDragPreview(null);
+      setGhostArea(null);
       dragHotspotIdRef.current = null;
     }, [scene, selection, updateHotspotArea, ui.gridSnapEnabled, ui.gridSize]),
   });
@@ -445,6 +457,7 @@ export function SceneCanvas(): React.ReactElement {
             selectedHotspotIds={selection.hotspotIds}
             scaleX={scaleX}
             scaleY={scaleY}
+            ghostArea={ghostArea}
             onSelect={(id, e) => {
               if (ui.sceneTool === 'delete' && selection.caseId && selection.sceneId) {
                 if (window.confirm('핫스팟을 삭제하시겠습니까?')) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Hotspot } from '@gi-engine/core';
+import type { Hotspot, HotspotArea } from '@gi-engine/core';
 import type { DragMode } from '@/hooks/useCanvasDrag';
 
 /** Map from CSS cursor string → DragMode */
@@ -20,6 +20,8 @@ interface HotspotOverlayProps {
   /** Scale from scene coordinates to canvas pixels */
   scaleX: number;
   scaleY: number;
+  /** Ghost area to show original position during drag */
+  ghostArea?: { hotspotId: string; area: HotspotArea } | null;
   onSelect: (id: string, e: React.MouseEvent) => void;
   onHotspotPointerDown?: (e: React.PointerEvent<SVGRectElement>, hotspotId: string) => void;
   onResizeHandlePointerDown?: (e: React.PointerEvent<SVGRectElement>, hotspotId: string, mode: DragMode) => void;
@@ -36,6 +38,7 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
   selectedHotspotIds,
   scaleX,
   scaleY,
+  ghostArea,
   onSelect,
   onHotspotPointerDown,
   onResizeHandlePointerDown,
@@ -45,6 +48,20 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
     <svg
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}
     >
+      {/* Ghost rect during drag */}
+      {ghostArea && ghostArea.area.type === 'rect' && (
+        <rect
+          x={ghostArea.area.x * scaleX}
+          y={ghostArea.area.y * scaleY}
+          width={ghostArea.area.width * scaleX}
+          height={ghostArea.area.height * scaleY}
+          fill="rgba(255,255,255,0.1)"
+          stroke="rgba(255,255,255,0.5)"
+          strokeWidth={1}
+          strokeDasharray="6 3"
+          pointerEvents="none"
+        />
+      )}
       {hotspots.map(hotspot => {
         const isSelected = selectedHotspotIds.includes(hotspot.id);
         const area = hotspot.area;
