@@ -73,10 +73,12 @@ describe('SceneRenderer — non-scrollable (default)', () => {
     expect(container.querySelector('.gi-scene')).not.toBeNull();
   });
 
-  it('gi-scene is a direct child of container', () => {
+  it('gi-scene is wrapped in gi-scene-zoom-wrapper for non-scrollable scene', () => {
     renderer.render(makeScene(), makeCaseState());
     const sceneEl = container.querySelector('.gi-scene');
-    expect(sceneEl!.parentElement).toBe(container);
+    const zoomWrapper = container.querySelector('.gi-scene-zoom-wrapper');
+    expect(sceneEl!.parentElement).toBe(zoomWrapper);
+    expect(zoomWrapper!.parentElement).toBe(container);
   });
 
   it('destroy() removes the gi-scene element', () => {
