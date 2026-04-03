@@ -7,7 +7,7 @@ import { AudioAssetPicker } from '@/components/shared/AudioAssetPicker';
 import { CollectibleWordsEditor } from './CollectibleWordsEditor';
 import { InnerHotspotEditor } from './InnerHotspotEditor';
 import { AIExamineImageModal } from '@/components/ai/AIExamineImageModal';
-import type { Hotspot, HotspotAction, Scene } from '@gi-engine/core';
+import type { Hotspot, HotspotAction, Scene, HotspotArea } from '@gi-engine/core';
 
 interface HotspotPropertiesProps {
   hotspot: Hotspot;
@@ -29,6 +29,7 @@ function makeDefaultAction(type: HotspotAction['type']): HotspotAction {
 
 export function HotspotProperties({ hotspot, scene }: HotspotPropertiesProps): React.ReactElement {
   const selection = useEditorStore(s => s.selection);
+  const dragPreview = useEditorStore(s => s.ui.dragPreview);
   const { updateHotspot, updateHotspotAction, setPanelWidth } = useEditorStore();
 
   // Auto-expand panel for complex action types
@@ -50,7 +51,9 @@ export function HotspotProperties({ hotspot, scene }: HotspotPropertiesProps): R
     updateHotspot(caseId, sceneId, hotspot.id, patch);
   };
 
-  const area = hotspot.area.type === 'rect' ? hotspot.area : null;
+  const isDraggingThis = dragPreview?.hotspotId === hotspot.id;
+  const displayArea: HotspotArea = isDraggingThis ? dragPreview.area : hotspot.area;
+  const area = displayArea.type === 'rect' ? displayArea : null;
 
   return (
     <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>

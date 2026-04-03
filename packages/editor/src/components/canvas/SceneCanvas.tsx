@@ -12,7 +12,8 @@ export function SceneCanvas(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const selection = useEditorStore(s => s.selection);
   const ui = useEditorStore(s => s.ui);
-  const { setSelection, addHotspot, updateHotspotArea } = useEditorStore();
+  const dragPreview = ui.dragPreview;
+  const { setSelection, addHotspot, updateHotspotArea, setDragPreview } = useEditorStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRectRef = useRef<CanvasRect | null>(null);
@@ -25,7 +26,6 @@ export function SceneCanvas(): React.ReactElement {
   const [polyVertices, setPolyVertices] = useState<[number, number][]>([]);
   const [polyCursor, setPolyCursor] = useState<{ x: number; y: number } | null>(null);
 
-  const [dragPreview, setDragPreview] = useState<{ hotspotId: string; area: HotspotArea } | null>(null);
   const [ghostArea, setGhostArea] = useState<{ hotspotId: string; area: HotspotArea } | null>(null);
 
   // polygon vertex drag state

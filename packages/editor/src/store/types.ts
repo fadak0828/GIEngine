@@ -96,6 +96,7 @@ export interface UIState {
   shortcutHelpOpen: boolean;
   gridSnapEnabled: boolean;
   gridSize: number;
+  dragPreview: { hotspotId: string; area: HotspotArea } | null;
 }
 
 // ── History ───────────────────────────────────────────────────────
@@ -224,6 +225,9 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice, ItchSlice
   // Convenience: set selected scene / sub-puzzle
   setSelectedScene: (sceneId: string | null) => void;
   setSelectedSubPuzzle: (subPuzzleId: string | null) => void;
+
+  // Drag preview (does not commit to history)
+  setDragPreview: (preview: { hotspotId: string; area: HotspotArea } | null) => void;
 
   // Asset selectors
   getAssetUsages: (assetId: string) => AssetUsage[];

@@ -40,6 +40,7 @@ export const defaultUI: UIState = {
   shortcutHelpOpen: false,
   gridSnapEnabled: true,
   gridSize: 10,
+  dragPreview: null,
 };
 
 // ── Slice type ───────────────────────────────────────────────────
@@ -73,6 +74,7 @@ export type SelectionSlice = {
   setShortcutHelpOpen: (open: boolean) => void;
   toggleGridSnap: () => void;
   setGridSize: (size: number) => void;
+  setDragPreview: (preview: { hotspotId: string; area: import('@gi-engine/core').HotspotArea } | null) => void;
   addToHotspotSelection: (hotspotId: string) => void;
   removeFromHotspotSelection: (hotspotId: string) => void;
   clearHotspotSelection: () => void;
@@ -223,5 +225,9 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   clearHotspotSelection: () => {
     set(state => ({ selection: { ...state.selection, hotspotIds: [] } }));
+  },
+
+  setDragPreview: (preview) => {
+    set(state => ({ ui: { ...state.ui, dragPreview: preview } }));
   },
 });
