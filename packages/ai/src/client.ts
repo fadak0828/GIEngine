@@ -90,6 +90,28 @@ export class GeminiClient {
     this._activeKey = null;
   }
 
+  async analyzeImage(
+    imageBase64: string,
+    prompt: string,
+    model?: string,
+  ): Promise<string> {
+    const genAI = await this.getGenAI();
+    const effectiveModel = model || this.getTextModel();
+    const generativeModel = genAI.getGenerativeModel({ model: effectiveModel });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (generativeModel as any).generateContent({
+      contents: [
+        {
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: 'image/png', data: imageBase64 } },
+          ],
+        },
+      ],
+    });
+    return result.response.text();
+  }
+
   async generateText(prompt: string, model?: string): Promise<string> {
     const genAI = await this.getGenAI();
     const effectiveModel = model || this.getTextModel();

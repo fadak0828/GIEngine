@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useEditorStore } from '@/store/editor-store';
-import type { Hotspot, Locale, Case, Scene, ExamineImageAction } from '@gi-engine/core';
+import type { Hotspot, Locale, Case, Scene, ExamineImageAction, HotspotArea } from '@gi-engine/core';
 
 // Inline types to avoid compile-time dependency on @gi-engine/ai
 type BackgroundStyle = 'realistic' | 'painterly' | 'pixel-art' | 'noir';
@@ -10,8 +10,6 @@ interface HotspotPromptInfo {
   label: string;
   positionZone: string;
   relativeSize: 'small' | 'medium' | 'large';
-  position: { x: number; y: number };
-  size: { width: number; height: number };
   actionType: string;
   contentHint?: string;
   revealedWords?: string[];
@@ -26,6 +24,13 @@ interface GameContextForPrompt {
   siblingSceneNames?: string[];
   hotspots: HotspotPromptInfo[];
   sceneWords?: Array<{ display: string; category?: string }>;
+}
+
+interface DetectedAreaPreview {
+  hotspotId: string;
+  label: string;
+  detectedArea: HotspotArea;
+  originalArea: HotspotArea;
 }
 
 interface AIBackgroundModalProps {
@@ -182,8 +187,6 @@ function buildHotspotPromptInfos(
       label: ctx.label,
       positionZone: ctx.positionZone,
       relativeSize: ctx.relativeSize,
-      position: { x: ctx.centerX, y: ctx.centerY },
-      size: { width: ctx.width, height: ctx.height },
       actionType: action.type,
       contentHint,
       revealedWords,
@@ -253,19 +256,17 @@ function buildSpatialHintsInline(hotspots: HotspotPromptInfo[]): Map<string, str
 
     const zoneMates = byZone.get(h.positionZone) ?? [];
     if (zoneMates.length > 1) {
-      const sorted = [...zoneMates].sort((a, b) => a.position.x - b.position.x);
+      const sorted = [...zoneMates].sort((a, b) => {
+        const sizeOrder: Record<string, number> = { small: 0, medium: 1, large: 2 };
+        return sizeOrder[b.relativeSize] - sizeOrder[a.relativeSize];
+      });
       const idx = sorted.findIndex(x => x.id === h.id);
-      const sortedY = [...zoneMates].sort((a, b) => a.position.y - b.position.y);
-      const idxY = sortedY.findIndex(x => x.id === h.id);
-
-      if (sorted.length > 1) {
-        if (idx === 0) parts.push('It is the leftmost object in this area.');
-        else if (idx === sorted.length - 1) parts.push('It is the rightmost object in this area.');
-        else parts.push('There are objects to both its left and right in this area.');
-      }
-      if (sortedY.length > 1 && idxY !== idx) {
-        if (idxY === 0) parts.push('It is the topmost object in this area.');
-        else if (idxY === sortedY.length - 1) parts.push('It is the bottommost object in this area.');
+      if (idx === 0) {
+        parts.push('It is the largest/most prominent object in this area.');
+      } else if (idx === sorted.length - 1) {
+        parts.push('It is the smallest/least prominent object in this area.');
+      } else {
+        parts.push('It is intermediate in prominence within this area.');
       }
     }
 
@@ -323,7 +324,7 @@ function buildRichPromptInline(
         'human characters', 'human figures', 'people',
         'labels', 'names', 'coordinates', 'position numbers',
       ],
-      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment. Do NOT render any text, coordinate numbers, or object names in the image.',
+      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment. Do NOT render any text, coordinate numbers, or object names in the image. CRITICAL CONSTRAINTS: (1) Exactly match the specified number of interactive objects — do not omit or add any. (2) No overlapping between objects — each object must occupy a distinct, non-overlapping area. (3) Objects must be clearly visually distinguishable from each other through size, position, or visual treatment.',
     },
   };
 
@@ -344,8 +345,6 @@ function buildRichPromptInline(
       properties: {
         position_zone: h.positionZone,
         relative_size: h.relativeSize,
-        pixel_center: h.position,
-        pixel_size: h.size,
       },
       details: {
         action: h.actionType,
@@ -399,7 +398,7 @@ export function AIBackgroundModal({
   hotspots,
   sceneDimensions,
 }: AIBackgroundModalProps): React.ReactElement | null {
-  const { addAsset, updateScene, updateHotspotAction } = useEditorStore();
+  const { addAsset, updateScene, updateHotspotAction, updateHotspotArea } = useEditorStore();
   const project = useEditorStore(s => s.project);
   const words = useEditorStore(s => s.words);
   const ui = useEditorStore(s => s.ui);
@@ -415,6 +414,11 @@ export function AIBackgroundModal({
   const [contextExpanded, setContextExpanded] = useState(false);
   const [generateHotspotImages, setGenerateHotspotImages] = useState(false);
   const [hotspotGenProgress, setHotspotGenProgress] = useState<{ current: number; total: number } | null>(null);
+
+  const [detectionProgress, setDetectionProgress] = useState<string | null>(null);
+  const [detectionPreview, setDetectionPreview] = useState<DetectedAreaPreview[] | null>(null);
+  const [detectionImage, setDetectionImage] = useState<string | null>(null);
+  const [showDetectionConfirm, setShowDetectionConfirm] = useState(false);
 
   // Build game context from editor state
   const gameContext = useMemo((): GameContextForPrompt | null => {
@@ -502,12 +506,33 @@ export function AIBackgroundModal({
     return () => {
       setGenerateHotspotImages(false);
       setHotspotGenProgress(null);
+      setDetectionProgress(null);
+      setDetectionPreview(null);
+      setDetectionImage(null);
+      setShowDetectionConfirm(false);
     };
   }, []);
 
   if (!open) return null;
 
   const hotspotContexts = computeHotspotContextsInline(sceneDimensions, hotspots, locale);
+
+  const handleConfirmDetection = () => {
+    if (!detectionPreview) return;
+    for (const preview of detectionPreview) {
+      updateHotspotArea(caseId, sceneId, preview.hotspotId, preview.detectedArea);
+    }
+    setShowDetectionConfirm(false);
+    setDetectionPreview(null);
+    setDetectionImage(null);
+    onClose();
+  };
+
+  const handleCancelDetection = () => {
+    setShowDetectionConfirm(false);
+    setDetectionPreview(null);
+    setDetectionImage(null);
+  };
 
   const handleGenerate = async () => {
     const effectiveDescription = isPromptManuallyEdited
@@ -516,81 +541,72 @@ export function AIBackgroundModal({
     if (!effectiveDescription) return;
     setIsLoading(true);
     setError(null);
+    setDetectionProgress('이미지 생성 중...');
     try {
       const aiModule = await import('@gi-engine/ai') as {
-        generateBackground: (req: {
+        generateBackgroundWithDetection: (req: {
           sceneDescription: string;
           style: BackgroundStyle;
           aspectRatio: '16:9';
           gameContext?: GameContextForPrompt;
-        }) => Promise<{ asset: { id: string; type: 'image'; src: string; inline?: string; mimeType: string; alt?: { ko: string; en: string } }; promptUsed: string }>;
+          hotspots: HotspotPromptInfo[];
+          sceneWidth: number;
+          sceneHeight: number;
+          onProgress?: (step: string) => void;
+        }) => Promise<{
+          asset: { id: string; type: 'image'; src: string; inline?: string; mimeType: string; alt?: { ko: string; en: string } };
+          updatedHotspots: Array<{ hotspotId: string; area: HotspotArea }>;
+          detectionResults: Array<{ hotspotId: string; area: HotspotArea; confidence: number }>;
+          promptUsed: string;
+        }>;
       };
 
-      // When prompt is manually edited, pass it as sceneDescription directly (no gameContext)
-      // When auto-generated, pass original description + gameContext for structured prompt
+      const hotspotInfos = buildHotspotPromptInfos(sceneDimensions, hotspots, locale, new Map());
+
       const result = isPromptManuallyEdited
-        ? await aiModule.generateBackground({
+        ? await aiModule.generateBackgroundWithDetection({
             sceneDescription: effectiveDescription,
             style,
             aspectRatio: '16:9',
+            hotspots: hotspotInfos,
+            sceneWidth: sceneDimensions.width,
+            sceneHeight: sceneDimensions.height,
+            onProgress: (step) => setDetectionProgress(step),
           })
-        : await aiModule.generateBackground({
+        : await aiModule.generateBackgroundWithDetection({
             sceneDescription: effectiveDescription,
             style,
             aspectRatio: '16:9',
             gameContext: gameContext || undefined,
+            hotspots: hotspotInfos,
+            sceneWidth: sceneDimensions.width,
+            sceneHeight: sceneDimensions.height,
+            onProgress: (step) => setDetectionProgress(step),
           });
 
+      setDetectionProgress(null);
       addAsset(result.asset);
       updateScene(caseId, sceneId, { background: result.asset.id });
 
-      // ── Phase 2: generate examine_image hotspot images ─────────
-      if (generateHotspotImages) {
-        const targets = findExamineImageHotspotsNeedingImage(hotspots, locale);
-        if (targets.length > 0) {
-          setHotspotGenProgress({ current: 0, total: targets.length });
-          try {
-            const aiModule = await import('@gi-engine/ai') as {
-              generateHotspotImage: (req: {
-                description: string;
-                style: BackgroundStyle;
-                aspectRatio: '4:3';
-              }) => Promise<{ asset: { id: string; type: 'image'; src: string; inline?: string; mimeType: string; alt?: { ko: string; en: string } }; promptUsed: string }>;
-            };
-            for (let i = 0; i < targets.length; i++) {
-              setHotspotGenProgress({ current: i + 1, total: targets.length });
-              const { hotspot, imagePrompt } = targets[i];
-              const hotspotResult = await aiModule.generateHotspotImage({
-                description: imagePrompt,
-                style,
-                aspectRatio: '4:3',
-              });
-              addAsset(hotspotResult.asset);
-              const updatedAction: ExamineImageAction = {
-                ...(hotspot.action as ExamineImageAction),
-                image: hotspotResult.asset.id,
-              };
-              updateHotspotAction(caseId, sceneId, hotspot.id, updatedAction);
-            }
-          } catch (genErr) {
-            setError(
-              `배경은 생성되었으나 핫스팟 이미지 생성 중 오류: ${
-                genErr instanceof Error ? genErr.message : String(genErr)
-              }`,
-            );
-            setHotspotGenProgress(null);
-            setIsLoading(false);
-            return;
-          }
-        }
-      }
+      const preview: DetectedAreaPreview[] = result.updatedHotspots.map((updated) => {
+        const originalHotspot = hotspots.find(h => h.id === updated.hotspotId);
+        return {
+          hotspotId: updated.hotspotId,
+          label: originalHotspot?.ariaLabel?.[locale] || originalHotspot?.ariaLabel?.ko || updated.hotspotId,
+          detectedArea: updated.area,
+          originalArea: originalHotspot?.area || updated.area,
+        };
+      });
 
-      setHotspotGenProgress(null);
-      onClose();
+      setDetectionImage(result.asset.inline || null);
+      setDetectionPreview(preview);
+      setShowDetectionConfirm(true);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
+      setDetectionProgress(null);
     }
   };
 
@@ -854,6 +870,98 @@ export function AIBackgroundModal({
             핫스팟 이미지 생성 중... ({hotspotGenProgress.current}/{hotspotGenProgress.total})
           </div>
         )}
+
+        {/* Detection confirmation UI */}
+        {showDetectionConfirm && detectionPreview && detectionImage && (
+          <div style={{
+            marginBottom: 12,
+            padding: 12,
+            background: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: 4,
+          }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+              핫스팟 위치 감지 완료
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              감지된 영역을 확인하고 필요시 수동으로 조정하세요.
+            </div>
+            {/* Image preview with overlay */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              marginBottom: 8,
+              borderRadius: 4,
+              overflow: 'hidden',
+            }}>
+              <img
+                src={`data:image/png;base64,${detectionImage}`}
+                alt="생성된 배경"
+                style={{ width: '100%', display: 'block' }}
+              />
+              {/* Hotspot overlays */}
+              {detectionPreview.map((preview, idx) => {
+                const area = preview.detectedArea;
+                if (area.type !== 'rect') return null;
+                const scaleX = 100 / sceneDimensions.width;
+                const scaleY = 100 / sceneDimensions.height;
+                return (
+                  <div
+                    key={preview.hotspotId}
+                    title={preview.label}
+                    style={{
+                      position: 'absolute',
+                      left: `${area.x * scaleX}%`,
+                      top: `${area.y * scaleY}%`,
+                      width: `${area.width * scaleX}%`,
+                      height: `${area.height * scaleY}%`,
+                      border: '2px solid rgba(16, 185, 129, 0.8)',
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      borderRadius: 2,
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <div style={{
+                      position: 'absolute',
+                      top: -18,
+                      left: 0,
+                      fontSize: 9,
+                      color: 'rgba(16, 185, 129, 1)',
+                      backgroundColor: 'rgba(0,0,0,0.7)',
+                      padding: '1px 4px',
+                      borderRadius: 2,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {idx + 1}. {preview.label.length > 15 ? preview.label.slice(0, 15) + '...' : preview.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Detection results list */}
+            <div style={{ maxHeight: 120, overflowY: 'auto', marginBottom: 8 }}>
+              {detectionPreview.map((preview, idx) => (
+                <div key={preview.hotspotId} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 4,
+                  fontSize: 10,
+                }}>
+                  <span style={{ color: 'var(--text-muted)', width: 16 }}>{idx + 1}.</span>
+                  <span style={{ flex: 1, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {preview.label}
+                  </span>
+                  <span style={{ color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                    {preview.detectedArea.type === 'rect'
+                      ? `x:${preview.detectedArea.x} y:${preview.detectedArea.y} w:${preview.detectedArea.width} h:${preview.detectedArea.height}`
+                      : 'circle'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
             스타일
@@ -896,45 +1004,85 @@ export function AIBackgroundModal({
 
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={isLoading ? undefined : onClose}
-            disabled={isLoading}
-            style={{
-              flex: 1,
-              padding: '7px 12px',
-              fontSize: 12,
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 3,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-            }}
-          >
-            취소
-          </button>
-          <button
-            onClick={handleGenerate}
-            disabled={isLoading || !description.trim()}
-            style={{
-              flex: 2,
-              padding: '7px 12px',
-              fontSize: 12,
-              background: !isLoading && description.trim() ? 'var(--accent)' : 'var(--bg-card)',
-              color: !isLoading && description.trim() ? '#000' : 'var(--text-muted)',
-              border: 'none',
-              borderRadius: 3,
-              cursor: !isLoading && description.trim() ? 'pointer' : 'not-allowed',
-              fontWeight: 600,
-            }}
-          >
-            {isLoading
-              ? hotspotGenProgress
-                ? `핫스팟 이미지 생성 중 (${hotspotGenProgress.current}/${hotspotGenProgress.total})...`
-                : '생성 중...'
-              : generateHotspotImages && findExamineImageHotspotsNeedingImage(hotspots, locale).length > 0
-              ? '배경 + 핫스팟 이미지 생성'
-              : '배경 생성'}
-          </button>
+          {showDetectionConfirm ? (
+            <>
+              <button
+                onClick={handleCancelDetection}
+                style={{
+                  flex: 1,
+                  padding: '7px 12px',
+                  fontSize: 12,
+                  background: 'transparent',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 3,
+                  cursor: 'pointer',
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmDetection}
+                style={{
+                  flex: 2,
+                  padding: '7px 12px',
+                  fontSize: 12,
+                  background: 'var(--accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: 3,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+              >
+                핫스팟 영역 적용
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={isLoading ? undefined : onClose}
+                disabled={isLoading}
+                style={{
+                  flex: 1,
+                  padding: '7px 12px',
+                  fontSize: 12,
+                  background: 'transparent',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 3,
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleGenerate}
+                disabled={isLoading || !description.trim()}
+                style={{
+                  flex: 2,
+                  padding: '7px 12px',
+                  fontSize: 12,
+                  background: !isLoading && description.trim() ? 'var(--accent)' : 'var(--bg-card)',
+                  color: !isLoading && description.trim() ? '#000' : 'var(--text-muted)',
+                  border: 'none',
+                  borderRadius: 3,
+                  cursor: !isLoading && description.trim() ? 'pointer' : 'not-allowed',
+                  fontWeight: 600,
+                }}
+              >
+                {isLoading
+                  ? detectionProgress
+                    ? detectionProgress
+                    : hotspotGenProgress
+                    ? `핫스팟 이미지 생성 중 (${hotspotGenProgress.current}/${hotspotGenProgress.total})...`
+                    : '생성 중...'
+                  : generateHotspotImages && findExamineImageHotspotsNeedingImage(hotspots, locale).length > 0
+                  ? '배경 + 핫스팟 이미지 생성'
+                  : '배경 + 핫스팟 감지 생성'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>

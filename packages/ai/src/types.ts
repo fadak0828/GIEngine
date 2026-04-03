@@ -25,10 +25,6 @@ export interface HotspotPromptInfo {
   label: string;
   positionZone: string;
   relativeSize: 'small' | 'medium' | 'large';
-  /** Pixel position of bounding box center */
-  position: { x: number; y: number };
-  /** Pixel size of bounding box */
-  size: { width: number; height: number };
   /** What the hotspot does: examine, examine_image, word_reveal, navigate, toggle_layer, composite */
   actionType: string;
   /** Examine text content or caption, if available */

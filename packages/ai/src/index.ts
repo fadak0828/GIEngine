@@ -19,10 +19,21 @@ export type {
   HotspotImageGenerateResult,
 } from './generators/hotspot-generator.js';
 
-export { generateBackground } from './generators/background-generator.js';
+export { generateBackground, generateBackgroundWithDetection } from './generators/background-generator.js';
+export type {
+  BackgroundWithDetectionOptions,
+  BackgroundWithDetectionResult,
+} from './generators/background-generator.js';
 export { generateHotspotImage } from './generators/hotspot-generator.js';
+export { detectHotspotsFromImage } from './generators/hotspot-detector.js';
 export { generateStory } from './generators/story-generator.js';
 export { generatePuzzle } from './generators/puzzle-generator.js';
+
+export type {
+  DetectedHotspot,
+  HotspotDetectionInput,
+  DetectHotspotsOptions,
+} from './generators/hotspot-detector.js';
 
 export { buildBackgroundPrompt, buildRichBackgroundPrompt } from './prompts/background-prompts.js';
 export type {

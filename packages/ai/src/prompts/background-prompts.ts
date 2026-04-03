@@ -209,26 +209,20 @@ function buildSpatialHints(hotspots: HotspotPromptInfo[]): Map<string, string> {
     const zoneDesc = ZONE_LABELS[h.positionZone];
     if (zoneDesc) parts.push(`Positioned in the ${zoneDesc} of the scene.`);
 
-    // 2. Ordering within the same zone (left/right/top/bottom)
+    // 2. Zone-mate ordering based on relative size (larger objects tend to be more prominent)
     const zoneMates = byZone.get(h.positionZone) ?? [];
     if (zoneMates.length > 1) {
-      // Sort by x (left→right)
-      const sorted = [...zoneMates].sort((a, b) => a.position.x - b.position.x);
+      const sorted = [...zoneMates].sort((a, b) => {
+        const sizeOrder = { small: 0, medium: 1, large: 2 };
+        return sizeOrder[b.relativeSize] - sizeOrder[a.relativeSize];
+      });
       const idx = sorted.findIndex(x => x.id === h.id);
-
-      // Sort by y (top→bottom)
-      const sortedY = [...zoneMates].sort((a, b) => a.position.y - b.position.y);
-      const idxY = sortedY.findIndex(x => x.id === h.id);
-
-      if (sorted.length > 1) {
-        if (idx === 0) parts.push('It is the leftmost object in this area.');
-        else if (idx === sorted.length - 1) parts.push('It is the rightmost object in this area.');
-        else parts.push(`There are objects to both its left and right in this area.`);
-      }
-
-      if (sortedY.length > 1 && idxY !== idx) {
-        if (idxY === 0) parts.push('It is the topmost object in this area.');
-        else if (idxY === sortedY.length - 1) parts.push('It is the bottommost object in this area.');
+      if (idx === 0) {
+        parts.push('It is the largest/most prominent object in this area.');
+      } else if (idx === sorted.length - 1) {
+        parts.push('It is the smallest/least prominent object in this area.');
+      } else {
+        parts.push('It is intermediate in prominence within this area.');
       }
     }
 
@@ -236,8 +230,6 @@ function buildSpatialHints(hotspots: HotspotPromptInfo[]): Map<string, string> {
     const otherZones = [...byZone.entries()].filter(([zone]) => zone !== h.positionZone);
     for (const [otherZone, others] of otherZones) {
       if (others.length === 0) continue;
-      // Use first hotspot in the other zone as anchor
-      const anchor = others[0];
       const [myCol] = h.positionZone.split('-');
       const [otherCol] = otherZone.split('-');
 
@@ -294,8 +286,6 @@ interface StructuredPrompt {
     properties: {
       position_zone: string;
       relative_size: string;
-      pixel_center: { x: number; y: number };
-      pixel_size: { width: number; height: number };
     };
     details: {
       action: string;
@@ -359,7 +349,7 @@ export function buildRichBackgroundPrompt(
           ]
         : ['text', 'letters', 'words', 'readable writing', 'UI elements',
             'labels', 'names', 'coordinates', 'position numbers'],
-      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment. Do NOT render any text, coordinate numbers, or object names in the image.',
+      global_rule: 'All interactive objects must be visually distinct and naturally integrated into the scene environment. Do NOT render any text, coordinate numbers, or object names in the image. CRITICAL CONSTRAINTS: (1) Exactly match the specified number of interactive objects — do not omit or add any. (2) No overlapping between objects — each object must occupy a distinct, non-overlapping area. (3) Objects must be clearly visually distinguishable from each other through size, position, or visual treatment.',
     },
   };
 
@@ -384,7 +374,7 @@ export function buildRichBackgroundPrompt(
     };
   }
 
-  // Interactive objects with pixel-precise coordinates + spatial hints
+  // Interactive objects with zone-based positioning + spatial hints
   if (gameContext.hotspots.length > 0) {
     const spatialHints = buildSpatialHints(gameContext.hotspots);
     prompt.interactive_objects = gameContext.hotspots.map(h => ({
@@ -392,8 +382,6 @@ export function buildRichBackgroundPrompt(
       properties: {
         position_zone: h.positionZone,
         relative_size: h.relativeSize,
-        pixel_center: h.position,
-        pixel_size: h.size,
       },
       details: {
         action: h.actionType,

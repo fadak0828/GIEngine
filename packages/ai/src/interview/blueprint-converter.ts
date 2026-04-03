@@ -12,7 +12,7 @@ import type { Case, Scene, Word, AssetDefinition, AssetRef, Locale } from '@gi-e
 import type { CaseBlueprint, BlueprintScene } from './types.js';
 import type { GameContextForPrompt, HotspotPromptInfo } from '../types.js';
 import { generateCaseFromBlueprint } from '../generators/case-generator.js';
-import { generateBackground } from '../generators/background-generator.js';
+import { generateBackground, generateBackgroundWithDetection } from '../generators/background-generator.js';
 
 // ─── 진행률 콜백 ──────────────────────────────────────────────────────────────
 
@@ -460,41 +460,58 @@ export async function convertBlueprintToGameData(
   onProgress?.({ step: '씬 및 단서어 변환 중...', percent: 15 });
   const { case: baseCase, words } = await generateCaseFromBlueprint(processedBlueprint, locale);
 
-  // Step 2: 핫스팟 위치 의미적 계산 (positionHint 우선 + 안전 클램핑)
-  onProgress?.({ step: '핫스팟 위치 계산 중...', percent: 40 });
-  const positionedScenes: Scene[] = baseCase.scenes.map((scene, i) => {
-    const bScene = processedBlueprint.scenes[i];
-    return bScene ? applySmartPositionsToScene(scene, bScene) : scene;
-  });
-  let finalCase: Case = { ...baseCase, scenes: positionedScenes };
+  let finalCase: Case = baseCase;
 
-  // Step 3: 배경 이미지 생성 (옵션) — 게임 컨텍스트 주입 + 재시도
+  // Step 2+3: 배경 이미지 생성 + 핫스팟 위치 Vision 감지 ( 통합 파이프라인)
   if (generateBackgrounds && processedBlueprint.scenes.length > 0) {
     const total = processedBlueprint.scenes.length;
     for (let i = 0; i < total; i++) {
       const bScene = processedBlueprint.scenes[i];
-      const pct = 45 + Math.floor(((i + 1) / total) * 40);
-      onProgress?.({ step: `씬 배경 생성 중 (${i + 1}/${total})...`, percent: pct });
+      const pct = 40 + Math.floor(((i + 1) / total) * 50);
+      onProgress?.({ step: `배경 생성 + 핫스팟 감지 중 (${i + 1}/${total})...`, percent: pct });
 
       const gameContext = buildGameContextForScene(finalCase.scenes[i], i, processedBlueprint, locale);
+      const scene = finalCase.scenes[i];
 
-      const bgResult = await generateBackgroundWithRetry({
+      const bgDetectionResult = await generateBackgroundWithDetection({
         sceneDescription: bScene.description,
         style: 'painterly',
         aspectRatio: '16:9',
         gameContext,
+        hotspots: gameContext.hotspots,
+        sceneWidth: scene.dimensions.width,
+        sceneHeight: scene.dimensions.height,
+        onProgress: (step) => onProgress?.({ step, percent: pct }),
       });
 
-      if (bgResult) {
-        generatedAssets.push(bgResult.asset);
-        finalCase = {
-          ...finalCase,
-          scenes: finalCase.scenes.map((scene, idx) =>
-            idx === i ? { ...scene, background: bgResult.asset.id as AssetRef } : scene,
-          ),
-        };
-      }
+      generatedAssets.push(bgDetectionResult.asset);
+
+      const updatedHotspots = scene.hotspots.map(hotspot => {
+        const detected = bgDetectionResult.updatedHotspots.find(d => d.hotspotId === hotspot.id);
+        return detected ? { ...hotspot, area: detected.area } : hotspot;
+      });
+
+      finalCase = {
+        ...finalCase,
+        scenes: finalCase.scenes.map((s, idx) =>
+          idx === i
+            ? {
+                ...s,
+                background: bgDetectionResult.asset.id as AssetRef,
+                hotspots: updatedHotspots,
+              }
+            : s,
+        ),
+      };
     }
+  } else {
+    // Background 생성 없이 핫스팟 위치만 의미적 계산
+    onProgress?.({ step: '핫스팟 위치 계산 중...', percent: 40 });
+    const positionedScenes: Scene[] = baseCase.scenes.map((scene, i) => {
+      const bScene = processedBlueprint.scenes[i];
+      return bScene ? applySmartPositionsToScene(scene, bScene) : scene;
+    });
+    finalCase = { ...baseCase, scenes: positionedScenes };
   }
 
   onProgress?.({ step: '변환 완료', percent: 90 });
