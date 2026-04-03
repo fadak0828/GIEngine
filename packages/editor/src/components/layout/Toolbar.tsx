@@ -173,9 +173,9 @@ export function Toolbar(): React.ReactElement {
         ⚡ Quick Create
       </button>
 
-      {/* AI Interview */}
+      {/* AI Interview — redirects to QuickCreate since InterviewEngine is deprecated (FADAA-107) */}
       <button
-        onClick={() => openInterview(undefined)}
+        onClick={() => openQuickCreate(undefined)}
         style={{
           ...btnStyle,
           background: 'var(--accent-dim)',
