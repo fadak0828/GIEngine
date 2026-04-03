@@ -14,6 +14,7 @@ interface SceneNodeProps {
 const SceneNode = React.memo(function SceneNode({ scene, caseId, isSelected, onSelect }: SceneNodeProps): React.ReactElement {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
   const { updateScene } = useEditorStore();
+  const [isHovered, setIsHovered] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -46,21 +47,27 @@ const SceneNode = React.memo(function SceneNode({ scene, caseId, isSelected, onS
     setEditValue(currentName);
   }, [currentName]);
 
+  const isActive = isSelected || isHovered;
+
   return (
     <div
       onClick={isEditing ? undefined : onSelect}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         padding: '3px 12px 3px 40px',
         cursor: isEditing ? 'default' : 'pointer',
         fontSize: 12,
-        color: isSelected ? 'var(--accent)' : 'var(--text-secondary)',
-        background: isSelected ? 'rgba(245,158,11,0.1)' : 'transparent',
+        color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+        background: isSelected ? 'var(--accent-dim)' : isHovered ? 'rgba(212,150,58,0.08)' : 'transparent',
+        borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
         borderRadius: 3,
         overflow: 'hidden',
         whiteSpace: 'nowrap',
         display: 'flex',
         alignItems: 'center',
         gap: 4,
+        transition: 'background 150ms ease, border-color 150ms ease, color 150ms ease',
       }}
     >
       <span>🎬</span>
@@ -115,6 +122,7 @@ interface CaseNodeProps {
 const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isExpanded, selectedSceneId, onSelect, onToggle, onSceneSelect }: CaseNodeProps): React.ReactElement {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
   const { addScene, deleteCase, updateCase } = useEditorStore();
+  const [isHovered, setIsHovered] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -157,17 +165,23 @@ const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isE
     if (window.confirm('사건을 삭제하시겠습니까?')) deleteCase(actId, caseData.id);
   }, [deleteCase, actId, caseData.id]);
 
+  const isActive = isSelected || isHovered;
+
   return (
     <div>
       <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         style={{
           display: 'flex',
           alignItems: 'center',
           padding: '4px 8px 4px 24px',
           cursor: 'pointer',
-          background: isSelected ? 'rgba(245,158,11,0.15)' : 'transparent',
+          background: isSelected ? 'var(--accent-dim)' : isHovered ? 'rgba(212,150,58,0.08)' : 'transparent',
+          borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
           borderRadius: 3,
           gap: 4,
+          transition: 'background 150ms ease, border-color 150ms ease',
         }}
       >
         <button
@@ -209,7 +223,7 @@ const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isE
             style={{
               flex: 1,
               fontSize: 13,
-              color: isSelected ? 'var(--accent)' : 'var(--text-primary)',
+              color: isActive ? 'var(--accent)' : 'var(--text-primary)',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -218,7 +232,7 @@ const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isE
             {currentTitle}
           </span>
         )}
-        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: 10, color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
           {caseData.scenes.length}씬
         </span>
         <button
