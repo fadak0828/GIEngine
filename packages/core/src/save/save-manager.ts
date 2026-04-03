@@ -19,11 +19,27 @@ export class SaveManager {
     if (typeof raw['gameId'] !== 'string') return null;
     if (typeof raw['caseStates'] !== 'object' || raw['caseStates'] === null) return null;
 
-    // Fill in missing fields added in later versions
+    // Fill in missing top-level fields added in later versions
     if (typeof raw['currentLocale'] !== 'string') raw['currentLocale'] = 'ko';
     if (typeof raw['gameVersion'] !== 'string') raw['gameVersion'] = '0.0.0';
     if (typeof raw['savedAt'] !== 'string') raw['savedAt'] = new Date().toISOString();
     if (raw['currentPosition'] === undefined) raw['currentPosition'] = null;
+    if (typeof raw['flags'] !== 'object' || raw['flags'] === null) raw['flags'] = {};
+
+    // Fill in missing per-case fields added in later versions
+    const caseStates = raw['caseStates'] as Record<string, unknown>;
+    for (const caseId of Object.keys(caseStates)) {
+      const cs = caseStates[caseId] as Record<string, unknown>;
+      if (!Array.isArray(cs['visitedHotspotIds'])) cs['visitedHotspotIds'] = [];
+      if (!Array.isArray(cs['visitedSceneIds'])) cs['visitedSceneIds'] = [];
+      if (!Array.isArray(cs['collectedWordIds'])) cs['collectedWordIds'] = [];
+      if (typeof cs['layerVisibility'] !== 'object' || cs['layerVisibility'] === null) {
+        cs['layerVisibility'] = {};
+      }
+      if (typeof cs['puzzleStates'] !== 'object' || cs['puzzleStates'] === null) {
+        cs['puzzleStates'] = {};
+      }
+    }
 
     return raw as unknown as SaveState;
   }

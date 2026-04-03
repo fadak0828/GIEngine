@@ -99,7 +99,7 @@ export class GIEngine {
 
     if (loadSave) {
       const raw = this.saveManager.load();
-      const saved = raw ?? this.saveManager.migrate(raw);
+      const saved = raw ? this.saveManager.migrate(raw) : null;
       if (saved && saved.gameId === this.definition.id) {
         this.saveState = saved;
         this.i18n.setLocale(saved.currentLocale);
