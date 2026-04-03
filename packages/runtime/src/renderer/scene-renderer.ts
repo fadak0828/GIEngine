@@ -78,7 +78,7 @@ export class SceneRenderer {
     }
   }
 
-  applyTransition(type: 'fade' | 'slide_left' | 'slide_right' | 'instant'): void {
+  applyTransition(type: 'fade' | 'slide_left' | 'slide_right' | 'instant' | 'dissolve' | 'wipe_left' | 'wipe_right'): void {
     if (!this.sceneEl || type === 'instant') return;
     const cls = `gi-scene--${type.replace('_', '-')}-enter`;
     this.sceneEl.classList.add(cls);

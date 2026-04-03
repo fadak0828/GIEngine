@@ -134,10 +134,12 @@ export interface WordRevealAction {
   feedback?: LocalizedText;
 }
 
+export type SceneTransitionType = 'fade' | 'slide_left' | 'slide_right' | 'instant' | 'dissolve' | 'wipe_left' | 'wipe_right';
+
 export interface NavigateAction {
   type: 'navigate';
   targetSceneId: string;
-  transition?: 'fade' | 'slide_left' | 'slide_right' | 'instant';
+  transition?: SceneTransitionType;
 }
 
 export interface ToggleLayerAction {

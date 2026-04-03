@@ -952,6 +952,36 @@
   animation: gi-slide-right-enter 0.4s ease;
 }
 
+/* --- Dissolve (cross-fade) transition --- */
+@keyframes gi-dissolve-enter {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.gi-scene--dissolve-enter {
+  animation: gi-dissolve-enter 0.6s ease-in-out;
+}
+
+/* --- Wipe transitions (clip-path based) --- */
+@keyframes gi-wipe-left-enter {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes gi-wipe-right-enter {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0%); }
+}
+
+.gi-scene--wipe-left-enter {
+  animation: gi-wipe-left-enter 0.5s ease-out;
+}
+
+.gi-scene--wipe-right-enter {
+  animation: gi-wipe-right-enter 0.5s ease-out;
+}
+
 /* --- Responsive Breakpoints --- */
 
 /* Small phones */
