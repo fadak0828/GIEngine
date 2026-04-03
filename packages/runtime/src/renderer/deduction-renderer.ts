@@ -180,7 +180,11 @@ export class DeductionRenderer {
     if (!slotEl) return;
 
     // Remove validation styling when assignment changes
-    slotEl.classList.remove('gi-slot--correct', 'gi-slot--partial', 'gi-slot--incorrect', 'gi-slot--animate');
+    slotEl.classList.remove('gi-slot--correct', 'gi-slot--partial', 'gi-slot--partial-strong', 'gi-slot--incorrect', 'gi-slot--animate', 'gi-slot--locked');
+
+    // Remove X icon if present
+    const xIcon = slotEl.querySelector('.gi-slot-x-icon');
+    if (xIcon) xIcon.remove();
 
     if (wordId) {
       const word = words.find(w => w.id === wordId);
