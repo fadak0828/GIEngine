@@ -1,11 +1,12 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { HotspotOverlay } from './HotspotOverlay';
 import { AIBackgroundModal } from '@/components/ai/AIBackgroundModal';
 import { canvasToScene, computeScale, type CanvasRect } from '@/utils/coordinate';
 import { applyDragToArea } from '@/utils/hotspot-drag';
 import { useCanvasDrag, type DragMode, type DragState } from '@/hooks/useCanvasDrag';
-import type { HotspotArea } from '@gi-engine/core';
+import type { HotspotArea, Hotspot } from '@gi-engine/core';
+import { genId } from '@/store/utils';
 
 export function SceneCanvas(): React.ReactElement {
   const project = useEditorStore(s => s.project);
@@ -33,6 +34,19 @@ export function SceneCanvas(): React.ReactElement {
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const dragHotspotIdRef = useRef<string | null>(null);
 
+  // Hotspot clipboard for copy/paste
+  const hotspotClipboardRef = useRef<Hotspot[]>([]);
+
+  // Track shift key for temporarily disabling grid snap
+  const shiftKeyRef = useRef(false);
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Shift') shiftKeyRef.current = true; };
+    const onKeyUp = (e: KeyboardEvent) => { if (e.key === 'Shift') shiftKeyRef.current = false; };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => { window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp); };
+  }, []);
+
   const scene = useMemo(() => {
     if (!project || !selection.caseId || !selection.sceneId) return null;
     for (const act of project.acts) {
@@ -59,6 +73,61 @@ export function SceneCanvas(): React.ReactElement {
     return () => observer.disconnect();
   }, [updateCanvasRect]);
 
+  // Keyboard shortcuts for hotspot copy/paste
+  useEffect(() => {
+    if (!scene || !selection.caseId || !selection.sceneId) return;
+    const caseId = selection.caseId;
+    const sceneId = selection.sceneId;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const { hotspotIds } = useEditorStore.getState().selection;
+        if (hotspotIds.length > 0) {
+          const selectedHotspots = scene.hotspots.filter(h => hotspotIds.includes(h.id));
+          hotspotClipboardRef.current = selectedHotspots.map(h => ({ ...h, id: genId('hotspot') }));
+          useEditorStore.getState().showNotification(`${selectedHotspots.length}개 핫스팟 복사됨`, 'success');
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        const clipboard = hotspotClipboardRef.current;
+        if (clipboard.length > 0) {
+          const offset = 20;
+          clipboard.forEach(hotspot => {
+            let newArea: HotspotArea;
+            if (hotspot.area.type === 'rect') {
+              newArea = {
+                type: 'rect',
+                x: hotspot.area.x + offset,
+                y: hotspot.area.y + offset,
+                width: hotspot.area.width,
+                height: hotspot.area.height,
+              };
+            } else if (hotspot.area.type === 'circle') {
+              newArea = {
+                type: 'circle',
+                cx: hotspot.area.cx + offset,
+                cy: hotspot.area.cy + offset,
+                radius: hotspot.area.radius,
+              };
+            } else if (hotspot.area.type === 'polygon') {
+              newArea = {
+                type: 'polygon',
+                points: hotspot.area.points.map(([px, py]) => [px + offset, py + offset] as [number, number]),
+              };
+            } else {
+              return;
+            }
+            addHotspot(caseId, sceneId, newArea);
+          });
+          useEditorStore.getState().showNotification(`${clipboard.length}개 핫스팟 붙여넣기 완료`, 'success');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scene, selection.caseId, selection.sceneId, addHotspot]);
+
   const { startDrag } = useCanvasDrag({
     canvasRectRef,
     sceneDimensions: scene?.dimensions ?? { width: 1280, height: 720 },
@@ -68,9 +137,10 @@ export function SceneCanvas(): React.ReactElement {
       if (!hotspotId || !scene) return;
       const hotspot = scene.hotspots.find(h => h.id === hotspotId);
       if (!hotspot) return;
-      const newArea = applyDragToArea(hotspot.area, dragState, mode, scene.dimensions);
+      const gridSnap = { enabled: ui.gridSnapEnabled, gridSize: ui.gridSize, shiftHeld: shiftKeyRef.current };
+      const newArea = applyDragToArea(hotspot.area, dragState, mode, scene.dimensions, gridSnap);
       setDragPreview({ hotspotId, area: newArea });
-    }, [scene]),
+    }, [scene, ui.gridSnapEnabled, ui.gridSize]),
 
     onDragEnd: useCallback((dragState: DragState, mode: DragMode) => {
       const hotspotId = dragHotspotIdRef.current;
@@ -81,12 +151,13 @@ export function SceneCanvas(): React.ReactElement {
       }
       const hotspot = scene.hotspots.find(h => h.id === hotspotId);
       if (hotspot) {
-        const finalArea = applyDragToArea(hotspot.area, dragState, mode, scene.dimensions);
+        const gridSnap = { enabled: ui.gridSnapEnabled, gridSize: ui.gridSize, shiftHeld: shiftKeyRef.current };
+        const finalArea = applyDragToArea(hotspot.area, dragState, mode, scene.dimensions, gridSnap);
         updateHotspotArea(selection.caseId, selection.sceneId, hotspotId, finalArea);
       }
       setDragPreview(null);
       dragHotspotIdRef.current = null;
-    }, [scene, selection, updateHotspotArea]),
+    }, [scene, selection, updateHotspotArea, ui.gridSnapEnabled, ui.gridSize]),
   });
 
   const handleHotspotPointerDown = useCallback((
@@ -318,6 +389,18 @@ export function SceneCanvas(): React.ReactElement {
         )}
         <div style={{ flex: 1 }} />
         <button
+          onClick={() => useEditorStore.getState().toggleGridSnap()}
+          style={{
+            padding: '3px 8px', fontSize: 11,
+            background: ui.gridSnapEnabled ? 'var(--accent)' : 'transparent',
+            color: ui.gridSnapEnabled ? '#000' : 'var(--text-secondary)',
+            border: '1px solid var(--border-color)', borderRadius: 3, cursor: 'pointer',
+          }}
+          title={`그리드 스냅 ${ui.gridSnapEnabled ? '켜짐' : '꺼짐'} (10px)`}
+        >
+          ⊞ 스냅{ui.gridSnapEnabled ? ' ON' : ' OFF'}
+        </button>
+        <button
           onClick={() => setAiModalOpen(true)}
           style={{
             padding: '3px 10px', fontSize: 11, background: 'transparent',
@@ -359,16 +442,23 @@ export function SceneCanvas(): React.ReactElement {
 
           <HotspotOverlay
             hotspots={effectiveHotspots}
-            selectedHotspotId={selection.hotspotId}
+            selectedHotspotIds={selection.hotspotIds}
             scaleX={scaleX}
             scaleY={scaleY}
-            onSelect={id => {
+            onSelect={(id, e) => {
               if (ui.sceneTool === 'delete' && selection.caseId && selection.sceneId) {
                 if (window.confirm('핫스팟을 삭제하시겠습니까?')) {
                   useEditorStore.getState().deleteHotspot(selection.caseId, selection.sceneId, id);
                 }
+              } else if (e.ctrlKey || e.metaKey) {
+                const { hotspotIds } = useEditorStore.getState().selection;
+                if (hotspotIds.includes(id)) {
+                  useEditorStore.getState().removeFromHotspotSelection(id);
+                } else {
+                  useEditorStore.getState().addToHotspotSelection(id);
+                }
               } else {
-                setSelection({ hotspotId: id });
+                setSelection({ hotspotId: id, hotspotIds: [id] });
               }
             }}
             onHotspotPointerDown={handleHotspotPointerDown}

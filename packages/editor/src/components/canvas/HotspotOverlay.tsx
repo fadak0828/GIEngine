@@ -16,11 +16,11 @@ const CURSOR_TO_DRAG_MODE: Record<string, DragMode> = {
 
 interface HotspotOverlayProps {
   hotspots: Hotspot[];
-  selectedHotspotId: string | null;
+  selectedHotspotIds: string[];
   /** Scale from scene coordinates to canvas pixels */
   scaleX: number;
   scaleY: number;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, e: React.MouseEvent) => void;
   onHotspotPointerDown?: (e: React.PointerEvent<SVGRectElement>, hotspotId: string) => void;
   onResizeHandlePointerDown?: (e: React.PointerEvent<SVGRectElement>, hotspotId: string, mode: DragMode) => void;
   /** Called when user starts dragging a polygon vertex */
@@ -33,7 +33,7 @@ interface HotspotOverlayProps {
 
 export const HotspotOverlay = React.memo(function HotspotOverlay({
   hotspots,
-  selectedHotspotId,
+  selectedHotspotIds,
   scaleX,
   scaleY,
   onSelect,
@@ -46,7 +46,7 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}
     >
       {hotspots.map(hotspot => {
-        const isSelected = hotspot.id === selectedHotspotId;
+        const isSelected = selectedHotspotIds.includes(hotspot.id);
         const area = hotspot.area;
 
         // ── Rect hotspot ──────────────────────────────────────────
@@ -68,7 +68,7 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
                 strokeWidth={isSelected ? 2 : 1.5}
                 strokeDasharray={isSelected ? undefined : '4 2'}
                 style={{ pointerEvents: 'all', cursor: 'move' }}
-                onClick={() => onSelect(hotspot.id)}
+                onClick={e => onSelect(hotspot.id, e)}
                 onPointerDown={onHotspotPointerDown ? e => onHotspotPointerDown(e, hotspot.id) : undefined}
               />
               {/* Resize handles on selected hotspot */}
@@ -122,7 +122,7 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
                 strokeWidth={isSelected ? 2 : 1.5}
                 strokeDasharray={isSelected ? undefined : '4 2'}
                 style={{ pointerEvents: 'all', cursor: 'move' }}
-                onClick={() => onSelect(hotspot.id)}
+                onClick={e => onSelect(hotspot.id, e)}
               />
             </g>
           );
@@ -144,7 +144,7 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
                 strokeDasharray={isSelected ? undefined : '4 2'}
                 strokeLinejoin="round"
                 style={{ pointerEvents: 'all', cursor: 'move' }}
-                onClick={() => onSelect(hotspot.id)}
+                onClick={e => onSelect(hotspot.id, e)}
               />
               {/* Vertex drag handles on selected polygon */}
               {isSelected && area.points.map(([px, py], i) => (

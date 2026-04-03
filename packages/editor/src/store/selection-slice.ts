@@ -11,6 +11,7 @@ export const defaultSelection: SelectionState = {
   caseId: null,
   sceneId: null,
   hotspotId: null,
+  hotspotIds: [],
   puzzleId: null,
   layerId: null,
   subPuzzleId: null,
@@ -37,6 +38,8 @@ export const defaultUI: UIState = {
   assetTypeFilter: 'all',
   assetSearch: '',
   shortcutHelpOpen: false,
+  gridSnapEnabled: true,
+  gridSize: 10,
 };
 
 // ── Slice type ───────────────────────────────────────────────────
@@ -68,6 +71,11 @@ export type SelectionSlice = {
   setAssetTypeFilter: (filter: AssetTypeFilter) => void;
   setAssetSearch: (query: string) => void;
   setShortcutHelpOpen: (open: boolean) => void;
+  toggleGridSnap: () => void;
+  setGridSize: (size: number) => void;
+  addToHotspotSelection: (hotspotId: string) => void;
+  removeFromHotspotSelection: (hotspotId: string) => void;
+  clearHotspotSelection: () => void;
 };
 
 // ── Slice creator ────────────────────────────────────────────────
@@ -190,5 +198,30 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   setShortcutHelpOpen: (open) => {
     set(state => ({ ui: { ...state.ui, shortcutHelpOpen: open } }));
+  },
+
+  toggleGridSnap: () => {
+    set(state => ({ ui: { ...state.ui, gridSnapEnabled: !state.ui.gridSnapEnabled } }));
+  },
+
+  setGridSize: (size) => {
+    set(state => ({ ui: { ...state.ui, gridSize: Math.max(1, size) } }));
+  },
+
+  addToHotspotSelection: (hotspotId) => {
+    set(state => {
+      if (state.selection.hotspotIds.includes(hotspotId)) return state;
+      return { selection: { ...state.selection, hotspotIds: [...state.selection.hotspotIds, hotspotId] } };
+    });
+  },
+
+  removeFromHotspotSelection: (hotspotId) => {
+    set(state => ({
+      selection: { ...state.selection, hotspotIds: state.selection.hotspotIds.filter(id => id !== hotspotId) },
+    }));
+  },
+
+  clearHotspotSelection: () => {
+    set(state => ({ selection: { ...state.selection, hotspotIds: [] } }));
   },
 });

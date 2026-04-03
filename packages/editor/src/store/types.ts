@@ -60,6 +60,7 @@ export interface SelectionState {
   caseId: string | null;
   sceneId: string | null;
   hotspotId: string | null;
+  hotspotIds: string[];
   puzzleId: string | null;
   layerId: string | null;
   subPuzzleId: string | null;
@@ -93,6 +94,8 @@ export interface UIState {
   assetTypeFilter: AssetTypeFilter;
   assetSearch: string;
   shortcutHelpOpen: boolean;
+  gridSnapEnabled: boolean;
+  gridSize: number;
 }
 
 // ── History ───────────────────────────────────────────────────────
@@ -212,6 +215,11 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice, ItchSlice
   setSceneTool: (tool: UIState['sceneTool']) => void;
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
   setShortcutHelpOpen: (open: boolean) => void;
+  toggleGridSnap: () => void;
+  setGridSize: (size: number) => void;
+  addToHotspotSelection: (hotspotId: string) => void;
+  removeFromHotspotSelection: (hotspotId: string) => void;
+  clearHotspotSelection: () => void;
 
   // Convenience: set selected scene / sub-puzzle
   setSelectedScene: (sceneId: string | null) => void;
