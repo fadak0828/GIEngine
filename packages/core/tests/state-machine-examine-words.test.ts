@@ -120,12 +120,10 @@ describe('Examine actions no longer auto-collect words', () => {
     if (result.nextState.type === 'exploring') {
       expect(result.nextState.sub.type).toBe('examining_text');
       if (result.nextState.sub.type === 'examining_text') {
-        // collectibleWords should be passed through to sub-state
         expect(result.nextState.sub.collectibleWords).toHaveLength(2);
       }
     }
-    // No auto-collection — no save state change
-    expect(result.saveState).toBeUndefined();
+    expect(result.saveState?.caseStates?.['case-1']?.visitedHotspotIds).toContain('hs-examine-with-words');
     expect(result.effects).toEqual([]);
   });
 
@@ -135,7 +133,7 @@ describe('Examine actions no longer auto-collect words', () => {
     if (result.nextState.type === 'exploring') {
       expect(result.nextState.sub.type).toBe('examining_text');
     }
-    expect(result.saveState).toBeUndefined();
+    expect(result.saveState?.caseStates?.['case-1']?.visitedHotspotIds).toContain('hs-examine-no-words');
     expect(result.effects).toEqual([]);
   });
 
@@ -145,7 +143,7 @@ describe('Examine actions no longer auto-collect words', () => {
     if (result.nextState.type === 'exploring') {
       expect(result.nextState.sub.type).toBe('examining_image');
     }
-    expect(result.saveState).toBeUndefined();
+    expect(result.saveState?.caseStates?.['case-1']?.visitedHotspotIds).toContain('hs-examine-image');
     expect(result.effects).toEqual([]);
   });
 });

@@ -89,18 +89,33 @@ export function handleExploring(
         return result;
       }
 
-      const updatedCaseState: CaseState = {
-        ...caseState,
-        visitedHotspotIds: [...caseState.visitedHotspotIds, event.hotspotId],
-      };
+      if (!result.saveState) {
+        const updatedCaseState: CaseState = {
+          ...caseState,
+          visitedHotspotIds: [...caseState.visitedHotspotIds, event.hotspotId],
+        };
+        return {
+          ...result,
+          saveState: {
+            caseStates: {
+              [state.caseId]: updatedCaseState,
+            },
+          },
+        };
+      }
+
+      const existingCaseState = result.saveState.caseStates?.[state.caseId];
+      const mergedCaseState: CaseState = existingCaseState
+        ? { ...existingCaseState, visitedHotspotIds: [...existingCaseState.visitedHotspotIds, event.hotspotId] }
+        : { ...caseState, visitedHotspotIds: [...caseState.visitedHotspotIds, event.hotspotId] };
 
       return {
         ...result,
         saveState: {
           ...result.saveState,
           caseStates: {
-            ...result.saveState?.caseStates,
-            [state.caseId]: updatedCaseState,
+            ...result.saveState.caseStates,
+            [state.caseId]: mergedCaseState,
           },
         },
       };
