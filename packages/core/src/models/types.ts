@@ -407,7 +407,9 @@ export type GameEvent =
   | { type: 'INNER_HOTSPOT_CLICK'; hotspotId: string }
   | { type: 'OPEN_PUZZLE_OVERLAY'; puzzleId: string }
   | { type: 'CLOSE_PUZZLE_OVERLAY' }
-  | { type: 'COLLECT_WORD_IN_POPUP'; wordId: string };
+  | { type: 'COLLECT_WORD_IN_POPUP'; wordId: string }
+  | { type: 'REQUEST_HINT'; puzzleId: string; level: 1 | 2 | 3 }
+  | { type: 'APPLY_HINT_PENALTY'; puzzleId: string; penalty: number };
 
 // --- State Transition Result ---
 
@@ -444,6 +446,22 @@ export interface ValidationResult {
   allCorrect: boolean;
   slotResults: Record<string, 'correct' | 'partial' | 'incorrect'>;
   segmentResults?: Record<string, { correct: number; total: number }>;
+}
+
+// --- Hint System ---
+
+export interface HintConfig {
+  maxHints: number;
+  cooldownSec: number;
+  scorePenalty?: number;
+}
+
+export interface Hint {
+  id: string;
+  puzzleId: string;
+  level: 1 | 2 | 3;
+  text: LocalizedText;
+  condition?: string;
 }
 
 // --- Common Types ---

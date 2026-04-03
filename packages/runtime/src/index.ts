@@ -14,6 +14,8 @@ export { KeyboardHandler } from './input/keyboard-handler.js';
 export { DragDropManager } from './dragdrop/drag-drop-manager.js';
 export { AudioManager } from './audio/audio-manager.js';
 export { WordBankPanelRenderer } from './renderer/word-bank-panel-renderer.js';
+export { HintManager } from './hint/hint-manager.js';
+export { HintRenderer } from './hint/hint-renderer.js';
 
 // Default export
 export { GIEngine as default } from './engine.js';
