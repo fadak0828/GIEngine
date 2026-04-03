@@ -17,6 +17,7 @@ export class WordBankPanelRenderer {
   private rootEl: HTMLElement | null = null;
   private panelEl: HTMLElement | null = null;
   private isExpanded = false;
+  private previousWordIds: Set<string> = new Set();
 
   constructor(opts: WordBankPanelRendererOptions) {
     this.container = opts.container;
@@ -65,10 +66,18 @@ export class WordBankPanelRenderer {
   updateWords(words: Word[], assignedWordIds: Set<string>): void {
     if (!this.rootEl || !this.panelEl) return;
 
-    // Rebuild panel content
-    this.buildPanelContent(this.panelEl, words, assignedWordIds);
+    const currentWordIds = new Set(words.map(w => w.id));
+    const newWordIds = new Set<string>();
+    for (const id of currentWordIds) {
+      if (!this.previousWordIds.has(id)) {
+        newWordIds.add(id);
+      }
+    }
 
-    // Update count badge on toggle button
+    this.buildPanelContent(this.panelEl, words, assignedWordIds, newWordIds);
+
+    this.previousWordIds = currentWordIds;
+
     const badge = this.rootEl.querySelector<HTMLElement>('.gi-word-bank-panel-count');
     if (badge) badge.textContent = String(words.length);
   }
@@ -101,11 +110,11 @@ export class WordBankPanelRenderer {
   private buildPanelContent(
     panel: HTMLElement,
     words: Word[],
-    assignedWordIds: Set<string>
+    assignedWordIds: Set<string>,
+    newWordIds?: Set<string>
   ): void {
     panel.innerHTML = '';
 
-    // Header
     const header = document.createElement('div');
     header.className = 'gi-word-bank-panel-header';
 
@@ -129,7 +138,6 @@ export class WordBankPanelRenderer {
       return;
     }
 
-    // Group by category and render each group
     const grouped = this.groupByCategory(words);
     for (const [category, categoryWords] of grouped) {
       const group = document.createElement('div');
@@ -150,6 +158,9 @@ export class WordBankPanelRenderer {
         item.dataset.wordId = word.id;
         if (assignedWordIds.has(word.id)) {
           item.classList.add('gi-word-bank-panel-item--assigned');
+        }
+        if (newWordIds?.has(word.id)) {
+          item.classList.add('gi-word-bank-panel-item--new');
         }
         item.textContent = this.i18n.resolveText(word.display);
         list.appendChild(item);

@@ -809,12 +809,12 @@
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0.5rem 1.25rem;
+  padding: 0.6rem 1.5rem;
   background: rgba(196, 148, 58, 0.9);
   color: #1a1410;
   font-family: var(--gi-font-ui);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   border-radius: var(--gi-radius);
   z-index: 40;
   pointer-events: none;
@@ -1539,6 +1539,60 @@
 .gi-toast-text {
   white-space: nowrap;
 }
+
+.gi-toast-text {
+  font-size: 1.15em;
+}
+
+/* --- Word Bank Panel Slide-In Animation --- */
+@keyframes gi-word-bank-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.gi-word-bank-panel-item--new {
+  animation: gi-word-bank-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* --- Word Collection Particle Burst --- */
+@keyframes gi-particle-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0);
+    opacity: 0;
+  }
+}
+
+.gi-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: gi-particle-burst 0.6s ease-out forwards;
+  z-index: 45;
+}
+
+.gi-particle--person { background: #6aa3d4; box-shadow: 0 0 4px #6aa3d4; }
+.gi-particle--place { background: #6ad47a; box-shadow: 0 0 4px #6ad47a; }
+.gi-particle--object { background: #d4a86a; box-shadow: 0 0 4px #d4a86a; }
+.gi-particle--action { background: #d46a6a; box-shadow: 0 0 4px #d46a6a; }
+.gi-particle--time { background: #9b6ad4; box-shadow: 0 0 4px #9b6ad4; }
+.gi-particle--motive { background: #d46aaa; box-shadow: 0 0 4px #d46aaa; }
+.gi-particle--evidence { background: #d4d06a; box-shadow: 0 0 4px #d4d06a; }
 
 /* --- Accessibility: Reduced Motion --- */
 @media (prefers-reduced-motion: reduce) {

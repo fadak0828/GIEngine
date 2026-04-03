@@ -128,7 +128,8 @@ export class Renderer {
     this.popupRenderer.markWordCollected(wordId);
     const wordDef = def.words?.[wordId];
     const wordName = wordDef ? this.i18n.resolveText(wordDef.display) : wordId;
-    this.showWordToast(wordName);
+    const category = wordDef?.category;
+    this.showWordToast(wordName, undefined, category);
   }
 
   update(state: GameState, save: SaveState, def: GameDefinition): void {
@@ -326,14 +327,19 @@ export class Renderer {
         break;
       case 'word_collected': {
         this.popupRenderer.dismiss();
-        const wordNames = state.sub.wordIds.map(wid => {
+        const wordNames: string[] = [];
+        let category: string | undefined;
+        for (const wid of state.sub.wordIds) {
           const wordDef = def.words?.[wid];
-          return wordDef ? this.i18n.resolveText(wordDef.display) : wid;
-        });
+          wordNames.push(wordDef ? this.i18n.resolveText(wordDef.display) : wid);
+          if (!category && wordDef?.category) {
+            category = wordDef.category;
+          }
+        }
         if (wordNames.length === 1) {
-          this.showWordToast(wordNames[0]);
+          this.showWordToast(wordNames[0], undefined, category);
         } else {
-          this.showWordToast(wordNames.join(', '), wordNames.length);
+          this.showWordToast(wordNames.join(', '), wordNames.length, category);
         }
         break;
       }
@@ -835,7 +841,7 @@ export class Renderer {
     }, 2000);
   }
 
-  private showWordToast(wordDisplay: string, count?: number): void {
+  private showWordToast(wordDisplay: string, count?: number, category?: string): void {
     this.removeToast();
 
     const toast = document.createElement('div');
@@ -858,10 +864,47 @@ export class Renderer {
     this.toastEl = toast;
     this.container.appendChild(toast);
 
+    if (category) {
+      requestAnimationFrame(() => {
+        this.createParticleBurst(toast, category);
+      });
+    }
+
     this.toastTimeout = setTimeout(() => {
       toast.classList.add('gi-toast--exit');
       setTimeout(() => this.removeToast(), 300);
     }, 2500);
+  }
+
+  private createParticleBurst(originEl: HTMLElement, category: string): void {
+    const particleCount = 6 + Math.floor(Math.random() * 3);
+    const categoryClass = `gi-particle--${category ?? 'evidence'}`;
+    const originRect = originEl.getBoundingClientRect();
+    const containerRect = this.container.getBoundingClientRect();
+
+    const centerX = originRect.left - containerRect.left + originRect.width / 2;
+    const centerY = originRect.top - containerRect.top + originRect.height / 2;
+
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.className = `gi-particle ${categoryClass}`;
+
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5;
+      const distance = 40 + Math.random() * 30;
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+
+      particle.style.left = `${centerX}px`;
+      particle.style.top = `${centerY}px`;
+      particle.style.setProperty('--dx', `${dx}px`);
+      particle.style.setProperty('--dy', `${dy}px`);
+
+      this.container.appendChild(particle);
+
+      setTimeout(() => {
+        particle.remove();
+      }, 600);
+    }
   }
 
   private removeToast(): void {
