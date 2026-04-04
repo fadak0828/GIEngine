@@ -270,15 +270,17 @@ const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isE
 interface ActNodeProps {
   act: Act;
   isExpanded: boolean;
+  isSelected: boolean;
   selectedCaseId: string | null;
   selectedSceneId: string | null;
   onToggle: () => void;
 }
 
-const ActNode = React.memo(function ActNode({ act, isExpanded, selectedCaseId, selectedSceneId, onToggle }: ActNodeProps): React.ReactElement {
+const ActNode = React.memo(function ActNode({ act, isExpanded, isSelected, selectedCaseId, selectedSceneId, onToggle }: ActNodeProps): React.ReactElement {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
   const { addCase, deleteAct, setSelection, updateAct, setActivePanel } = useEditorStore();
   const [expandedCases, setExpandedCases] = useState<Set<string>>(new Set());
+  const [isHovered, setIsHovered] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -340,18 +342,24 @@ const ActNode = React.memo(function ActNode({ act, isExpanded, selectedCaseId, s
     setActivePanel('scene');
   }, [setSelection, setActivePanel]);
 
+  const isActive = isSelected || isHovered;
+
   return (
     <div>
       <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         style={{
           display: 'flex',
           alignItems: 'center',
           padding: '5px 8px',
           cursor: 'pointer',
-          background: 'var(--bg-card)',
+          background: isSelected ? 'var(--accent-dim)' : isHovered ? 'rgba(212,150,58,0.08)' : 'var(--bg-card)',
+          borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
           borderRadius: 4,
           marginBottom: 2,
           gap: 4,
+          transition: 'background 150ms ease, border-color 150ms ease',
         }}
       >
         <button
@@ -445,6 +453,7 @@ const ActNode = React.memo(function ActNode({ act, isExpanded, selectedCaseId, s
 
 export function ProjectTree(): React.ReactElement {
   const project = useEditorStore(s => s.project);
+  const selectedActId = useEditorStore(s => s.selection.actId);
   const selectedCaseId = useEditorStore(s => s.selection.caseId);
   const selectedSceneId = useEditorStore(s => s.selection.sceneId);
   const { addAct } = useEditorStore();
@@ -485,6 +494,7 @@ export function ProjectTree(): React.ReactElement {
             key={act.id}
             act={act}
             isExpanded={expandedActs.has(act.id)}
+            isSelected={selectedActId === act.id}
             selectedCaseId={selectedCaseId}
             selectedSceneId={selectedSceneId}
             onToggle={() => toggleAct(act.id)}
