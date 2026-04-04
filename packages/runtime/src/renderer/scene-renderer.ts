@@ -117,8 +117,24 @@ export class SceneRenderer {
       zoomWrapper.appendChild(el);
       this.container.appendChild(zoomWrapper);
       this.setupZoomHandlers(zoomWrapper, el, scene);
+      // 초기 transform 명시적 적용
       el.style.transform = `translate(0px, 0px) scale(1)`;
       el.style.transformOrigin = '0 0';
+    }
+  }
+
+  /**
+   * 줌 상태를 1x 배율과 (0,0) 패닝으로 강제 초기화합니다.
+   * 씬 전환 시 호출하여 이전 씬의 줌/팬 상태가 유출되지 않도록 합니다.
+   */
+  resetZoomState(): void {
+    this.zoom = 1;
+    this.zoomPanX = 0;
+    this.zoomPanY = 0;
+    if (this.sceneEl && this.zoomWrapperEl) {
+      this.sceneEl.style.transform = `translate(0px, 0px) scale(1)`;
+      this.sceneEl.style.transformOrigin = '0 0';
+      this.zoomWrapperEl.style.cursor = 'zoom-in';
     }
   }
 
@@ -251,6 +267,19 @@ export class SceneRenderer {
     this.currentScene = null;
     this.panOffset = { x: 0, y: 0 };
     this.didPanDrag = false;
+    // Remove any orphaned gi-scene-zoom-wrapper elements left in the container
+    const orphanWrappers = this.container.querySelectorAll('.gi-scene-zoom-wrapper');
+    for (const wrapper of orphanWrappers) {
+      wrapper.remove();
+    }
+    const orphanViewports = this.container.querySelectorAll('.gi-scene-viewport');
+    for (const viewport of orphanViewports) {
+      viewport.remove();
+    }
+    const orphanScenes = this.container.querySelectorAll('.gi-scene');
+    for (const scene of orphanScenes) {
+      scene.remove();
+    }
   }
 
   updateLayerVisibility(caseState: CaseState): void {
