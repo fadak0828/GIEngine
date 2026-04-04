@@ -5,15 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useEditorStore } from '../src/store/editor-store';
 import type { AssetDefinition, Word } from '@gi-engine/core';
-
-function resetStore() {
-  useEditorStore.setState({
-    project: null,
-    words: [],
-    meta: { filePath: null, isDirty: false, lastSavedAt: null },
-    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, hotspotIds: [], puzzleId: null, subPuzzleId: null, layerId: null, assetId: null },
-  });
-}
+import { resetStore } from './test-helpers';
 
 // Start each test with a fresh project
 function setupProject() {

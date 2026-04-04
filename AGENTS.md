@@ -1,28 +1,22 @@
-# GIEngine
+# GIEngine — Agent Rules
 
-## Skill routing
+이 파일은 모든 AI 에이전트(OpenCode, Claude Code 등)가 따라야 하는 프로젝트 규칙입니다.
 
-When the user's request matches an available skill, ALWAYS invoke it using the Skill
-tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
-The skill has specialized workflows that produce better results than ad-hoc answers.
+## Project Overview
 
-Key routing rules:
-- Product ideas, "is this worth building", brainstorming → invoke office-hours
-- Bugs, errors, "why is this broken", 500 errors → invoke investigate
-- Ship, deploy, push, create PR → invoke ship
-- QA, test the site, find bugs → invoke qa
-- Code review, check my diff → invoke review
-- Update docs after shipping → invoke document-release
-- Weekly retro → invoke retro
-- Design system, brand → invoke design-consultation
-- Visual audit, design polish → invoke design-review
-- Architecture review → invoke plan-eng-review
+Golden Idol 스타일 추리/추론 게임 엔진. npm workspaces 모노레포.
+
+- `packages/core` — 공유 타입, 유틸리티
+- `packages/editor` — React 기반 게임 에디터
+- `packages/runtime` — 게임 런타임 엔진
+- `packages/exporter` — 프로젝트 내보내기
+- `packages/ai` — AI 기반 콘텐츠 생성
 
 ## Design System
-Always read DESIGN.md before making any visual or UI decisions.
-All font choices, colors, spacing, and aesthetic direction are defined there.
-Do not deviate without explicit user approval.
-In QA mode, flag any code that doesn't match DESIGN.md.
+
+UI/비주얼 작업 전에 반드시 `DESIGN.md`를 읽으세요.
+폰트, 색상, 간격, 미적 방향이 모두 정의되어 있습니다.
+명시적 승인 없이 벗어나지 마세요.
 
 ## Git Workflow Policy (필수)
 
@@ -40,7 +34,7 @@ In QA mode, flag any code that doesn't match DESIGN.md.
    Co-Authored-By: Paperclip <noreply@paperclip.ing>
    ```
 4. **커밋 전 검증**: `npm run typecheck` 또는 관련 테스트가 통과해야 커밋합니다.
-5. **미커밋 작업 금지**: heartbeat 종료 시 작업 중인 변경사항이 있으면 반드시 커밋하고 푸시합니다.
+5. **미커밋 작업 금지**: 세션 종료 시 작업 중인 변경사항이 있으면 반드시 커밋하고 푸시합니다.
 
 ### 푸시 규칙
 
@@ -63,7 +57,7 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 
 ### 위반 시
 
-- 미커밋 작업이 발견되면 해당 에이전트의 다음 heartbeat에서 최우선으로 커밋/푸시를 수행합니다.
+- 미커밋 작업이 발견되면 해당 에이전트의 다음 세션에서 최우선으로 커밋/푸시를 수행합니다.
 - 반복 위반 시 CEO가 에이전트 지침을 강화합니다.
 
 ## Windows UTF-8 인코딩 (필수)
@@ -84,5 +78,8 @@ curl --data-binary "@$TMPFILE" -H "Content-Type: application/json" ...
 rm -f "$TMPFILE"
 ```
 
-이 규칙은 Paperclip API 호출(코멘트, 이슈 생성/수정, 문서 업데이트 등) 뿐만 아니라
-한글이 포함된 모든 HTTP 요청에 적용됩니다.
+이 규칙은 Paperclip API 호출 뿐만 아니라 한글이 포함된 모든 HTTP 요청에 적용됩니다.
+
+## 응답 언어
+
+모든 응답은 한국어로 작성합니다. 기술 용어와 코드 식별자는 원본 그대로 유지합니다.

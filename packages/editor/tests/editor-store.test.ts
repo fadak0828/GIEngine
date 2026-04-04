@@ -1,39 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useEditorStore } from '../src/store/editor-store';
 import type { HotspotArea, Word } from '@gi-engine/core';
-
-// Reset store before each test
-function resetStore() {
-  useEditorStore.setState({
-    project: null,
-    words: [],
-    meta: { filePath: null, isDirty: false, lastSavedAt: null },
-    selection: { actId: null, caseId: null, sceneId: null, hotspotId: null, hotspotIds: [], puzzleId: null, subPuzzleId: null, layerId: null, assetId: null },
-    ui: {
-      activePanel: 'scene',
-      editorLocale: 'ko',
-      previewLocale: 'ko',
-      isFullscreen: false,
-      zoom: 1.0,
-      previewVisible: false,
-      previewHeight: 280,
-      previewMode: 'scene',
-      previewPlaying: false,
-      leftPanelWidth: 260,
-      rightPanelWidth: 320,
-      sceneTool: 'select',
-      autoSaveEnabled: false,
-      autoSaveIntervalMs: 30000,
-      notification: null,
-      assetViewMode: 'grid',
-      assetTypeFilter: 'all',
-      assetSearch: '',
-      shortcutHelpOpen: false,
-      gridSnapEnabled: true,
-      gridSize: 10,
-    },
-  });
-}
+import { resetStore } from './test-helpers';
 
 describe('EditorStore', () => {
   beforeEach(() => {
