@@ -44,6 +44,7 @@ export class SceneRenderer {
   private zoom = 1;
   private zoomPanX = 0;
   private zoomPanY = 0;
+  private zoomWrapperEl: HTMLElement | null = null;
   private zoomIndicatorEl: HTMLElement | null = null;
   private zoomIndicatorTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -89,6 +90,7 @@ export class SceneRenderer {
       // Zoom mode for non-scrollable scenes
       const zoomWrapper = document.createElement('div');
       zoomWrapper.className = 'gi-scene-zoom-wrapper';
+      this.zoomWrapperEl = zoomWrapper;
       zoomWrapper.style.position = 'relative';
       zoomWrapper.style.overflow = 'hidden';
       zoomWrapper.style.cursor = 'zoom-in';
@@ -115,6 +117,8 @@ export class SceneRenderer {
       zoomWrapper.appendChild(el);
       this.container.appendChild(zoomWrapper);
       this.setupZoomHandlers(zoomWrapper, el, scene);
+      el.style.transform = `translate(0px, 0px) scale(1)`;
+      el.style.transformOrigin = '0 0';
     }
   }
 
@@ -232,13 +236,18 @@ export class SceneRenderer {
       this.panHandlerCleanup();
       this.panHandlerCleanup = null;
     }
-    // Remove whichever top-level element we appended to the container.
-    const topEl = this.viewportEl ?? this.sceneEl;
-    if (topEl) {
-      topEl.remove();
+    if (this.zoomWrapperEl) {
+      this.zoomWrapperEl.remove();
+      this.zoomWrapperEl = null;
     }
-    this.viewportEl = null;
-    this.sceneEl = null;
+    if (this.viewportEl) {
+      this.viewportEl.remove();
+      this.viewportEl = null;
+    }
+    if (this.sceneEl) {
+      this.sceneEl.remove();
+      this.sceneEl = null;
+    }
     this.currentScene = null;
     this.panOffset = { x: 0, y: 0 };
     this.didPanDrag = false;
