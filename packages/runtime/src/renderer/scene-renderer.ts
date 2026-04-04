@@ -141,10 +141,8 @@ export class SceneRenderer {
     const clampZoomPan = () => {
       const wrapperW = zoomWrapper.clientWidth;
       const wrapperH = zoomWrapper.clientHeight;
-      const sceneW = scene.dimensions.width;
-      const sceneH = scene.dimensions.height;
-      const scaledW = sceneW * this.zoom;
-      const scaledH = sceneH * this.zoom;
+      const scaledW = wrapperW * this.zoom;
+      const scaledH = wrapperH * this.zoom;
       const maxPanX = 0;
       const minPanX = Math.min(0, wrapperW - scaledW);
       const maxPanY = 0;

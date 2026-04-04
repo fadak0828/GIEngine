@@ -98,6 +98,7 @@ export function handleExploring(
           ...result,
           saveState: {
             caseStates: {
+              ...save.caseStates,
               [state.caseId]: updatedCaseState,
             },
           },
@@ -114,6 +115,7 @@ export function handleExploring(
         saveState: {
           ...result.saveState,
           caseStates: {
+            ...save.caseStates,
             ...result.saveState.caseStates,
             [state.caseId]: mergedCaseState,
           },

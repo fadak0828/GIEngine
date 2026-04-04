@@ -222,9 +222,15 @@ export class GIEngine {
     // Update state
     this.gameState = result.nextState;
 
-    // Merge save state changes
+    // Merge save state changes (deep-merge caseStates to avoid losing other cases)
     if (result.saveState) {
-      this.saveState = { ...this.saveState, ...result.saveState };
+      this.saveState = {
+        ...this.saveState,
+        ...result.saveState,
+        caseStates: result.saveState.caseStates
+          ? { ...this.saveState.caseStates, ...result.saveState.caseStates }
+          : this.saveState.caseStates,
+      };
       this.saveState.savedAt = new Date().toISOString();
     }
 

@@ -8,7 +8,7 @@ import type {
   Hotspot,
   HotspotAction,
 } from '../models/types.js';
-import { getAllCases, findCase } from '../models/types.js';
+import { getAllCases, findCase, findScene } from '../models/types.js';
 
 /**
  * 아무 전이도 없는 경우의 기본 반환값.
@@ -106,7 +106,34 @@ export function handleHotspotAction(
       };
     }
 
-    case 'navigate':
+    case 'navigate': {
+      const navCaseData = findCase(def, state.caseId);
+      const targetScene = navCaseData ? findScene(navCaseData, action.targetSceneId) : undefined;
+
+      const navEffects: SideEffect[] = [];
+
+      if (targetScene) {
+        if (targetScene.bgmStop) {
+          navEffects.push({ type: 'stop_bgm' });
+        } else if (targetScene.bgm) {
+          navEffects.push({ type: 'play_bgm', assetRef: targetScene.bgm, loop: true });
+        }
+        if (targetScene.onEnter) {
+          for (const enterAction of targetScene.onEnter) {
+            navEffects.push(...hotspotActionToEffects(enterAction));
+          }
+        }
+      }
+
+      navEffects.push({ type: 'save_game' });
+
+      const navUpdatedCaseState: CaseState = {
+        ...caseState,
+        visitedSceneIds: caseState.visitedSceneIds.includes(action.targetSceneId)
+          ? caseState.visitedSceneIds
+          : [...caseState.visitedSceneIds, action.targetSceneId],
+      };
+
       return {
         nextState: {
           ...state,
@@ -115,9 +142,14 @@ export function handleHotspotAction(
         },
         saveState: {
           currentPosition: { caseId: state.caseId, sceneId: action.targetSceneId },
+          caseStates: {
+            ...save.caseStates,
+            [state.caseId]: navUpdatedCaseState,
+          },
         },
-        effects: [{ type: 'save_game' }],
+        effects: navEffects,
       };
+    }
 
     case 'toggle_layer': {
       const layerVisible = caseState.layerVisibility[action.layerId];
