@@ -22,6 +22,8 @@ interface HotspotOverlayProps {
   scaleY: number;
   /** Ghost area to show original position during drag */
   ghostArea?: { hotspotId: string; area: HotspotArea } | null;
+  /** Live drag preview area showing current position during drag */
+  dragPreview?: { hotspotId: string; area: HotspotArea } | null;
   onSelect: (id: string, e: React.MouseEvent) => void;
   onHotspotPointerDown?: (e: React.PointerEvent<SVGRectElement>, hotspotId: string) => void;
   onResizeHandlePointerDown?: (e: React.PointerEvent<SVGRectElement>, hotspotId: string, mode: DragMode) => void;
@@ -39,6 +41,7 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
   scaleX,
   scaleY,
   ghostArea,
+  dragPreview,
   onSelect,
   onHotspotPointerDown,
   onResizeHandlePointerDown,
@@ -48,17 +51,31 @@ export const HotspotOverlay = React.memo(function HotspotOverlay({
     <svg
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none' }}
     >
-      {/* Ghost rect during drag */}
+      {/* Ghost rect (original position) during drag */}
       {ghostArea && ghostArea.area.type === 'rect' && (
         <rect
           x={ghostArea.area.x * scaleX}
           y={ghostArea.area.y * scaleY}
           width={ghostArea.area.width * scaleX}
           height={ghostArea.area.height * scaleY}
-          fill="rgba(255,255,255,0.1)"
-          stroke="rgba(255,255,255,0.5)"
+          fill="rgba(255,255,255,0.08)"
+          stroke="rgba(255,255,255,0.4)"
           strokeWidth={1}
           strokeDasharray="6 3"
+          pointerEvents="none"
+        />
+      )}
+      {/* Live drag preview rect (current position during drag) */}
+      {dragPreview && dragPreview.area.type === 'rect' && (
+        <rect
+          x={dragPreview.area.x * scaleX}
+          y={dragPreview.area.y * scaleY}
+          width={dragPreview.area.width * scaleX}
+          height={dragPreview.area.height * scaleY}
+          fill="rgba(59,130,246,0.25)"
+          stroke="#3b82f6"
+          strokeWidth={2}
+          strokeDasharray="4 2"
           pointerEvents="none"
         />
       )}

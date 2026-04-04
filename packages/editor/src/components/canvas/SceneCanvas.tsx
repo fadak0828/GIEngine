@@ -458,6 +458,7 @@ export function SceneCanvas(): React.ReactElement {
             scaleX={scaleX}
             scaleY={scaleY}
             ghostArea={ghostArea}
+            dragPreview={dragPreview}
             onSelect={(id, e) => {
               if (ui.sceneTool === 'delete' && selection.caseId && selection.sceneId) {
                 if (window.confirm('핫스팟을 삭제하시겠습니까?')) {
