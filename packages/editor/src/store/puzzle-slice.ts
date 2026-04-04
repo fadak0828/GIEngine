@@ -6,6 +6,7 @@ import type {
   PuzzleTemplate,
   AnswerDefinition,
   PuzzleSet,
+  Hint,
 } from '@gi-engine/core';
 import type { EditorStore } from './types.js';
 import { genId } from './utils.js';
@@ -32,6 +33,7 @@ export type PuzzleSlice = {
   updateMainPuzzle: (caseId: string, patch: Partial<Puzzle>) => void;
   updatePuzzleTemplate: (caseId: string, template: PuzzleTemplate) => void;
   updatePuzzleAnswers: (caseId: string, answers: Record<string, AnswerDefinition>) => void;
+  updatePuzzleHints: (caseId: string, hints: Hint[]) => void;
   addSubPuzzle: (caseId: string, type: SubPuzzle['type']) => void;
   updateSubPuzzle: (caseId: string, puzzleId: string, patch: Partial<SubPuzzle>) => void;
   deleteSubPuzzle: (caseId: string, puzzleId: string) => void;
@@ -77,6 +79,20 @@ export const createPuzzleSlice: StateCreator<EditorStore, [], [], PuzzleSlice> =
         project: produce(state.project, draft => {
           const c = findCaseInDraft(draft, caseId);
           if (c) c.puzzles.main.answers = answers;
+        }),
+        meta: { ...state.meta, isDirty: true },
+      };
+    });
+  },
+
+  updatePuzzleHints: (caseId, hints) => {
+    get().pushToHistory();
+    set(state => {
+      if (!state.project) return state;
+      return {
+        project: produce(state.project, draft => {
+          const c = findCaseInDraft(draft, caseId);
+          if (c) c.puzzles.main.hints = hints;
         }),
         meta: { ...state.meta, isDirty: true },
       };

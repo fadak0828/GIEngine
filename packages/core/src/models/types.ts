@@ -219,6 +219,7 @@ export interface Puzzle {
   template: PuzzleTemplate;
   answers: Record<string, AnswerDefinition>;
   minWordsRequired?: number;
+  hints?: Hint[];
 }
 
 export type SubPuzzle =

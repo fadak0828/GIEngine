@@ -4,6 +4,7 @@ import { useEditorStore } from '@/store/editor-store';
 import { PuzzleTemplateEditor } from './PuzzleTemplateEditor';
 import { AnswerKeyEditor } from './AnswerKeyEditor';
 import { AIPuzzleGenerator } from './AIPuzzleGenerator';
+import { HintsEditor } from './HintsEditor';
 
 // ── renderPreview ─────────────────────────────────────────────────
 
@@ -250,6 +251,16 @@ export function PuzzleEditorPanel(): React.ReactElement {
                 caseWords={caseWords}
               />
             )}
+          </div>
+
+          {/* Hints */}
+          <div>
+            <div style={sectionLabelStyle}>힌트</div>
+            <HintsEditor
+              hints={mainPuzzle.hints ?? []}
+              caseId={selectedCase.id}
+              puzzleId={mainPuzzle.id}
+            />
           </div>
         </div>
       </div>
