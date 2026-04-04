@@ -258,6 +258,7 @@ export function PuzzleEditorPanel(): React.ReactElement {
             <div style={sectionLabelStyle}>힌트</div>
             <HintsEditor
               hints={mainPuzzle.hints ?? []}
+              hintConfig={mainPuzzle.hintConfig}
               caseId={selectedCase.id}
               puzzleId={mainPuzzle.id}
             />
