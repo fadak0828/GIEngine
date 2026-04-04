@@ -22,6 +22,9 @@ UI/비주얼 작업 전에 반드시 `DESIGN.md`를 읽으세요.
 
 모든 에이전트는 작업 완료 후 반드시 아래 절차를 따라야 합니다.
 
+> **상세 지침**: Git 워크트리 및 Git 플로우 전략은 `docs/company/GIT_STRATEGY.md`를 참조하세요.
+> 워크트리를 활용한 병렬 작업, 브랜치 전략, 충돌 해결 등 심화 내용을 포함합니다.
+
 ### 커밋 규칙
 
 1. **작업 단위 커밋**: 하나의 작업(기능, 버그 수정, 리팩토링)이 완료되면 즉시 커밋합니다.
@@ -92,6 +95,7 @@ rm -f "$TMPFILE"
 |------|------|------|
 | 회사 지침 | `docs/company/COMPANY_GUIDELINES.md` | 전체 운영 원칙, 커밋 규칙, 이슈 라이프사이클 |
 | 인원 및 역할 계획 | `docs/company/PERSONNEL_PLAN.md` | 역할 정의, 채용 계획, 역할별 상세 지침 |
+| Git 활용 전략 | `docs/company/GIT_STRATEGY.md` | Git 워크트리, Git 플로우, 병렬 작업 가이드 |
 
 특히:
 - 모든 제출 전 `npm run ci:check` 필수 통과
