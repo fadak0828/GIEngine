@@ -19,6 +19,7 @@ import type {
   LocalizedText,
   PuzzleSet,
   Hint,
+  HintConfig,
 } from '@gi-engine/core';
 import type { InterviewSlice } from './interview-slice.js';
 import type { QuickCreateSlice } from './quick-create-slice.js';
@@ -184,6 +185,7 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice, ItchSlice
   updatePuzzleTemplate: (caseId: string, template: PuzzleTemplate) => void;
   updatePuzzleAnswers: (caseId: string, answers: Record<string, AnswerDefinition>) => void;
   updatePuzzleHints: (caseId: string, hints: Hint[]) => void;
+  updatePuzzleHintConfig: (caseId: string, hintConfig: HintConfig | undefined) => void;
   addSubPuzzle: (caseId: string, type: SubPuzzle['type']) => void;
   updateSubPuzzle: (caseId: string, puzzleId: string, patch: Partial<SubPuzzle>) => void;
   deleteSubPuzzle: (caseId: string, puzzleId: string) => void;
