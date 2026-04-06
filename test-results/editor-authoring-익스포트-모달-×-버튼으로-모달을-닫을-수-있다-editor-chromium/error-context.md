@@ -1,0 +1,74 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - generic [ref=e10]: GIEngine
+      - generic [ref=e11]: Editor
+    - button "새 프로젝트 만들기 (Ctrl+N)" [ref=e13] [cursor=pointer]: ＋ 새 프로젝트
+    - button "프로젝트 파일 열기" [ref=e14] [cursor=pointer]: 📂 열기
+    - button "프로젝트 저장 (Ctrl+S)" [ref=e15] [cursor=pointer]: 💾 저장
+    - button "HTML 파일로 익스포트" [ref=e16] [cursor=pointer]: 📤 익스포트
+    - button "실행 취소 (Ctrl+Z)" [disabled] [ref=e18] [cursor=pointer]: ↩ 취소
+    - button "다시 실행 (Ctrl+Y)" [disabled] [ref=e19] [cursor=pointer]: ↪ 복구
+    - button "Enter fullscreen" [ref=e20] [cursor=pointer]: Fullscreen
+    - generic [ref=e21]: 새 프로젝트
+    - button "Quick Create — 1문장으로 빠르게 사건 생성" [ref=e22] [cursor=pointer]: ⚡ Quick Create
+    - button "AI 인터뷰로 새 사건 생성" [ref=e23] [cursor=pointer]: 🕵️ AI 인터뷰
+    - button "AI 모델 설정" [ref=e24] [cursor=pointer]: AI 설정
+    - group "편집 언어 선택" [ref=e26]:
+      - button "한국어로 편집" [pressed] [ref=e27] [cursor=pointer]: KO
+      - button "영어로 편집" [ref=e28] [cursor=pointer]: EN
+    - dialog "📤 HTML 익스포트" [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: 📤 HTML 익스포트
+        - button "HTML 내보내기 닫기" [active] [ref=e33] [cursor=pointer]: ×
+      - generic [ref=e34]:
+        - generic [ref=e35]: 출력 파일명
+        - generic [ref=e36]: game_1775454945585_1.html
+      - generic [ref=e37]:
+        - generic [ref=e38]: 제작자 (선택 사항 — OG 메타 태그에 포함됩니다)
+        - 'textbox "예: 홍길동" [ref=e39]'
+      - generic [ref=e40]:
+        - generic [ref=e41]: 빌드 모드
+        - combobox [ref=e42] [cursor=pointer]:
+          - option "프로덕션 (최소화)" [selected]
+          - option "개발 (가독성)"
+      - generic [ref=e43]:
+        - button "취소" [ref=e44] [cursor=pointer]
+        - button "HTML 내보내기" [ref=e45] [cursor=pointer]
+  - generic [ref=e46]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - generic [ref=e50]: 막/사건/씬
+        - button "새 막 추가" [ref=e51] [cursor=pointer]: + 막 추가
+      - generic [ref=e52]:
+        - text: 막이 없습니다.
+        - text: 위에서 막을 추가하세요.
+    - generic [ref=e53]:
+      - tablist "에디터 패널" [ref=e54]:
+        - tab "씬 편집" [selected] [ref=e55] [cursor=pointer]
+        - tab "에셋 관리 에셋 0개" [ref=e56] [cursor=pointer]:
+          - text: 에셋 관리
+          - generic "에셋 0개" [ref=e57]: "0"
+        - tab "단어 관리 단어 0개" [ref=e58] [cursor=pointer]:
+          - text: 단어 관리
+          - generic "단어 0개" [ref=e59]: "0"
+        - tab "퍼즐 편집" [ref=e60] [cursor=pointer]
+        - tab "서브 퍼즐 서브 퍼즐 0개" [ref=e61] [cursor=pointer]:
+          - text: 서브 퍼즐
+          - generic "서브 퍼즐 0개" [ref=e62]: "0"
+        - tab "검증" [ref=e63] [cursor=pointer]
+      - tabpanel "씬 편집" [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]: 🎬
+          - generic [ref=e67]: 씬을 선택하거나 사건에서 씬을 추가하세요
+      - button "▲ 프리뷰 열기" [ref=e69] [cursor=pointer]
+    - generic [ref=e71]:
+      - generic [ref=e72]: 속성 패널
+      - generic [ref=e73]:
+        - generic [ref=e74]: 왼쪽 트리에서 씬을 선택하거나
+        - generic [ref=e75]: 캔버스에서 핫스팟을 클릭하세요
+```
