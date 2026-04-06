@@ -3,18 +3,12 @@ import { useEditorStore } from '@/store/editor-store';
 import type { GameDefinition, Case, Scene } from '@/store/types';
 import type { PreviewMode } from '@/store/types';
 
+// @ts-expect-error — Vite ?raw import; resolved at editor build time from pre-built runtime IIFE
+import runtimeJs from '../../../../runtime/dist/index.iife.js?raw';
+// @ts-expect-error — Vite ?raw import; resolved at editor build time from pre-built runtime CSS
+import runtimeCss from '../../../../runtime/dist/runtime.css?raw';
+
 const REFRESH_DEBOUNCE_MS = 800;
-
-// ── Runtime existence check ──────────────────────────────────────────────────
-
-async function checkRuntimeExists(): Promise<boolean> {
-  try {
-    const res = await fetch('/runtime/index.iife.js', { method: 'HEAD' });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
 
 // ── srcdoc builder ───────────────────────────────────────────────────────────
 
@@ -39,6 +33,9 @@ function buildSrcdoc({ gameData, locale, mode, caseId, sceneId }: SrcdocOptions)
 
   const jsonData = JSON.stringify(gameData).replace(/</g, '\\u003c');
 
+  // Escape </script> in embedded JS to prevent premature tag closure
+  const safeRuntimeJs = runtimeJs.replace(/<\/script>/gi, '<\\/script>');
+
   return `<!DOCTYPE html>
 <html lang="${locale}">
 <head>
@@ -52,17 +49,20 @@ function buildSrcdoc({ gameData, locale, mode, caseId, sceneId }: SrcdocOptions)
       display:none;color:#ff6b6b;font-family:monospace;font-size:12px;
       padding:16px;white-space:pre-wrap;word-break:break-all;
     }
+${runtimeCss}
   </style>
 </head>
 <body>
   <div id="gi-root"></div>
   <pre id="gi-error"></pre>
-  <script src="/runtime/index.iife.js"></script>
+  <script>
+${safeRuntimeJs}
+  </script>
   <script>
     (async function() {
       try {
         if (typeof window.__giEngineBoot__ !== 'function') {
-          throw new Error('Runtime not loaded.\\nRun: npm run build -w packages/runtime');
+          throw new Error('Runtime not loaded.\nRun: npm run build -w packages/runtime');
         }
         const root = document.getElementById('gi-root');
         const gameData = ${jsonData};
@@ -201,7 +201,6 @@ export function PreviewPane(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const selection = useEditorStore(s => s.selection);
   const ui = useEditorStore(s => s.ui);
-  const words = useEditorStore(s => s.words);
   const {
     setPreviewLocale,
     setPreviewVisible,
@@ -210,8 +209,6 @@ export function PreviewPane(): React.ReactElement {
   } = useEditorStore();
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [runtimeExists, setRuntimeExists] = useState<boolean | null>(null);
-  const [checkingRuntime, setCheckingRuntime] = useState(false);
   // srcdocKey forces iframe recreation when incremented
   const [srcdocKey, setSrcdocKey] = useState(0);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -233,19 +230,6 @@ export function PreviewPane(): React.ReactElement {
       }
     }
   }
-
-  // Check runtime once on mount
-  useEffect(() => {
-    checkRuntimeExists().then(setRuntimeExists);
-  }, []);
-
-  // Re-check runtime on demand
-  const handleRecheckRuntime = useCallback(async () => {
-    setCheckingRuntime(true);
-    const exists = await checkRuntimeExists();
-    setRuntimeExists(exists);
-    setCheckingRuntime(false);
-  }, []);
 
   // Auto-refresh when project data changes while playing
   useEffect(() => {
@@ -479,56 +463,6 @@ export function PreviewPane(): React.ReactElement {
               <span>프로젝트를 열거나 새로 만드세요</span>
             ) : !selectedCase ? (
               <span>씬을 선택한 후 ▶ 실행을 클릭하세요</span>
-            ) : runtimeExists === false ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                <span>프리뷰를 사용하려면 런타임 빌드가 필요합니다</span>
-                <code
-                  style={{
-                    background: 'var(--bg-card)',
-                    padding: '4px 10px',
-                    borderRadius: 4,
-                    fontSize: 12,
-                    color: 'var(--text-secondary)',
-                    border: '1px solid var(--border-color)',
-                  }}
-                >
-                  npm run build -w packages/runtime
-                </code>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={handleRecheckRuntime}
-                    disabled={checkingRuntime}
-                    style={{
-                      padding: '6px 14px',
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 4,
-                      cursor: checkingRuntime ? 'wait' : 'pointer',
-                      fontWeight: 700,
-                      fontSize: 12,
-                    }}
-                  >
-                    {checkingRuntime ? '확인 중...' : '다시 확인'}
-                  </button>
-                  <button
-                    onClick={handlePlay}
-                    disabled
-                    style={{
-                      padding: '6px 14px',
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-muted)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 4,
-                      cursor: 'not-allowed',
-                      fontWeight: 700,
-                      fontSize: 12,
-                    }}
-                  >
-                    ▶ 실행
-                  </button>
-                </div>
-              </div>
             ) : (
               <>
                 <span>
@@ -555,43 +489,6 @@ export function PreviewPane(): React.ReactElement {
                 </button>
               </>
             )}
-          </div>
-        ) : runtimeExists === null ? (
-          <div
-            style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--text-muted)',
-              fontSize: 13,
-            }}
-          >
-            런타임 확인 중...
-          </div>
-        ) : runtimeExists === false ? (
-          <div
-            style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--text-muted)',
-              fontSize: 13,
-              gap: 8,
-            }}
-          >
-            런타임 빌드 필요 —{' '}
-            <code
-              style={{
-                background: 'var(--bg-card)',
-                padding: '2px 6px',
-                borderRadius: 3,
-                fontSize: 12,
-              }}
-            >
-              npm run build -w packages/runtime
-            </code>
           </div>
         ) : srcdoc ? (
           <>
