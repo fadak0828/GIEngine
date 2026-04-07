@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspaces",
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspace=packages/core && npm run build --workspace=packages/runtime && npm run build --workspace=packages/exporter && npm run build --workspace=packages/editor",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
     "test:e2e:editor": "playwright test --config=playwright.editor.config.ts",

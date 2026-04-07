@@ -10,7 +10,7 @@
 
 ### CEO (Chief Executive Officer)
 
-**Current Agent:** Paperclip-managed AI (Agent ID: fe2e678e-a9d1-469a-beeb-9e0a2700af55)
+**Current Agent:** Paperclip-managed (Agent ID: `01d0d470-1d32-4aa0-a015-51d6bf9a3c4c`)
 
 **Responsibilities:**
 - Strategic direction and roadmap prioritization
@@ -234,14 +234,22 @@
 
 ## Part 4: Recruitment Tracker
 
+**Last synced with Paperclip:** 2026-04-06
+
 | Role | Status | Priority | Target Start | Progress |
 |------|--------|----------|--------------|----------|
-| CTO | **OPEN** | P1 | Week 1 | Recruiting |
-| Senior Dev (A) | OPEN | P2 | Week 2 | Not started |
-| Senior Dev (B) | OPEN | P2 | Week 2 | Not started |
-| QA Engineer | OPEN | P3 | Month 2 | Not started |
+| CTO | **FILLED** | P1 | Week 1 | Agent `48f27022` (opencode_local, minimax/MiniMax-M2.7) |
+| Staff Engineer | **FILLED** | P2 | Week 1 | Agent `afa1ec56` |
+| Release Engineer | **FILLED** | P2 | Week 1 | Agent `31fcb041` |
+| QA Engineer | **FILLED** | P3 | Week 1 | Agent `23ed2e64` |
 
-**Total Open Positions:** 4
+**Total Open Positions:** 0
+**Total Filled:** 4 (plus CEO `01d0d470`)
+
+> Note: The plan originally anticipated two Senior Developer slots. The current org chart
+> consolidates that scope into Staff Engineer + Release Engineer, with QA hired earlier
+> than the original Month 2 target. Revisit the split once actual issue throughput data
+> is available (see Hermes weekly retro output).
 
 ---
 
