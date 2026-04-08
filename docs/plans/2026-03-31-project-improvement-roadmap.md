@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-09 by CTO (P3 marked done; PR #7 merged)
+**Last Updated:** 2026-04-09 by CTO (PRs #7, #8 merged; P3 complete)
 
 ---
 
@@ -27,6 +27,7 @@
 | PR #4 | P1 | fix(exporter): @ts-ignore → @ts-expect-error for Vite ?raw imports |
 | PR #5 | P2 | feat(runtime): hotspot hover effect via mouseenter/mouseleave |
 | PR #7 | P3 | feat(editor): add validation error count badge to tab bar |
+| PR #8 | P1 | fix(ai): remove unused localeName function from regenerate-prompt |
 
 ### Remaining Blockers
 
