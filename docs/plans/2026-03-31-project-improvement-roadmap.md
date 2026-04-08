@@ -24,6 +24,8 @@
 |----|-------|-------------|
 | PR #2 | P1 | test-results/ gitignore; root build order fix |
 | PR #3 | P1+P4 | Topological build order; PreviewPane /runtime inline; docs/index.md |
+| PR #4 | P1 | fix(exporter): @ts-ignore → @ts-expect-error for Vite ?raw imports |
+| PR #5 | P2 | feat(runtime): hotspot hover effect via mouseenter/mouseleave |
 
 ### Remaining Blockers
 
