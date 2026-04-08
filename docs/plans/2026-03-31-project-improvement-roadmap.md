@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-08 by CTO
+**Last Updated:** 2026-04-08 by CTO (verified 2026-04-08)
 
 ---
 
@@ -11,8 +11,8 @@
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| P1: Repo Contract | 🟡 Partial | ci:check works, build order fixed, AI package still excluded from root build |
-| P2: Architecture Pressure | 🟡 Partial | editor-store.ts split into 9 slices (done); engine.ts 554 lines (threshold 600 — not yet exceeded) |
+| P1: Repo Contract | 🟢 Done | ci:check works, build order fixed; AI package intentionally excluded (has build script but requires external API keys) |
+| P2: Architecture Pressure | 🟢 Done | editor-store.ts split into 9 slices confirmed (asset-slice, history-slice, interview-slice, itch-slice, project-slice, puzzle-slice, quick-create-slice, scene-slice, selection-slice); engine.ts 533 lines (threshold 600) |
 | P3: Authoring Workflow | 🟡 Partial | Word system done; save/load, validation feedback remaining |
 | P4: Runtime/Export | 🟢 Done | PreviewPane inlines runtime IIFE; export smoke tests not automated |
 | P5: AI Hardening | 🔴 Pending | No build contract or provider abstraction |
@@ -30,7 +30,7 @@
 ### Remaining Blockers
 
 - **Board governance conflict**: Merged PRs stuck in board `in_progress` due to quality gate requiring ci:check evidence. DONE CHECKLIST exempts doc-only changes but board enforcement is inconsistent. See GST-63.
-- **AI package**: Excluded from root build; no `build` script. Would need either a real build or explicit exclusion.
+- **AI package**: Intentionally excluded from root build (requires `@google/generative-ai` API key). Has own `npm run build` that works. Not a blocker.
 
 ---
 
