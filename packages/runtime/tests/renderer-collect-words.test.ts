@@ -138,7 +138,7 @@ function makeThinkingState(caseId: string): GameState {
 }
 
 function makeRenderer(container: HTMLElement) {
-  const dispatched: any[] = [];
+  const dispatched: unknown[] = [];
   const renderer = new Renderer({
     container,
     i18n: makeI18n(),
@@ -208,14 +208,6 @@ describe('collectWordsForCase — Tier 1: def.words dictionary', () => {
   });
 
   it('handles multiple collected words all from def.words', () => {
-    const def = makeDef({
-      words: {
-        'word-a': { id: 'word-a', display: { ko: '단서A', en: 'ClueA' } },
-        'word-b': { id: 'word-b', display: { ko: '단서B', en: 'ClueB' } },
-      },
-    });
-
-    // Override puzzle to have two slots
     const caseWithTwoSlotPuzzle = {
       ...makeCaseDef('case-1'),
       puzzles: {
