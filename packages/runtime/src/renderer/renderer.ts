@@ -2,7 +2,6 @@ import type {
   GameDefinition,
   GameState,
   SaveState,
-  Case,
   Scene,
   Puzzle,
   Word,
@@ -595,9 +594,9 @@ export class Renderer {
   // --- Controls HUD ---
 
   private renderControls(
-    scene: Scene,
-    state: GameState & { type: 'exploring' },
-    def: GameDefinition
+    _scene: Scene,
+    _state: GameState & { type: 'exploring' },
+    _def: GameDefinition
   ): void {
     this.removeControls();
 
@@ -616,7 +615,7 @@ export class Renderer {
 
     const sceneName = document.createElement('span');
     sceneName.className = 'gi-scene-name';
-    sceneName.textContent = this.i18n.resolveText(scene.name);
+    sceneName.textContent = this.i18n.resolveText(_scene.name);
     left.appendChild(sceneName);
 
     controls.appendChild(left);
