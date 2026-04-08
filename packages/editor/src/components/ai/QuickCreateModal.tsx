@@ -223,7 +223,7 @@ export function QuickCreateModal(): React.ReactElement | null {
     } finally {
       setApplyingChoices(false);
     }
-  }, [ // eslint-disable-line react-hooks/exhaustive-deps
+  }, [  
     qc.sentence, qc.blueprint, qc.choices, qc.selection,
     setQuickCreateError, setQuickCreateProgress, setQuickCreateBlueprint,
   ]);

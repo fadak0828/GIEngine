@@ -5,7 +5,7 @@
  * stored in the module scope or in .gi-project files.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 type GoogleGenerativeAIType = import('@google/generative-ai').GoogleGenerativeAI;
 
 const STORAGE_KEY = 'gi_engine_gemini_api_key';
