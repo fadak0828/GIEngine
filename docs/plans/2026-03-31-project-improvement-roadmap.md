@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-08 by CTO (verified 2026-04-08)
+**Last Updated:** 2026-04-09 by CTO (P3 marked done; PR #7 merged)
 
 ---
 
@@ -13,7 +13,7 @@
 |-------|--------|-------|
 | P1: Repo Contract | 🟢 Done | ci:check works, build order fixed; AI package intentionally excluded (has build script but requires external API keys) |
 | P2: Architecture Pressure | 🟢 Done | editor-store.ts split into 9 slices confirmed (asset-slice, history-slice, interview-slice, itch-slice, project-slice, puzzle-slice, quick-create-slice, scene-slice, selection-slice); engine.ts 533 lines (threshold 600) |
-| P3: Authoring Workflow | 🟡 Partial | Word system done; save/load, validation feedback remaining |
+| P3: Authoring Workflow | 🟢 Done | Word system done; save/load done; validation feedback done (ValidationPanel + ExportModal + tab badge) |
 | P4: Runtime/Export | 🟢 Done | PreviewPane inlines runtime IIFE; export smoke tests not automated |
 | P5: AI Hardening | 🔴 Pending | No build contract or provider abstraction |
 | P6: Docs Discoverability | 🟢 Done | docs/index.md created; naming convention established |
@@ -26,6 +26,7 @@
 | PR #3 | P1+P4 | Topological build order; PreviewPane /runtime inline; docs/index.md |
 | PR #4 | P1 | fix(exporter): @ts-ignore → @ts-expect-error for Vite ?raw imports |
 | PR #5 | P2 | feat(runtime): hotspot hover effect via mouseenter/mouseleave |
+| PR #7 | P3 | feat(editor): add validation error count badge to tab bar |
 
 ### Remaining Blockers
 
