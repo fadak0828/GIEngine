@@ -11,6 +11,7 @@ import type {
   AssetManifest,
   ValidationResult,
   SubPuzzle,
+  HotspotAction,
 } from '@gi-engine/core';
 import { I18nManager, getAllCases, findCase, findScene, findPuzzle } from '@gi-engine/core';
 
@@ -996,8 +997,7 @@ export class Renderer {
   }
 
   private extractWordsFromAction(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    action: any,
+    action: HotspotAction,
     def: GameDefinition,
     caseId: string,
     wordMap: Map<string, Word>
