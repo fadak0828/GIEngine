@@ -12,7 +12,7 @@ import type { Case, Scene, Word, AssetDefinition, AssetRef, Locale } from '@gi-e
 import type { CaseBlueprint, BlueprintScene } from './types.js';
 import type { GameContextForPrompt, HotspotPromptInfo } from '../types.js';
 import { generateCaseFromBlueprint } from '../generators/case-generator.js';
-import { generateBackground, generateBackgroundWithDetection } from '../generators/background-generator.js';
+import { generateBackgroundWithDetection } from '../generators/background-generator.js';
 
 // ─── 진행률 콜백 ──────────────────────────────────────────────────────────────
 
@@ -277,21 +277,6 @@ function buildGameContextForScene(
     sceneWords,
     hotspots,
   };
-}
-
-/** 배경 이미지 생성 (최대 2회 재시도, 실패 시 silent skip) */
-async function generateBackgroundWithRetry(
-  request: Parameters<typeof generateBackground>[0],
-  maxRetries = 2,
-): Promise<Awaited<ReturnType<typeof generateBackground>> | null> {
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await generateBackground(request);
-    } catch {
-      if (attempt === maxRetries) return null;
-    }
-  }
-  return null;
 }
 
 // ─── 단어 수집 가능성 검증 ───────────────────────────────────────────────────

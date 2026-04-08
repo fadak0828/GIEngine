@@ -398,7 +398,7 @@ export function AIBackgroundModal({
   hotspots,
   sceneDimensions,
 }: AIBackgroundModalProps): React.ReactElement | null {
-  const { addAsset, updateScene, updateHotspotAction, updateHotspotArea } = useEditorStore();
+  const { addAsset, updateScene, updateHotspotArea } = useEditorStore();
   const project = useEditorStore(s => s.project);
   const words = useEditorStore(s => s.words);
   const ui = useEditorStore(s => s.ui);
