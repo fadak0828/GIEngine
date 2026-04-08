@@ -10,8 +10,9 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'js' : 'iife.js'}`,
     },
     rollupOptions: {
-      // Bundle everything including @gi-engine/core
-      // for IIFE output (single-file export)
+      output: {
+        exports: 'named',
+      },
     },
     outDir: 'dist',
     sourcemap: true,
