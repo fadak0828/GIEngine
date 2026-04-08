@@ -12,7 +12,7 @@
 | Phase | Status | Notes |
 |-------|--------|-------|
 | P1: Repo Contract | 🟡 Partial | ci:check works, build order fixed, AI package still excluded from root build |
-| P2: Architecture Pressure | 🔴 Pending | editor-store.ts not split; engine.ts 554 lines (threshold 600) |
+| P2: Architecture Pressure | 🟡 Partial | editor-store.ts split into 9 slices (done); engine.ts 554 lines (threshold 600 — not yet exceeded) |
 | P3: Authoring Workflow | 🟡 Partial | Word system done; save/load, validation feedback remaining |
 | P4: Runtime/Export | 🟢 Done | PreviewPane inlines runtime IIFE; export smoke tests not automated |
 | P5: AI Hardening | 🔴 Pending | No build contract or provider abstraction |
