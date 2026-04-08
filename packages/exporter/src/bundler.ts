@@ -83,9 +83,12 @@ async function loadRuntimeJs(_mode: 'development' | 'production'): Promise<strin
  */
 async function loadRuntimeCss(): Promise<string> {
   const cssPaths = [
+    path.resolve(__dirname, '../../runtime/dist/runtime.css'),
     path.resolve(__dirname, '../../runtime/dist/gi-runtime.css'),
     path.resolve(__dirname, '../../runtime/dist/style.css'),
+    path.resolve(process.cwd(), '../runtime/dist/runtime.css'),
     path.resolve(process.cwd(), '../runtime/dist/gi-runtime.css'),
+    path.resolve(process.cwd(), '../../packages/runtime/dist/runtime.css'),
     path.resolve(process.cwd(), '../../packages/runtime/dist/gi-runtime.css'),
   ];
 
