@@ -4,9 +4,9 @@
  */
 import type { GameDefinition, AssetManifest, AssetDefinition } from '@gi-engine/core';
 import { assembleHtml } from './template.js';
-// @ts-ignore — Vite ?raw import; resolved at editor build time from pre-built runtime IIFE
+// @ts-expect-error — Vite ?raw import; resolved at editor build time from pre-built runtime IIFE
 import runtimeJs from '../../runtime/dist/index.iife.js?raw';
-// @ts-ignore — Vite ?raw import; resolved at editor build time from pre-built runtime CSS
+// @ts-expect-error — Vite ?raw import; resolved at editor build time from pre-built runtime CSS
 import runtimeCss from '../../runtime/dist/runtime.css?raw';
 
 export interface BrowserExportOptions {
