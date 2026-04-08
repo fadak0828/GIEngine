@@ -471,7 +471,7 @@ describe('QuickCreateEngine', () => {
 
     it('withChoices=true 시 선택지 생성이 병렬로 처리됩니다', async () => {
       // 4개 섹션이 병렬 처리되므로 순차 대비 빠름을 간접 확인
-      let callOrder: number[] = [];
+      const callOrder: number[] = [];
       mockGenerateText.mockImplementation(async (_prompt: string, model: string) => {
         if (model.includes('pro')) {
           callOrder.push(0); // 블루프린트 먼저

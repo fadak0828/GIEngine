@@ -144,7 +144,7 @@ export function handleThinking(
         },
       };
 
-      let saveUpdate: Partial<SaveState> = {
+      const saveUpdate: Partial<SaveState> = {
         caseStates: { ...save.caseStates, [state.caseId]: updatedCaseState },
       };
 
