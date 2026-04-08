@@ -28,10 +28,6 @@ export interface RegeneratePuzzlePromptOptions {
   reasonHint?: string;
 }
 
-function localeName(locale: Locale): string {
-  return locale === 'ko' ? '한국어' : 'English';
-}
-
 type KoEn = 'ko' | 'en';
 
 function koen(locale: Locale): KoEn {
@@ -48,7 +44,6 @@ function localizedText(text: { ko: string; en: string }, locale: KoEn): string {
  */
 export function buildRegenerateScenePrompt(options: RegenerateScenePromptOptions): string {
   const { originalBlueprint, sceneTempId, locale, reasonHint } = options;
-  const ln = localeName(locale);
   const ke = koen(locale);
 
   const otherScenes = originalBlueprint.scenes.filter(s => s.tempId !== sceneTempId);
@@ -115,7 +110,6 @@ ${originalBlueprint.words.map(w => `- ${w.tempId}: ${localizedText(w.display, ke
  */
 export function buildRegenerateWordPrompt(options: RegenerateWordPromptOptions): string {
   const { originalBlueprint, wordTempId, locale, reasonHint } = options;
-  const ln = localeName(locale);
   const ke = koen(locale);
 
   const otherWords = originalBlueprint.words.filter(w => w.tempId !== wordTempId);
@@ -171,7 +165,6 @@ ${originalBlueprint.characters.map(c => `- ${c.name} (${c.role})`).join('\n')}
  */
 export function buildRegeneratePuzzlePrompt(options: RegeneratePuzzlePromptOptions): string {
   const { originalBlueprint, locale, reasonHint } = options;
-  const ln = localeName(locale);
   const ke = koen(locale);
 
   const reasonText = reasonHint ? `\n재생성 요청 이유: ${reasonHint}` : '';
