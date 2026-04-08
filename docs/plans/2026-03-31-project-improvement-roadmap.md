@@ -28,6 +28,7 @@
 | PR #5 | P2 | feat(runtime): hotspot hover effect via mouseenter/mouseleave |
 | PR #7 | P3 | feat(editor): add validation error count badge to tab bar |
 | PR #8 | P1 | fix(ai): remove unused localeName function from regenerate-prompt |
+| PR #9 | P1 | fix: remove dead code - unused generateBackgroundWithRetry and updateHotspotAction |
 
 ### Remaining Blockers
 
