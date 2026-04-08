@@ -155,7 +155,7 @@ export class DeductionRenderer {
 
   private playLockAnimation(): void {
     const slots = Array.from(this.slotElements.entries());
-    slots.forEach(([slotId, slotEl], index) => {
+    slots.forEach(([_slotId, slotEl], index) => {
       setTimeout(() => {
         slotEl.classList.add('gi-slot--locked');
       }, index * 100);
