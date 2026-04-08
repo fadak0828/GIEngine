@@ -10,7 +10,7 @@ export function Toolbar(): React.ReactElement {
   const project = useEditorStore(s => s.project);
   const meta = useEditorStore(s => s.meta);
   const ui = useEditorStore(s => s.ui);
-  const { newProject, saveProject, setEditorLocale, undo, redo, openInterview, openQuickCreate, setFullscreen, showNotification } = useEditorStore();
+  const { newProject, saveProject, setEditorLocale, undo, redo, openQuickCreate, setFullscreen, showNotification } = useEditorStore();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
   const fullscreenSupported = document.fullscreenEnabled && typeof document.documentElement.requestFullscreen === 'function';
