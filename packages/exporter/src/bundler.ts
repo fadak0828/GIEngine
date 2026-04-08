@@ -43,10 +43,10 @@ async function loadRuntimeJs(_mode: 'development' | 'production'): Promise<strin
   // Must use IIFE format (index.iife.js) — the ES module (index.js) has `export {}` statements
   // which cause SyntaxError when embedded in a plain <script> block, preventing __giEngineBoot__.
   const runtimeDistPaths = [
-    path.resolve(__dirname, '../../runtime/dist/index.iife.js'),
-    path.resolve(__dirname, '../../runtime/dist/gi-runtime.js'),
-    path.resolve(__dirname, '../../runtime/dist/gi-runtime.min.js'),
-    path.resolve(__dirname, '../../runtime/dist/index.js'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/index.iife.js'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/gi-runtime.js'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/gi-runtime.min.js'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/index.js'),
   ];
 
   for (const runtimePath of runtimeDistPaths) {
@@ -59,10 +59,10 @@ async function loadRuntimeJs(_mode: 'development' | 'production'): Promise<strin
 
   // Also try via process.cwd()-based paths (IIFE format first)
   const cwdPaths = [
-    path.resolve(process.cwd(), '../runtime/dist/index.iife.js'),
-    path.resolve(process.cwd(), '../../packages/runtime/dist/index.iife.js'),
-    path.resolve(process.cwd(), '../runtime/dist/gi-runtime.js'),
-    path.resolve(process.cwd(), '../../packages/runtime/dist/gi-runtime.js'),
+    path.resolve(process.cwd(), 'packages/runtime/dist/index.iife.js'),
+    path.resolve(process.cwd(), '../packages/runtime/dist/index.iife.js'),
+    path.resolve(process.cwd(), 'packages/runtime/dist/gi-runtime.js'),
+    path.resolve(process.cwd(), '../packages/runtime/dist/gi-runtime.js'),
   ];
 
   for (const runtimePath of cwdPaths) {
@@ -83,13 +83,11 @@ async function loadRuntimeJs(_mode: 'development' | 'production'): Promise<strin
  */
 async function loadRuntimeCss(): Promise<string> {
   const cssPaths = [
-    path.resolve(__dirname, '../../runtime/dist/runtime.css'),
-    path.resolve(__dirname, '../../runtime/dist/gi-runtime.css'),
-    path.resolve(__dirname, '../../runtime/dist/style.css'),
-    path.resolve(process.cwd(), '../runtime/dist/runtime.css'),
-    path.resolve(process.cwd(), '../runtime/dist/gi-runtime.css'),
-    path.resolve(process.cwd(), '../../packages/runtime/dist/runtime.css'),
-    path.resolve(process.cwd(), '../../packages/runtime/dist/gi-runtime.css'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/runtime.css'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/gi-runtime.css'),
+    path.resolve(__dirname, '../../../packages/runtime/dist/style.css'),
+    path.resolve(process.cwd(), 'packages/runtime/dist/runtime.css'),
+    path.resolve(process.cwd(), '../packages/runtime/dist/runtime.css'),
   ];
 
   for (const cssPath of cssPaths) {
