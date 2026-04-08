@@ -18,7 +18,7 @@ import type {
 } from '@gi-engine/core';
 import type { CaseBlueprint, BlueprintScene, BlueprintWord } from '../interview/types.js';
 import { generatePuzzle } from './puzzle-generator.js';
-import { generateStory } from './story-generator.js';
+// generateStory removed — lint auto-fix
 
 // ─── ID 생성 ─────────────────────────────────────────────────────────────────
 
