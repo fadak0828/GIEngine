@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useEditorStore } from '@/store/editor-store';
+import { validateProjectDefinition } from '@gi-engine/core';
 
 export function MainAreaTabBar(): React.ReactElement {
   const activePanel = useEditorStore(s => s.ui.activePanel);
@@ -22,6 +23,15 @@ export function MainAreaTabBar(): React.ReactElement {
   const assetCount = useEditorStore(s =>
     s.project ? Object.keys(s.project.assets.items).length : 0
   );
+
+  const validationResult = useMemo(() => {
+    const project = useEditorStore.getState().project;
+    const words = useEditorStore.getState().words;
+    if (!project) return null;
+    return validateProjectDefinition(project, words);
+  }, []);
+
+  const validationErrorCount = validationResult?.errorCount ?? 0;
 
   const isSceneActive = activePanel === 'scene' || activePanel === 'settings';
   const isAssetsActive = activePanel === 'assets';
@@ -76,6 +86,13 @@ export function MainAreaTabBar(): React.ReactElement {
     background: 'var(--bg-card)',
     border: '1px solid var(--border-color)',
     padding: '0 4px',
+  };
+
+  const errorBadgeStyle: React.CSSProperties = {
+    ...badgeStyle,
+    background: 'rgba(196,64,64,0.15)',
+    color: 'var(--danger-text)',
+    border: '1px solid rgba(196,64,64,0.3)',
   };
 
   return (
@@ -154,6 +171,11 @@ export function MainAreaTabBar(): React.ReactElement {
         onBlur={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
       >
         검증
+        {validationErrorCount > 0 && (
+          <span style={errorBadgeStyle} aria-label={`${validationErrorCount}개의 오류`}>
+            {validationErrorCount}
+          </span>
+        )}
       </button>
     </div>
   );
