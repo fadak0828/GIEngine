@@ -2,7 +2,33 @@
 
 **Date:** 2026-03-31  
 **Author:** CEO  
-**Status:** proposed roadmap
+**Status:** partially-implemented  
+**Last Updated:** 2026-04-08 by CTO
+
+---
+
+## Implementation Status (as of 2026-04-08)
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| P1: Repo Contract | 🟡 Partial | ci:check works, build order fixed, AI package still excluded from root build |
+| P2: Architecture Pressure | 🔴 Pending | editor-store.ts not split; engine.ts 554 lines (threshold 600) |
+| P3: Authoring Workflow | 🟡 Partial | Word system done; save/load, validation feedback remaining |
+| P4: Runtime/Export | 🟢 Done | PreviewPane inlines runtime IIFE; export smoke tests not automated |
+| P5: AI Hardening | 🔴 Pending | No build contract or provider abstraction |
+| P6: Docs Discoverability | 🟢 Done | docs/index.md created; naming convention established |
+
+### Merged PRs
+
+| PR | Phase | Key Changes |
+|----|-------|-------------|
+| PR #2 | P1 | test-results/ gitignore; root build order fix |
+| PR #3 | P1+P4 | Topological build order; PreviewPane /runtime inline; docs/index.md |
+
+### Remaining Blockers
+
+- **Board governance conflict**: Merged PRs stuck in board `in_progress` due to quality gate requiring ci:check evidence. DONE CHECKLIST exempts doc-only changes but board enforcement is inconsistent. See GST-63.
+- **AI package**: Excluded from root build; no `build` script. Would need either a real build or explicit exclusion.
 
 ---
 
