@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-09 by CTO (PRs #7, #8 merged; P3 complete)
+**Last Updated:** 2026-04-09 by CTO (lint cleaned to 0 warnings; PRs #12, #14 merged)
 
 ---
 
@@ -30,6 +30,8 @@
 | PR #8 | P1 | fix(ai): remove unused localeName function from regenerate-prompt |
 | PR #9 | P1 | fix: remove dead code - unused generateBackgroundWithRetry and updateHotspotAction |
 | PR #12 | P1 | fix(lint): remove unused Case import and renderControls args; remove openInterview in Toolbar |
+| PR #13 | P1 | fix(deploy): replace github-script with curl for commit comments |
+| PR #14 | P1 | fix(runtime): rename unused slotId to _slotId in playLockAnimation |
 
 ### Remaining Blockers
 
