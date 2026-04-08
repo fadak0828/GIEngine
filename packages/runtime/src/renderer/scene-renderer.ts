@@ -444,6 +444,14 @@ export class SceneRenderer {
       this.onHotspotClick(hotspot.id);
     });
 
+    el.addEventListener('mouseenter', () => {
+      el.classList.add('gi-hotspot--hover');
+    });
+
+    el.addEventListener('mouseleave', () => {
+      el.classList.remove('gi-hotspot--hover');
+    });
+
     return el;
   }
 
