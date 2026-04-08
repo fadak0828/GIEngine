@@ -183,7 +183,7 @@ export function WordDropdown(props: WordDropdownProps): React.ReactElement {
   }
 
   // ── Multi-select mode ──
-  const { wordIds, onChange, label } = props;
+  const { wordIds, label } = props;
 
   return (
     <div ref={containerRef} className={s.root}>

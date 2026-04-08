@@ -249,6 +249,7 @@ describe('handleExploring — BACK_TO_SELECT', () => {
 
 describe('handleExploring — unknown event', () => {
   it('알 수 없는 이벤트 → noTransition', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = handleExploring(makeExploringState(), makeSave(), { type: 'ASSETS_LOADED' } as any, testDef);
     expect(result.nextState).toEqual(makeExploringState());
     expect(result.effects).toEqual([]);

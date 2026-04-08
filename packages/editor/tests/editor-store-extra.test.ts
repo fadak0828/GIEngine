@@ -97,8 +97,7 @@ describe('EditorStore — additional coverage', () => {
     });
 
     it('does nothing for unknown case id', () => {
-      const { } = setupActAndCase();
-      const before = JSON.stringify(useEditorStore.getState().project);
+      setupActAndCase();
       useEditorStore.getState().updateCase('nonexistent', { thumbnail: 'x.png' });
       // Acts structure unchanged
       expect(useEditorStore.getState().project!.acts[0].cases[0].thumbnail).toBe('');

@@ -150,7 +150,7 @@ export function SceneCanvas(): React.ReactElement {
       const gridSnap = { enabled: ui.gridSnapEnabled, gridSize: ui.gridSize, shiftHeld: shiftKeyRef.current };
       const newArea = applyDragToArea(hotspot.area, dragState, mode, scene.dimensions, gridSnap);
       setDragPreview({ hotspotId, area: newArea });
-    }, [scene, ui.gridSnapEnabled, ui.gridSize]),
+    }, [scene, ui.gridSnapEnabled, ui.gridSize, setDragPreview]),
 
     onDragEnd: useCallback((dragState: DragState, mode: DragMode) => {
       const hotspotId = dragHotspotIdRef.current;
@@ -169,7 +169,7 @@ export function SceneCanvas(): React.ReactElement {
       setDragPreview(null);
       setGhostArea(null);
       dragHotspotIdRef.current = null;
-    }, [scene, selection, updateHotspotArea, ui.gridSnapEnabled, ui.gridSize]),
+    }, [scene, selection, updateHotspotArea, ui.gridSnapEnabled, ui.gridSize, setDragPreview]),
   });
 
   const handleHotspotPointerDown = useCallback((
@@ -228,7 +228,7 @@ export function SceneCanvas(): React.ReactElement {
       return pt;
     });
     setDragPreview({ hotspotId: polyVertexDrag.hotspotId, area: { type: 'polygon', points: newPoints } });
-  }, [polyVertexDrag, scene, selection]);
+  }, [polyVertexDrag, scene, selection, setDragPreview]);
 
   const handleSVGPointerUp = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (!polyVertexDrag || !polyVertexStartRef.current || !scene || !selection.caseId || !selection.sceneId) {
@@ -250,7 +250,7 @@ export function SceneCanvas(): React.ReactElement {
     });
     updateHotspotArea(selection.caseId, selection.sceneId, polyVertexDrag.hotspotId, { type: 'polygon', points: newPoints });
     setPolyVertexDrag(null); polyVertexStartRef.current = null; setDragPreview(null);
-  }, [polyVertexDrag, scene, selection, updateHotspotArea]);
+  }, [polyVertexDrag, scene, selection, updateHotspotArea, setDragPreview]);
 
   const getCanvasRect = useCallback(() => {
     if (!containerRef.current) return null;

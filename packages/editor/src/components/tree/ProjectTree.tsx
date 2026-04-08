@@ -342,8 +342,6 @@ const ActNode = React.memo(function ActNode({ act, isExpanded, isSelected, selec
     setActivePanel('scene');
   }, [setSelection, setActivePanel]);
 
-  const isActive = isSelected || isHovered;
-
   return (
     <div>
       <div

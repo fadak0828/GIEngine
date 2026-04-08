@@ -155,7 +155,7 @@ export class DeductionRenderer {
 
   private playLockAnimation(): void {
     const slots = Array.from(this.slotElements.entries());
-    slots.forEach(([slotId, slotEl], index) => {
+    slots.forEach(([_slotId, slotEl], index) => {
       setTimeout(() => {
         slotEl.classList.add('gi-slot--locked');
       }, index * 100);
@@ -431,7 +431,7 @@ export class DeductionRenderer {
   private renderWordBank(
     words: Word[],
     assignedWordIds: Set<string>,
-    puzzle: Puzzle
+    _puzzle: Puzzle
   ): HTMLElement {
     const bank = document.createElement('div');
     bank.className = 'gi-word-bank';

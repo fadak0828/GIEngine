@@ -259,7 +259,7 @@ export function PreviewPane(): React.ReactElement {
     return () => {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
-  }, [selection.sceneId, selection.caseId, ui.previewLocale]);
+  }, [selection.sceneId, selection.caseId, ui.previewLocale, ui.previewPlaying]);
 
   const handlePlay = useCallback(() => {
     if (!project) return;

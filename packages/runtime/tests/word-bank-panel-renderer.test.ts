@@ -32,6 +32,7 @@ function makeWord(id: string, displayKo: string, category?: string): Word {
   return {
     id,
     display: { ko: displayKo, en: displayKo },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     category: category as any,
     caseId: 'case-1',
   };

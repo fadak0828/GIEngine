@@ -6,6 +6,8 @@ import type {
   StateTransitionResult,
   SideEffect,
   CaseState,
+  Puzzle,
+  SubPuzzle,
 } from '../models/types.js';
 import { findCase, findScene, findPuzzle, getAllCases } from '../models/types.js';
 import { validatePuzzle, validateSubPuzzle } from '../validator/validator.js';
@@ -410,9 +412,9 @@ export function handleExploring(
 
       let valResult;
       if ('answers' in valPuzzle) {
-        valResult = validatePuzzle(valPuzzle as any, valPuzzleState.slotAssignments);
+        valResult = validatePuzzle(valPuzzle as Puzzle, valPuzzleState.slotAssignments);
       } else {
-        valResult = validateSubPuzzle(valPuzzle as any, valPuzzleState.slotAssignments);
+        valResult = validateSubPuzzle(valPuzzle as SubPuzzle, valPuzzleState.slotAssignments);
       }
 
       const updatedValPuzzleState = {
@@ -443,7 +445,6 @@ export function handleExploring(
             const nextCase = allCases[currentIdx + 1];
             const nextCaseState = save.caseStates[nextCase.id];
             if (nextCaseState && nextCaseState.status === 'locked') {
-              updatedValCaseState;
               const updatedSaveCases = {
                 ...save.caseStates,
                 [state.caseId]: updatedValCaseState,

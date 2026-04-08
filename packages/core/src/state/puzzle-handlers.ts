@@ -6,6 +6,8 @@ import type {
   StateTransitionResult,
   SideEffect,
   CaseState,
+  Puzzle,
+  SubPuzzle,
 } from '../models/types.js';
 import { findCase, findScene, findPuzzle, getAllCases } from '../models/types.js';
 import { validatePuzzle, validateSubPuzzle } from '../validator/validator.js';
@@ -122,9 +124,9 @@ export function handleThinking(
 
       let result;
       if ('answers' in puzzle) {
-        result = validatePuzzle(puzzle as any, puzzleState.slotAssignments);
+        result = validatePuzzle(puzzle as Puzzle, puzzleState.slotAssignments);
       } else {
-        result = validateSubPuzzle(puzzle as any, puzzleState.slotAssignments);
+        result = validateSubPuzzle(puzzle as SubPuzzle, puzzleState.slotAssignments);
       }
 
       const effects: SideEffect[] = [];
