@@ -13,7 +13,6 @@
  */
 
 import type { FunMetricScore } from './fun-metric.js';
-import type { Locale } from '@gi-engine/core';
 
 // ── Benchmark 인터페이스 ───────────────────────────────────────────────
 

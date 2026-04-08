@@ -4,7 +4,6 @@ import type {
   PuzzleSegment,
   PuzzleState,
   Word,
-  CaseState,
   ValidationResult,
   AssetManifest,
   GameEvent,

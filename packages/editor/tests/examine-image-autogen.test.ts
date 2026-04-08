@@ -8,9 +8,7 @@
  * - 회귀: image가 이미 있는 examine_image 핫스팟은 건드리지 않음
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import React from 'react';
+import { describe, it, expect } from 'vitest';
 import type { Hotspot, ExamineImageAction } from '@gi-engine/core';
 
 // ─── findExamineImageHotspotsNeedingImage 로직 재현 (AIBackgroundModal.tsx) ────

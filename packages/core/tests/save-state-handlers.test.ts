@@ -10,7 +10,7 @@ import {
   handleGameCompleted,
 } from '../src/state/save-state-handlers.js';
 import { createInitialSaveState } from '../src/save/initial-state.js';
-import type { GameDefinition, GameState, SaveState } from '../src/models/types.js';
+import type { GameDefinition, GameState } from '../src/models/types.js';
 
 // --- fixture ---
 

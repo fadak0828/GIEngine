@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useCanvasDrag, type DragMode } from '../src/hooks/useCanvasDrag';
+import { useCanvasDrag } from '../src/hooks/useCanvasDrag';
 import type { CanvasRect, SceneDimensions } from '../src/utils/coordinate';
 
 /**

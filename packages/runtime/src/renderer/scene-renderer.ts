@@ -4,7 +4,6 @@ import type {
   HotspotArea,
   SceneLayer,
   CaseState,
-  GameDefinition,
   AssetManifest,
   VisibilityCondition,
 } from '@gi-engine/core';
@@ -148,7 +147,7 @@ export class SceneRenderer {
     }, 1200);
   }
 
-  private setupZoomHandlers(zoomWrapper: HTMLElement, sceneContent: HTMLElement, scene: Scene): void {
+  private setupZoomHandlers(zoomWrapper: HTMLElement, sceneContent: HTMLElement, _scene: Scene): void {
     const MIN_ZOOM = 1;
     const MAX_ZOOM = 2.5;
 
@@ -228,7 +227,7 @@ export class SceneRenderer {
       applyZoomTransform();
     });
 
-    const stopDrag = (e: PointerEvent) => {
+    const stopDrag = (_e: PointerEvent) => {
       if (!isDragging) return;
       isDragging = false;
       zoomWrapper.style.cursor = this.zoom > 1 ? 'grab' : 'zoom-in';
