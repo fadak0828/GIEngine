@@ -1,4 +1,4 @@
-import type { GameEvent, Word } from '@gi-engine/core';
+import type { GameEvent } from '@gi-engine/core';
 import type { DeductionRenderer } from '../renderer/deduction-renderer.js';
 import type { SubPuzzleRenderer } from '../renderer/sub-puzzle-renderer.js';
 import { I18nManager } from '@gi-engine/core';

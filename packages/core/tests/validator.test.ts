@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validatePuzzle, validateSubPuzzle, validateFillInBlank } from '../src/validator/validator.js';
+import { validateSubPuzzle, validateFillInBlank } from '../src/validator/validator.js';
 import type { Puzzle, CharacterIdPuzzle, TimelinePuzzle, RelationshipPuzzle } from '../src/models/types.js';
 
 describe('ValidatorEngine', () => {

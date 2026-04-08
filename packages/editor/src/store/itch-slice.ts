@@ -1,4 +1,3 @@
-import { produce } from 'immer';
 import type { StateCreator } from 'zustand';
 import type { EditorStore } from './types.js';
 
