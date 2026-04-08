@@ -42,7 +42,7 @@ function makeHotspot(i: number, sceneIndex: number): Hotspot {
   };
 }
 
-function makeScene(sceneIndex: number, caseIndex: number): Scene {
+function makeScene(sceneIndex: number, _caseIndex: number): Scene {
   // 5–6 hotspots per scene; first scene in each case gets 6, rest get 5
   const hotspotCount = sceneIndex % 3 === 0 ? 6 : 5;
   const hotspots: Hotspot[] = Array.from({ length: hotspotCount }, (_, i) =>

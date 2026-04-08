@@ -300,6 +300,7 @@ describe('collectWordsForCase — Tier 2: scene hotspot fallback', () => {
 
     const defNoWords = makeDef(); // no def.words
     // Override scenes in act
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defNoWords.acts[0].cases[0].scenes = [sceneWithWordReveal as any];
 
     const save = makeSave('case-1', ['word-a']);

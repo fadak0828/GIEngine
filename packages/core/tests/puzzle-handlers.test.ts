@@ -8,6 +8,7 @@ import type {
   GameDefinition,
   GameState,
   SaveState,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   CaseState,
   TimelinePuzzle,
   RelationshipPuzzle,

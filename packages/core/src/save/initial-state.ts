@@ -50,7 +50,7 @@ export function createInitialSaveState(def: GameDefinition): SaveState {
   };
 }
 
-function createInitialPuzzleState(puzzle: { id: string }): PuzzleState {
+function createInitialPuzzleState(_puzzle: { id: string }): PuzzleState {
   return {
     solved: false,
     slotAssignments: {},

@@ -32,6 +32,7 @@ export interface GIEngineBootOptions {
 }
 
 if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).__giEngineBoot__ = async function(
     root: HTMLElement,
     gameData: GameDefinition,

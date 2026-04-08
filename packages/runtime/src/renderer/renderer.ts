@@ -996,6 +996,7 @@ export class Renderer {
   }
 
   private extractWordsFromAction(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     action: any,
     def: GameDefinition,
     caseId: string,

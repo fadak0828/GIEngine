@@ -90,7 +90,6 @@ export function generateItchMetadata(
   options?: { coverImage?: string; tags?: string[] }
 ): ItchMetadataResult {
   const title = gameDef.title.ko ?? gameDef.title.en ?? 'GIEngine Game';
-  const description = gameDef.description?.ko ?? gameDef.description?.en ?? title;
 
   // Build itch.txt format
   const lines: string[] = [
@@ -243,7 +242,7 @@ export async function publishToItch(
   options: ItchPublishOptions,
   gameDef: GameDefinition
 ): Promise<ItchPublishResult> {
-  const { htmlPath, pageId, versionLabel = new Date().toISOString().slice(0, 10) } = options;
+  const { htmlPath, pageId } = options;
   const htmlFileName = path.basename(htmlPath);
 
   // 1. Validate inputs

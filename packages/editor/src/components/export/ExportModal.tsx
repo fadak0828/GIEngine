@@ -70,6 +70,7 @@ export function ExportModal({ open, onClose }: ExportModalProps): React.ReactEle
     setErrorMessage(null);
     try {
       // Merge editor words into the game definition's words dictionary
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const wordsDict: Record<string, { id: string; display: { ko: string; en: string }; category?: string; hint?: { ko: string; en: string } }> = { ...(project as any).words };
       for (const w of words) {
         wordsDict[w.id] = {

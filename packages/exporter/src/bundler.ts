@@ -38,7 +38,7 @@ export interface BundleResult {
  * Attempts to read the pre-built runtime JS from packages/runtime/dist/.
  * Falls back to a placeholder if not found.
  */
-async function loadRuntimeJs(mode: 'development' | 'production'): Promise<string> {
+async function loadRuntimeJs(_mode: 'development' | 'production'): Promise<string> {
   // Try to find the runtime dist relative to this package
   // Must use IIFE format (index.iife.js) — the ES module (index.js) has `export {}` statements
   // which cause SyntaxError when embedded in a plain <script> block, preventing __giEngineBoot__.

@@ -49,7 +49,7 @@ describe('PopupRenderer — 이미지 팝업 줌/패닝 (Phase 4)', () => {
 
   describe('showImagePopup 기본 DOM 구조', () => {
     it('오버레이와 팝업이 생성됨', () => {
-      const { renderer } = makeRenderer(container);
+      makeRenderer(container);
       const assets: AssetManifest = { items: {} };
       makeImageAsset(assets, 'img1', '/test.png');
       const r2 = new PopupRenderer({

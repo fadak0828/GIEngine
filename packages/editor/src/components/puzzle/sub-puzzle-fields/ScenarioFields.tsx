@@ -47,7 +47,9 @@ export function ScenarioFields({
   };
 
   const removeAnswer = (key: string) => {
-    const { [key]: _, ...rest } = puzzle.answers;
+    const rest = Object.fromEntries(
+      Object.entries(puzzle.answers).filter(([k]) => k !== key)
+    );
     updateSubPuzzle(caseId, puzzle.id, {
       answers: rest,
     } as Partial<ScenarioPuzzle>);

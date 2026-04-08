@@ -363,7 +363,7 @@ function buildFallbackPuzzle(
   blueprint: CaseBlueprint,
   wordIdMap: Map<string, string>,
   validRequiredTempIds: string[],
-  locale: Locale,
+  _locale: Locale,
 ): Puzzle {
   const requiredTempIds = validRequiredTempIds.slice(0, 2);
   const segments: PuzzleTemplate['segments'] = [

@@ -91,11 +91,13 @@ describe('validateGameDefinition via bundle', () => {
   });
 
   it('throws when version is missing', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     const { version: _, ...noVersion } = validGame as any;
     await expect(bundleData(noVersion, tmpDir)).rejects.toThrow(/version/);
   });
 
   it('throws when title is missing', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     const { title: _, ...noTitle } = validGame as any;
     await expect(bundleData(noTitle, tmpDir)).rejects.toThrow(/title/);
   });
@@ -111,6 +113,7 @@ describe('validateGameDefinition via bundle', () => {
   });
 
   it('throws when assets is missing', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     const { assets: _, ...noAssets } = validGame as any;
     await expect(bundleData(noAssets, tmpDir)).rejects.toThrow(/assets/);
   });

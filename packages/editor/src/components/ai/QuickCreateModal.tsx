@@ -567,13 +567,6 @@ function Step1({
 
 // ── Step 2: 선택지 화면 ───────────────────────────────────────────
 
-interface Step2Props {
-  choices: NonNullable<ReturnType<typeof useEditorStore extends (s: infer S) => infer R ? never : never>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  selection: Record<string, any>;
-  onSelectionChange: (patch: Record<string, string>) => void;
-}
-
 function Step2({
   choices,
   selection,

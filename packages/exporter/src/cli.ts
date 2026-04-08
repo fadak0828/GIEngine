@@ -151,7 +151,6 @@ async function main(): Promise<void> {
 
       // Load game definition for metadata
       const fs = await import('node:fs/promises');
-      const path = await import('node:path');
       const rawJson = await fs.readFile(args.input, 'utf-8');
       const gameDef = JSON.parse(rawJson);
 

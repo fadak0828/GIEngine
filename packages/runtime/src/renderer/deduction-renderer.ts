@@ -431,7 +431,7 @@ export class DeductionRenderer {
   private renderWordBank(
     words: Word[],
     assignedWordIds: Set<string>,
-    puzzle: Puzzle
+    _puzzle: Puzzle
   ): HTMLElement {
     const bank = document.createElement('div');
     bank.className = 'gi-word-bank';
