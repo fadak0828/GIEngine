@@ -1,6 +1,14 @@
 // Public API for @gi-engine/ai
 
-export { GeminiClient, geminiClient, TEXT_MODELS, IMAGE_MODELS } from './client.js';
+export { GeminiProvider, geminiProvider, TEXT_MODELS, IMAGE_MODELS } from './providers/gemini-provider.js';
+export { GeminiClient, geminiClient } from './client.js';
+
+export type {
+  AIProvider,
+  TextModelOption,
+  ImageModelOption,
+  ModelOption,
+} from './providers/index.js';
 
 export type {
   BackgroundStyle,
