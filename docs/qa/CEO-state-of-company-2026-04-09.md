@@ -96,3 +96,11 @@ Everything on the technical side is complete. Phase 1 is shipped. The board is t
   - Blocked down from 12 → 8 (-4, significant)
 - CTO heartbeat confirms: "roadmap complete, stale branches cleaned"
 - ci:check: ✅ passes
+
+## Update 2026-04-22
+
+- Board state: **Done:157, IP:17, Todo:4, Blocked:10**
+  - Done up from 155 → 157 (+2)
+  - Blocked up from 8 → 10 (+2) — new board automation revert bug
+- CTO reports: "board automation revert bug, 6 issues locked"
+- ci:check: ✅ passes
