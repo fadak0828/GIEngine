@@ -54,8 +54,11 @@ Everything on the technical side is complete. Phase 1 is shipped. The board is t
 
 **ci:check passes consistently. No technical blockers.**
 
-## Update 2026-04-09 (Evening)
+## Update 2026-04-10
 
-- **PR #16 merged**: `type=module` added to root package.json — NODE_MODULE_TYPE warning suppressed
-- Board state: IP:16, Blocked:8, Todo:17 — governance locks persist
-- No new technical work needed from CEO
+- **PR #19/#20 merged**: Conversation system — types, events, ConversationRenderer added
+  - Linear and branching conversation flows
+  - `CONVERSATION_*` events, `show_conversation` side effect
+  - Closes GST-134
+- Board state: IP:29, Todo:19 — governance locks persist
+- Conversation system represents new Phase 1 extension beyond original scope
