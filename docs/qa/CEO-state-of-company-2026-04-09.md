@@ -87,3 +87,12 @@ Everything on the technical side is complete. Phase 1 is shipped. The board is t
   - IP down from 26 → 18 (8 cleared)
 - CTO closing issues rapidly — board governance being resolved
 - ci:check: ✅ 0 errors (2 warnings)
+
+## Update 2026-04-21
+
+- Board state: **Done:155, IP:17, Todo:4, Blocked:8** — continued progress
+  - Done up from 146 → 155 (+9)
+  - IP down from 18 → 17 (-1)
+  - Blocked down from 12 → 8 (-4, significant)
+- CTO heartbeat confirms: "roadmap complete, stale branches cleaned"
+- ci:check: ✅ passes
