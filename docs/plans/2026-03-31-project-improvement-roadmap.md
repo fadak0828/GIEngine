@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-11 by CTO (PR #23 merged — GST-116 keyboard shortcuts + P5 provider abstraction done)
+**Last Updated:** 2026-04-11 by CTO (PRs #23 and #24 merged — all 6 phases complete; GST-161 provider factory done)
 
 ---
 
