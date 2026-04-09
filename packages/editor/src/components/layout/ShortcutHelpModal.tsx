@@ -16,6 +16,9 @@ const SHORTCUTS: { key: string; label: string }[][] = [
     { key: 'Ctrl + 4', label: '퍼즐 편집 탭' },
   ],
   [
+    { key: 'Alt + ← / Alt + →', label: '이전/다음 씬 이동' },
+    { key: 'F2', label: '선택 항목 이름 변경' },
+    { key: 'Delete', label: '선택 항목 삭제' },
     { key: '? 또는 Ctrl + /', label: '단축키 도움말 열기/닫기' },
     { key: 'Esc', label: '모달 / 오버레이 닫기' },
   ],
