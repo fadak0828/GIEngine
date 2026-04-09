@@ -1,8 +1,20 @@
 import type { StateCreator } from 'zustand';
 import type { Locale } from '@gi-engine/core';
 import type { EditorStore, SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter, PreviewMode } from './types.js';
+import { loadPersistedUI } from './ui-persist.js';
 
 export type { SelectionState, UIState, ActivePanel, AssetViewMode, AssetTypeFilter, PreviewMode };
+
+// ── Persistent UI defaults ─────────────────────────────────────────
+
+const persistedUI = (() => {
+  try {
+    const raw = localStorage.getItem('gi-editor-ui-v1');
+    return raw ? (JSON.parse(raw) as ReturnType<typeof loadPersistedUI>) : null;
+  } catch {
+    return null;
+  }
+})();
 
 // ── Default state ────────────────────────────────────────────────
 
@@ -20,26 +32,26 @@ export const defaultSelection: SelectionState = {
 
 export const defaultUI: UIState = {
   activePanel: 'scene',
-  editorLocale: 'ko',
-  previewLocale: 'ko',
+  editorLocale: (persistedUI?.editorLocale as Locale) ?? 'ko',
+  previewLocale: (persistedUI?.previewLocale as Locale) ?? 'ko',
   isFullscreen: false,
   zoom: 1.0,
-  previewVisible: false,
-  previewHeight: 280,
-  previewMode: 'scene',
+  previewVisible: persistedUI?.previewVisible ?? false,
+  previewHeight: persistedUI?.previewHeight ?? 280,
+  previewMode: (persistedUI?.previewMode as PreviewMode) ?? 'scene',
   previewPlaying: false,
-  leftPanelWidth: 260,
-  rightPanelWidth: 320,
-  sceneTool: 'select',
+  leftPanelWidth: persistedUI?.leftPanelWidth ?? 260,
+  rightPanelWidth: persistedUI?.rightPanelWidth ?? 320,
+  sceneTool: (persistedUI?.sceneTool as UIState['sceneTool']) ?? 'select',
   autoSaveEnabled: true,
   autoSaveIntervalMs: 60000,
   notification: null,
-  assetViewMode: 'grid',
-  assetTypeFilter: 'all',
+  assetViewMode: (persistedUI?.assetViewMode as AssetViewMode) ?? 'grid',
+  assetTypeFilter: (persistedUI?.assetTypeFilter as AssetTypeFilter) ?? 'all',
   assetSearch: '',
   shortcutHelpOpen: false,
-  gridSnapEnabled: true,
-  gridSize: 10,
+  gridSnapEnabled: persistedUI?.gridSnapEnabled ?? true,
+  gridSize: persistedUI?.gridSize ?? 10,
   dragPreview: null,
 };
 
