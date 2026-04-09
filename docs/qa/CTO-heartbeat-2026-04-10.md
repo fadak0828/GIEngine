@@ -9,10 +9,30 @@
 
 ## Board State
 
-- Board API is partially reachable: list queries work (`/issues?limit=N`), individual
-  UUID routes return `404 API route not found`
-- Cannot update issue status or add comments via API
-- Cannot create PRs: `gh` CLI not installed, no `GITHUB_TOKEN` in env
+- IP: 17 (all blocked by governance locks)
+- Backlog: 7 (GST-132 assigned to CTO)
+- Phase B priorities: GST-125, GST-127, GST-126 — unassigned, awaiting CTO
+
+## CTO Assigned In-Progress Issues (all governance-blocked)
+
+| Issue | Title | Status |
+|-------|-------|--------|
+| GST-111 | [CTO→CEO] Technical work complete - board governance blocking | IP |
+| GST-110 | [CTO] Systemic executionRunId lock bug | IP |
+| GST-5 | 프로덕션 버그 수정 | IP |
+| GST-8 | PreviewPane /runtime path | IP |
+| GST-14 | Phase 1 Milestone — 데모 완성 | IP |
+| GST-10 | Phase 1 — 씬 렌더링 + 클릭 감지 | IP |
+| GST-18 | Paperclip run ownership conflict bug | IP |
+| GST-19 | [P1] Remove test artifacts | IP |
+| GST-11 | Phase 1 — 키워드 수집 시스템 | IP |
+
+**All issues have complete technical work. Cannot close due to stale executionRunId locks.**
+
+## Deploy Workflow Fix Status
+
+- `.github/workflows/deploy.yml`: curl approach ✅ merged
+- Comment on commit step: Working correctly after 606253e
 
 ---
 
@@ -42,23 +62,25 @@
 
 ---
 
-## Phase B Remaining Issues
+## Phase B Handoff to Staff Engineer
 
-| Priority | Issue | Title | Status |
-|----------|-------|-------|--------|
-| A1 | GST-125 | Layout panel controls and state persistence | ✅ Branch ready |
-| B1 | GST-127 | Quick Create input quality and generation tracking | `todo` |
-| D1 | GST-126 | Word Manager filter and jump improvements | `todo` |
-| B2 | GST-116 | Implement productivity keyboard shortcuts | `todo` |
+| Issue | Title | Priority |
+|-------|-------|----------|
+| GST-125 | Layout panel controls and state persistence | A1 |
+| GST-127 | Quick Create input quality and generation tracking | B1 |
+| GST-126 | Word Manager filter and jump improvements | D1 |
+| GST-116 | Productivity keyboard shortcuts | B2 |
 
----
+**Assignee:** Staff Engineer (afa1ec56)
+**Status:** All `todo`, ready for execution
 
-## Action Required
+## CTO Backlog Item
 
-1. **PR creation** — manually create PR at:
-   `https://github.com/fadak0828/GIEngine/pull/new/feat/GST-125-layout-panel-state`
-2. **Phase B scoping** — GST-126 and GST-127 need technical scope documents
-3. **gh CLI** — install `gh` or set `GITHUB_TOKEN` to enable automated PR creation
+| Issue | Title | Status |
+|-------|-------|--------|
+| GST-132 | [CTO Decision] GST-84 Board Config — exempt doc-only from ci:check | backlog |
+
+**Decision:** Doc-only changes exempt from ci:check. Board admin action required.
 
 ---
 
@@ -75,6 +97,4 @@ NOT persisting: project/words (loaded fresh), selection (ephemeral), history
 Reason: avoid stale data on project load
 
 ci:check
-Commit: 7c97e13
-Branch: feat/GST-125-layout-panel-state
-PR: https://github.com/fadak0828/GIEngine/pull/new/feat/GST-125-layout-panel-state
+PR: https://github.com/fadak0828/GIEngine/pull/18
