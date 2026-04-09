@@ -23,6 +23,8 @@ export interface GameDefinition {
   acts: Act[];
   assets: AssetManifest;
   words?: Record<string, WordDefinition>;
+  /** Conversation definitions keyed by ID */
+  conversations?: Record<string, ConversationDefinition>;
 }
 
 export interface GameSettings {
@@ -111,7 +113,8 @@ export type HotspotAction =
   | ToggleLayerAction
   | CompositeAction
   | PlaySoundAction
-  | DelayAction;
+  | DelayAction
+  | ConversationAction;
 
 export interface ExamineAction {
   type: 'examine';
@@ -167,6 +170,42 @@ export interface DelayAction {
   type: 'delay';
   /** 대기 시간 (밀리초) */
   duration: number;
+}
+
+export interface ConversationAction {
+  type: 'conversation';
+  /** Conversation ID referencing GameDefinition.conversations */
+  conversationId: string;
+}
+
+export interface ConversationDefinition {
+  id: string;
+  /** NPC character ID */
+  characterId: string;
+  /** Array of dialog nodes in order */
+  nodes: ConversationNode[];
+}
+
+export interface ConversationNode {
+  id: string;
+  /** Speaker label shown in dialog header */
+  speaker: LocalizedText;
+  /** Main dialog text */
+  content: LocalizedText;
+  /** Optional: choices presented to the player */
+  choices?: ConversationChoice[];
+  /** Optional: action triggered when this node is displayed */
+  onEnter?: HotspotAction;
+  /** Optional: next node ID after this one (for linear conversations) */
+  next?: string;
+}
+
+export interface ConversationChoice {
+  id: string;
+  /** Choice text shown to player */
+  text: LocalizedText;
+  /** Target node ID when this choice is selected */
+  targetNodeId: string;
 }
 
 export type ActionSequence = HotspotAction[];
@@ -411,7 +450,11 @@ export type GameEvent =
   | { type: 'CLOSE_PUZZLE_OVERLAY' }
   | { type: 'COLLECT_WORD_IN_POPUP'; wordId: string }
   | { type: 'REQUEST_HINT'; puzzleId: string; level: 1 | 2 | 3 }
-  | { type: 'APPLY_HINT_PENALTY'; puzzleId: string; penalty: number };
+  | { type: 'APPLY_HINT_PENALTY'; puzzleId: string; penalty: number }
+  | { type: 'START_CONVERSATION'; conversationId: string }
+  | { type: 'CONVERSATION_CHOICE'; conversationId: string; nodeId: string }
+  | { type: 'CONVERSATION_ADVANCE'; conversationId: string; nodeId: string }
+  | { type: 'CONVERSATION_END'; conversationId: string };
 
 // --- State Transition Result ---
 
@@ -434,7 +477,8 @@ export type SideEffect =
   /** onEnter 시퀀스에서 레이어 가시성 변경 */
   | { type: 'toggle_layer'; layerId: string; visible?: boolean }
   /** 씬 전환 시퀀스에서 지정 시간(ms)만큼 대기 */
-  | { type: 'delay'; duration: number };
+  | { type: 'delay'; duration: number }
+  | { type: 'show_conversation'; conversationId: string };
 
 export interface PopupContent {
   title?: LocalizedText;
