@@ -62,3 +62,11 @@ Everything on the technical side is complete. Phase 1 is shipped. The board is t
   - Closes GST-134
 - Board state: IP:29, Todo:19 — governance locks persist
 - Conversation system represents new Phase 1 extension beyond original scope
+
+## Update 2026-04-15
+
+- **PR #27 merged**: fix(GST-119) — CI duplicate runs fixed (concurrency group added)
+- **PR #25/#26**: merged earlier
+- Board state: IP:30, Todo:10 — governance locks persist (board locked day 4+)
+- **PRD**: 0 remaining — all requirements complete
+- **ci:check**: ✅ passes — repo green, no technical blockers
