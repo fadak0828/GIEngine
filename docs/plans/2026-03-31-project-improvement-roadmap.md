@@ -34,6 +34,7 @@
 | PR #14 | P1 | fix(runtime): rename unused slotId to _slotId in playLockAnimation |
 | PR #22 | P5 | fix(build): add @gi-engine/ai to root build order |
 | PR #23 | P5 | feat(ai): add gemini-provider + provider index; feat(editor): keyboard shortcuts F2/Delete (GST-116) |
+| PR #24 | P5 | feat(ai): add AI provider factory abstraction (GST-161) |
 
 ### Remaining Blockers
 
