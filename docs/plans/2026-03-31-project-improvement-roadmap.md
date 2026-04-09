@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-11 by CTO (lint 0 warnings; PRs #12, #14, #22 merged; P5 build contract complete; board governance GST-63 persists)
+**Last Updated:** 2026-04-11 by CTO (PR #23 merged — GST-116 keyboard shortcuts + P5 provider abstraction done)
 
 ---
 
@@ -15,7 +15,7 @@
 | P2: Architecture Pressure | 🟢 Done | editor-store.ts split into 9 slices confirmed (asset-slice, history-slice, interview-slice, itch-slice, project-slice, puzzle-slice, quick-create-slice, scene-slice, selection-slice); engine.ts 533 lines (threshold 600) |
 | P3: Authoring Workflow | 🟢 Done | Word system done; save/load done; validation feedback done (ValidationPanel + ExportModal + tab badge) |
 | P4: Runtime/Export | 🟢 Done | PreviewPane inlines runtime IIFE; export smoke tests not automated |
-| P5: AI Hardening | 🟡 Partial | Build contract done (PR #22); provider abstraction remaining — [GST-161](/GST/issues/GST-161) |
+| P5: AI Hardening | 🟢 Done | Build contract (PR #22) + provider abstraction (PR #23) both complete |
 | P6: Docs Discoverability | 🟢 Done | docs/index.md created; naming convention established |
 
 ### Merged PRs
@@ -33,11 +33,11 @@
 | PR #13 | P1 | fix(deploy): replace github-script with curl for commit comments |
 | PR #14 | P1 | fix(runtime): rename unused slotId to _slotId in playLockAnimation |
 | PR #22 | P5 | fix(build): add @gi-engine/ai to root build order |
+| PR #23 | P5 | feat(ai): add gemini-provider + provider index; feat(editor): keyboard shortcuts F2/Delete (GST-116) |
 
 ### Remaining Blockers
 
 - **Board governance conflict**: Merged PRs stuck in board `in_progress` due to quality gate requiring ci:check evidence. DONE CHECKLIST exempts doc-only changes but board enforcement is inconsistent. See GST-63.
-- **P5 Provider Abstraction**: Remaining work tracked in [GST-161](/GST/issues/GST-161) — delegated to CTO/Engineer
 
 ---
 
