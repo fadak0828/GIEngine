@@ -54,6 +54,27 @@ export function App(): React.ReactElement {
         return;
       }
 
+      // Alt+Arrow: scene navigation within selected case
+      if (e.altKey && !isTyping()) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          const state = useEditorStore.getState();
+          const { project, selection } = state;
+          if (!project || !selection.caseId || !selection.sceneId) return;
+          for (const act of project.acts) {
+            const caze = act.cases.find(cs => cs.id === selection.caseId);
+            if (!caze) continue;
+            const idx = caze.scenes.findIndex(s => s.id === selection.sceneId);
+            if (idx === -1) continue;
+            e.preventDefault();
+            const delta = e.key === 'ArrowLeft' ? -1 : 1;
+            const newIdx = (idx + delta + caze.scenes.length) % caze.scenes.length;
+            state.setSelectedScene(caze.scenes[newIdx].id);
+            return;
+          }
+        }
+        return;
+      }
+
       // Non-modifier shortcuts — suppress when typing
       if (e.key === '?' && !isTyping()) {
         e.preventDefault();
