@@ -3,7 +3,7 @@
 **Date:** 2026-03-31  
 **Author:** CEO  
 **Status:** partially-implemented  
-**Last Updated:** 2026-04-09 by CTO (lint cleaned to 0 warnings; PRs #12, #14 merged)
+**Last Updated:** 2026-04-11 by CTO (lint 0 warnings; PRs #12, #14, #22 merged; P5 build contract complete; board governance GST-63 persists)
 
 ---
 
@@ -11,11 +11,11 @@
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| P1: Repo Contract | 🟢 Done | ci:check works, build order fixed; AI package intentionally excluded (has build script but requires external API keys) |
+| P1: Repo Contract | 🟢 Done | ci:check works, build order fixed; @gi-engine/ai included via PR #22 |
 | P2: Architecture Pressure | 🟢 Done | editor-store.ts split into 9 slices confirmed (asset-slice, history-slice, interview-slice, itch-slice, project-slice, puzzle-slice, quick-create-slice, scene-slice, selection-slice); engine.ts 533 lines (threshold 600) |
 | P3: Authoring Workflow | 🟢 Done | Word system done; save/load done; validation feedback done (ValidationPanel + ExportModal + tab badge) |
 | P4: Runtime/Export | 🟢 Done | PreviewPane inlines runtime IIFE; export smoke tests not automated |
-| P5: AI Hardening | 🔴 Pending | No build contract or provider abstraction |
+| P5: AI Hardening | 🟡 Partial | Build contract done (PR #22); provider abstraction remaining — [GST-161](/GST/issues/GST-161) |
 | P6: Docs Discoverability | 🟢 Done | docs/index.md created; naming convention established |
 
 ### Merged PRs
@@ -32,11 +32,12 @@
 | PR #12 | P1 | fix(lint): remove unused Case import and renderControls args; remove openInterview in Toolbar |
 | PR #13 | P1 | fix(deploy): replace github-script with curl for commit comments |
 | PR #14 | P1 | fix(runtime): rename unused slotId to _slotId in playLockAnimation |
+| PR #22 | P5 | fix(build): add @gi-engine/ai to root build order |
 
 ### Remaining Blockers
 
 - **Board governance conflict**: Merged PRs stuck in board `in_progress` due to quality gate requiring ci:check evidence. DONE CHECKLIST exempts doc-only changes but board enforcement is inconsistent. See GST-63.
-- **AI package**: Intentionally excluded from root build (requires `@google/generative-ai` API key). Has own `npm run build` that works. Not a blocker.
+- **P5 Provider Abstraction**: Remaining work tracked in [GST-161](/GST/issues/GST-161) — delegated to CTO/Engineer
 
 ---
 
