@@ -50,6 +50,7 @@ export const defaultUI: UIState = {
   assetTypeFilter: (persistedUI?.assetTypeFilter as AssetTypeFilter) ?? 'all',
   assetSearch: '',
   shortcutHelpOpen: false,
+  treeEditingId: null,
   gridSnapEnabled: persistedUI?.gridSnapEnabled ?? true,
   gridSize: persistedUI?.gridSize ?? 10,
   dragPreview: null,
@@ -84,6 +85,7 @@ export type SelectionSlice = {
   setAssetTypeFilter: (filter: AssetTypeFilter) => void;
   setAssetSearch: (query: string) => void;
   setShortcutHelpOpen: (open: boolean) => void;
+  setTreeEditingId: (id: string | null) => void;
   toggleGridSnap: () => void;
   setGridSize: (size: number) => void;
   setDragPreview: (preview: { hotspotId: string; area: import('@gi-engine/core').HotspotArea } | null) => void;
@@ -212,6 +214,10 @@ export const createSelectionSlice: StateCreator<EditorStore, [], [], SelectionSl
 
   setShortcutHelpOpen: (open) => {
     set(state => ({ ui: { ...state.ui, shortcutHelpOpen: open } }));
+  },
+
+  setTreeEditingId: (id) => {
+    set(state => ({ ui: { ...state.ui, treeEditingId: id } }));
   },
 
   toggleGridSnap: () => {
