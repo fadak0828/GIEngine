@@ -2,6 +2,7 @@
   "name": "gi-engine",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Golden Idol style detective/deduction game engine",
   "workspaces": [
     "packages/*"
