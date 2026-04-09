@@ -22,6 +22,7 @@ vi.mock('../src/providers/factory.js', () => ({
 }));
 
 import { getProvider } from '../src/providers/factory.js';
+import { AIProvider } from '../src/providers/index.js';
 
 const mockProvider = {
   generateText: vi.fn(),
@@ -152,7 +153,7 @@ describe('QuickCreateEngine', () => {
 
   beforeEach(() => {
     engine = new QuickCreateEngine();
-    mockGetProvider.mockReturnValue(mockProvider as any);
+    mockGetProvider.mockReturnValue(mockProvider as unknown as AIProvider);
     // mockReset: mockResolvedValueOnce 큐 + 구현 완전 초기화 (테스트 간 오염 방지)
     // clearAllMocks는 호출 이력만 삭제하고 큐는 남김 -> 테스트 간 오염 발생
     mockProvider.generateText.mockReset();

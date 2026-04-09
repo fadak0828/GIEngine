@@ -26,6 +26,7 @@ vi.mock('../src/interview/blueprint-converter.js', () => ({
 }));
 
 import { getProvider } from '../src/providers/factory.js';
+import { AIProvider } from '../src/providers/index.js';
 import { calcSmartHotspotPositions } from '../src/interview/blueprint-converter.js';
 
 const mockGetProvider = vi.mocked(getProvider);
@@ -61,7 +62,7 @@ describe('detectHotspotsFromImage', () => {
     mockCalcSmartPositions.mockImplementation((hotspots, _w, _h) =>
       makeSmartPositionResult(hotspots.length),
     );
-    mockGetProvider.mockReturnValue(mockProvider as any);
+    mockGetProvider.mockReturnValue(mockProvider as unknown as AIProvider);
   });
 
   // ── 1. 빈 핫스팟 ─────────────────────────────────────────────────────────
