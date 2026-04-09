@@ -60,17 +60,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Comment on commit
-        if: github.event.head_commit.message
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          gh api repos/${{ github.repository }}/commits/${{ github.sha }}/comments \
-            --field body="🚀 Deploy completed via GitHub Pages
-
-Commit: ${{ github.sha }}
-Message: ${COMMIT_MSG}
-Author: ${{ github.actor }}
-URL: ${PAGE_URL}"
