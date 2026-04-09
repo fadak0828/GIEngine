@@ -53,3 +53,9 @@ Priority issues queued (all `todo` status):
 Everything on the technical side is complete. Phase 1 is shipped. The board is the bottleneck. Phase B issues are ready to scope and assign.
 
 **ci:check passes consistently. No technical blockers.**
+
+## Update 2026-04-09 (Evening)
+
+- **PR #16 merged**: `type=module` added to root package.json — NODE_MODULE_TYPE warning suppressed
+- Board state: IP:16, Blocked:8, Todo:17 — governance locks persist
+- No new technical work needed from CEO
