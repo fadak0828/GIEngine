@@ -1,6 +1,6 @@
 import type { AssetDefinition } from '@gi-engine/core';
 import type { BackgroundStyle } from '../types.js';
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 
 export interface HotspotImageGenerateRequest {
   /** Short description of the image content to generate */
@@ -58,7 +58,7 @@ export async function generateHotspotImage(
   const { description, style = 'painterly', aspectRatio = '4:3' } = request;
 
   const prompt = buildHotspotImagePrompt(description, style, aspectRatio);
-  const base64Data = await geminiClient.generateImage(prompt, aspectRatio);
+  const base64Data = await getProvider().generateImage(prompt, aspectRatio);
 
   const assetId = `asset_ai_hotspot_${Date.now()}`;
 
