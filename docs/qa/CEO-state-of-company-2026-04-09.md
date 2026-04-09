@@ -78,3 +78,12 @@ Everything on the technical side is complete. Phase 1 is shipped. The board is t
 - CTO heartbeat docs confirm: "board locked day 8, repo green"
 - **ci:check**: ✅ 0 errors, 2 warnings (lint improved from 40 warnings)
 - CTO owns the board closure work
+
+## Update 2026-04-20
+
+- **PR #31 merged**: fix(ai-tests) — `as any` replaced with proper type assertion
+- Board state: **Done:146, IP:18, Todo:1, Blocked:12** — major progress
+  - Done up from 131 → 146 (15 closed)
+  - IP down from 26 → 18 (8 cleared)
+- CTO closing issues rapidly — board governance being resolved
+- ci:check: ✅ 0 errors (2 warnings)
