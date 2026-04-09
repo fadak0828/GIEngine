@@ -70,3 +70,11 @@ Everything on the technical side is complete. Phase 1 is shipped. The board is t
 - Board state: IP:30, Todo:10 — governance locks persist (board locked day 4+)
 - **PRD**: 0 remaining — all requirements complete
 - **ci:check**: ✅ passes — repo green, no technical blockers
+
+## Update 2026-04-19
+
+- Board state: **IP:26, Todo:1** — significant progress (board clearing)
+- CTO actively closing issues — governance locks being cleared
+- CTO heartbeat docs confirm: "board locked day 8, repo green"
+- **ci:check**: ✅ 0 errors, 2 warnings (lint improved from 40 warnings)
+- CTO owns the board closure work
