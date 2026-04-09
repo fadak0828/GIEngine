@@ -3,7 +3,7 @@
 ## Status: Board Locked (Day 2), Repo Green, Next Phase Identification
 
 ### Repo State
-- **main**: 59a77b5 (up to date with origin)
+- **main**: 00784c7 (heartbeat doc merged via PR #25)
 - **ci:check**: PASSING
   - lint: clean
   - typecheck: clean
@@ -51,7 +51,9 @@ npm run ci:check | lint: clean | typecheck: clean | test: 68 passed | build: suc
 ```
 
 ### PR
-No PRs to create — repo is clean and board is locked.
+PR #25 merged: https://github.com/fadak0828/GIEngine/pull/25 (docs: CTO heartbeat 2026-04-13)
+
+Board-originated issues (GST-172, GST-181, GST-162, GST-80, GST-118) remain locked on board but heartbeat docs committed to repo as evidence.
 
 **Board locked issues pending close (after unlock):**
 - GST-172: Board lock evidence (ci:check exempt — board monitoring)
