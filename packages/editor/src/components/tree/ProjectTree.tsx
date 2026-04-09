@@ -13,19 +13,21 @@ interface SceneNodeProps {
 
 const SceneNode = React.memo(function SceneNode({ scene, caseId, isSelected, onSelect }: SceneNodeProps): React.ReactElement {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
-  const { updateScene } = useEditorStore();
+  const treeEditingId = useEditorStore(s => s.ui.treeEditingId);
+  const { updateScene, setTreeEditingId } = useEditorStore();
   const [isHovered, setIsHovered] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const isEditing = treeEditingId === scene.id;
+  const [editValue, setEditValue] = useState(scene.name[editorLocale] || scene.id);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing) {
+      setEditValue(scene.name[editorLocale] || scene.id);
       inputRef.current?.focus();
       inputRef.current?.select();
     }
-  }, [isEditing]);
+  }, [isEditing, scene.name, editorLocale, scene.id]);
 
   const currentName = scene.name[editorLocale] || scene.id;
 
@@ -34,18 +36,17 @@ const SceneNode = React.memo(function SceneNode({ scene, caseId, isSelected, onS
     if (trimmed) {
       updateScene(caseId, scene.id, { name: { ...scene.name, [editorLocale]: trimmed } });
     }
-    setIsEditing(false);
-  }, [editValue, updateScene, caseId, scene.id, scene.name, editorLocale]);
+    setTreeEditingId(null);
+  }, [editValue, updateScene, caseId, scene.id, scene.name, editorLocale, setTreeEditingId]);
 
   const cancelEdit = useCallback(() => {
-    setIsEditing(false);
-  }, []);
+    setTreeEditingId(null);
+  }, [setTreeEditingId]);
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditing(true);
-    setEditValue(currentName);
-  }, [currentName]);
+    setTreeEditingId(scene.id);
+  }, [setTreeEditingId, scene.id]);
 
   const isActive = isSelected || isHovered;
 
@@ -121,19 +122,21 @@ interface CaseNodeProps {
 
 const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isExpanded, selectedSceneId, onSelect, onToggle, onSceneSelect }: CaseNodeProps): React.ReactElement {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
-  const { addScene, deleteCase, updateCase } = useEditorStore();
+  const treeEditingId = useEditorStore(s => s.ui.treeEditingId);
+  const { addScene, deleteCase, updateCase, setTreeEditingId } = useEditorStore();
   const [isHovered, setIsHovered] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const isEditing = treeEditingId === caseData.id;
+  const [editValue, setEditValue] = useState(caseData.title[editorLocale] || caseData.id);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing) {
+      setEditValue(caseData.title[editorLocale] || caseData.id);
       inputRef.current?.focus();
       inputRef.current?.select();
     }
-  }, [isEditing]);
+  }, [isEditing, caseData.title, editorLocale, caseData.id]);
 
   const currentTitle = caseData.title[editorLocale] || caseData.id;
 
@@ -142,18 +145,17 @@ const CaseNode = React.memo(function CaseNode({ caseData, actId, isSelected, isE
     if (trimmed) {
       updateCase(caseData.id, { title: { ...caseData.title, [editorLocale]: trimmed } });
     }
-    setIsEditing(false);
-  }, [editValue, updateCase, caseData.id, caseData.title, editorLocale]);
+    setTreeEditingId(null);
+  }, [editValue, updateCase, caseData.id, caseData.title, editorLocale, setTreeEditingId]);
 
   const cancelEdit = useCallback(() => {
-    setIsEditing(false);
-  }, []);
+    setTreeEditingId(null);
+  }, [setTreeEditingId]);
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditing(true);
-    setEditValue(currentTitle);
-  }, [currentTitle]);
+    setTreeEditingId(caseData.id);
+  }, [setTreeEditingId, caseData.id]);
 
   const handleAddScene = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -278,20 +280,22 @@ interface ActNodeProps {
 
 const ActNode = React.memo(function ActNode({ act, isExpanded, isSelected, selectedCaseId, selectedSceneId, onToggle }: ActNodeProps): React.ReactElement {
   const editorLocale = useEditorStore(s => s.ui.editorLocale);
-  const { addCase, deleteAct, setSelection, updateAct, setActivePanel } = useEditorStore();
+  const treeEditingId = useEditorStore(s => s.ui.treeEditingId);
+  const { addCase, deleteAct, setSelection, updateAct, setActivePanel, setTreeEditingId } = useEditorStore();
   const [expandedCases, setExpandedCases] = useState<Set<string>>(new Set());
   const [isHovered, setIsHovered] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const isEditing = treeEditingId === act.id;
+  const [editValue, setEditValue] = useState(act.title[editorLocale] || act.id);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing) {
+      setEditValue(act.title[editorLocale] || act.id);
       inputRef.current?.focus();
       inputRef.current?.select();
     }
-  }, [isEditing]);
+  }, [isEditing, act.title, editorLocale, act.id]);
 
   const currentTitle = act.title[editorLocale] || act.id;
 
@@ -300,18 +304,17 @@ const ActNode = React.memo(function ActNode({ act, isExpanded, isSelected, selec
     if (trimmed) {
       updateAct(act.id, { title: { ...act.title, [editorLocale]: trimmed } });
     }
-    setIsEditing(false);
-  }, [editValue, updateAct, act.id, act.title, editorLocale]);
+    setTreeEditingId(null);
+  }, [editValue, updateAct, act.id, act.title, editorLocale, setTreeEditingId]);
 
   const cancelEdit = useCallback(() => {
-    setIsEditing(false);
-  }, []);
+    setTreeEditingId(null);
+  }, [setTreeEditingId]);
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditing(true);
-    setEditValue(currentTitle);
-  }, [currentTitle]);
+    setTreeEditingId(act.id);
+  }, [setTreeEditingId, act.id]);
 
   const toggleCase = useCallback((caseId: string) => {
     setExpandedCases(prev => {

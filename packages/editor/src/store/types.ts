@@ -97,6 +97,7 @@ export interface UIState {
   assetTypeFilter: AssetTypeFilter;
   assetSearch: string;
   shortcutHelpOpen: boolean;
+  treeEditingId: string | null;
   gridSnapEnabled: boolean;
   gridSize: number;
   dragPreview: { hotspotId: string; area: HotspotArea } | null;
@@ -221,6 +222,7 @@ export interface EditorStore extends InterviewSlice, QuickCreateSlice, ItchSlice
   setSceneTool: (tool: UIState['sceneTool']) => void;
   setPanelWidth: (panel: 'left' | 'right', width: number) => void;
   setShortcutHelpOpen: (open: boolean) => void;
+  setTreeEditingId: (id: string | null) => void;
   toggleGridSnap: () => void;
   setGridSize: (size: number) => void;
   addToHotspotSelection: (hotspotId: string) => void;

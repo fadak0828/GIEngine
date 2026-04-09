@@ -81,6 +81,51 @@ export function App(): React.ReactElement {
         const store = useEditorStore.getState();
         store.setShortcutHelpOpen(!store.ui.shortcutHelpOpen);
       }
+
+      // F2: rename selected tree node
+      if (e.key === 'F2' && !isTyping()) {
+        e.preventDefault();
+        const store = useEditorStore.getState();
+        const { selection, ui } = store;
+        if (ui.treeEditingId !== null) return; // already editing
+        if (selection.sceneId) {
+          store.setTreeEditingId(selection.sceneId);
+        } else if (selection.caseId) {
+          store.setTreeEditingId(selection.caseId);
+        } else if (selection.actId) {
+          store.setTreeEditingId(selection.actId);
+        }
+        return;
+      }
+
+      // Delete: delete selected item
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !isTyping()) {
+        const store = useEditorStore.getState();
+        const { selection, ui } = store;
+        if (ui.treeEditingId !== null) return; // don't delete while editing
+        if (selection.hotspotId && selection.caseId && selection.sceneId) {
+          store.deleteHotspot(selection.caseId, selection.sceneId, selection.hotspotId);
+          store.setSelection({ hotspotId: null });
+        } else if (selection.layerId && selection.caseId && selection.sceneId) {
+          store.deleteLayer(selection.caseId, selection.sceneId, selection.layerId);
+          store.setSelection({ layerId: null });
+        } else if (selection.assetId) {
+          store.deleteAsset(selection.assetId);
+        } else if (selection.sceneId && selection.caseId) {
+          if (window.confirm('씬을 삭제하시겠습니까?')) {
+            store.deleteScene(selection.caseId, selection.sceneId);
+          }
+        } else if (selection.caseId && selection.actId) {
+          if (window.confirm('사건을 삭제하시겠습니까?')) {
+            store.deleteCase(selection.actId, selection.caseId);
+          }
+        } else if (selection.actId) {
+          if (window.confirm('막을 삭제하시겠습니까?')) {
+            store.deleteAct(selection.actId);
+          }
+        }
+        return;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
