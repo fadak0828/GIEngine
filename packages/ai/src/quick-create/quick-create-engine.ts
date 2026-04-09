@@ -4,7 +4,7 @@
  * gemini-2.5-pro로 블루프린트 생성, gemini-2.5-flash로 선택지 생성
  */
 
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import type { CaseBlueprint } from '../interview/types.js';
 import { buildSentenceToBlueprintPrompt } from './prompts/sentence-to-blueprint-prompt.js';
 import { buildChoiceRefinedPrompt } from './prompts/choice-refined-prompt.js';
@@ -148,7 +148,7 @@ export class QuickCreateEngine {
   }
 
   private async generateBlueprintFromPrompt(prompt: string, sessionId: string): Promise<CaseBlueprint> {
-    const raw = await geminiClient.generateText(prompt, this.proModel);
+    const raw = await getProvider().generateText(prompt, this.proModel);
     return this.parseAndEnrichBlueprint(raw, sessionId);
   }
 

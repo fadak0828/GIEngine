@@ -1,5 +1,5 @@
 import type { PuzzleGenerateRequest, PuzzleGenerateResult } from '../types.js';
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import { buildPuzzlePrompt } from '../prompts/puzzle-prompts.js';
 
 /**
@@ -15,7 +15,7 @@ export async function generatePuzzle(
     locale: request.locale,
   });
 
-  const raw = await geminiClient.generateText(prompt);
+  const raw = await getProvider().generateText(prompt);
 
   // Strip markdown code fences if present
   const jsonText = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();

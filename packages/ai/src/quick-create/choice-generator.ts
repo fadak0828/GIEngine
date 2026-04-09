@@ -4,7 +4,7 @@
  * gemini-2.5-flash 사용 (비용 최적화)
  */
 
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import type { CaseBlueprint } from '../interview/types.js';
 import {
   buildChoiceGenerationPrompt,
@@ -24,7 +24,7 @@ export class ChoiceGenerator {
     originalSentence: string,
   ): Promise<ChoiceItem[]> {
     const prompt = buildChoiceGenerationPrompt(section, blueprint, originalSentence);
-    const raw = await geminiClient.generateText(prompt, this.flashModel);
+    const raw = await getProvider().generateText(prompt, this.flashModel);
     return parseChoiceItems(raw);
   }
 

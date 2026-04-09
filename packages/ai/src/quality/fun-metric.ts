@@ -11,7 +11,7 @@
 
 import type { Locale } from '@gi-engine/core';
 import type { CaseBlueprint } from '../interview/types.js';
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import { buildQualityScorePrompt } from './prompts/quality-score-prompt.js';
 
 export interface FunMetricScore {
@@ -160,7 +160,7 @@ export class FunMetricScorer {
     );
 
     const prompt = buildQualityScorePrompt({ blueprintJson, locale });
-    const raw = await geminiClient.generateText(prompt);
+    const raw = await getProvider().generateText(prompt);
     const metrics = parseQualityResponse(raw);
 
     return {

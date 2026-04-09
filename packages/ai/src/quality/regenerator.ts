@@ -7,7 +7,7 @@
 
 import type { Locale } from '@gi-engine/core';
 import type { CaseBlueprint, BlueprintHotspotHint } from '../interview/types.js';
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import {
   buildRegenerateScenePrompt,
   buildRegenerateWordPrompt,
@@ -99,7 +99,7 @@ export async function regenerateScene(
 ): Promise<RegenerationResult<CaseBlueprint>> {
   const { data, error, attempts } = await retry(async () => {
     const prompt = buildRegenerateScenePrompt({ originalBlueprint: blueprint, sceneTempId, locale, reasonHint });
-    const raw = await geminiClient.generateText(prompt, 'gemini-2.5-pro');
+    const raw = await getProvider().generateText(prompt, 'gemini-2.5-pro');
     return parseRegenerateScene(raw);
   }, MAX_RETRIES);
 
@@ -168,7 +168,7 @@ export async function regenerateWord(
 ): Promise<RegenerationResult<CaseBlueprint>> {
   const { data, error, attempts } = await retry(async () => {
     const prompt = buildRegenerateWordPrompt({ originalBlueprint: blueprint, wordTempId, locale, reasonHint });
-    const raw = await geminiClient.generateText(prompt, 'gemini-2.5-pro');
+    const raw = await getProvider().generateText(prompt, 'gemini-2.5-pro');
     return parseRegenerateWord(raw);
   }, MAX_RETRIES);
 
@@ -240,7 +240,7 @@ export async function regeneratePuzzle(
 ): Promise<RegenerationResult<CaseBlueprint>> {
   const { data, error, attempts } = await retry(async () => {
     const prompt = buildRegeneratePuzzlePrompt({ originalBlueprint: blueprint, locale, reasonHint });
-    const raw = await geminiClient.generateText(prompt, 'gemini-2.5-pro');
+    const raw = await getProvider().generateText(prompt, 'gemini-2.5-pro');
     return parseRegeneratePuzzle(raw);
   }, MAX_RETRIES);
 

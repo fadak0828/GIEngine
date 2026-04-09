@@ -17,21 +17,23 @@ import { detectHotspotsFromImage } from '../src/generators/hotspot-detector.js';
 
 // ─── 모킹 ─────────────────────────────────────────────────────────────────────
 
-vi.mock('../src/client.js', () => ({
-  geminiClient: {
-    analyzeImage: vi.fn(),
-  },
+vi.mock('../src/providers/factory.js', () => ({
+  getProvider: vi.fn(),
 }));
 
 vi.mock('../src/interview/blueprint-converter.js', () => ({
   calcSmartHotspotPositions: vi.fn(),
 }));
 
-import { geminiClient } from '../src/client.js';
+import { getProvider } from '../src/providers/factory.js';
 import { calcSmartHotspotPositions } from '../src/interview/blueprint-converter.js';
 
-const mockAnalyzeImage = vi.mocked(geminiClient.analyzeImage);
+const mockGetProvider = vi.mocked(getProvider);
 const mockCalcSmartPositions = vi.mocked(calcSmartHotspotPositions);
+
+const mockProvider = {
+  analyzeImage: vi.fn(),
+};
 
 // ─── 픽스처 ───────────────────────────────────────────────────────────────────
 
@@ -59,6 +61,7 @@ describe('detectHotspotsFromImage', () => {
     mockCalcSmartPositions.mockImplementation((hotspots, _w, _h) =>
       makeSmartPositionResult(hotspots.length),
     );
+    mockGetProvider.mockReturnValue(mockProvider as any);
   });
 
   // ── 1. 빈 핫스팟 ─────────────────────────────────────────────────────────
@@ -72,7 +75,7 @@ describe('detectHotspotsFromImage', () => {
     });
 
     expect(result).toEqual([]);
-    expect(mockAnalyzeImage).not.toHaveBeenCalled();
+    expect(mockProvider.analyzeImage).not.toHaveBeenCalled();
   });
 
   // ── 2. Vision 감지 성공 (JSON 응답) ──────────────────────────────────────
@@ -81,7 +84,7 @@ describe('detectHotspotsFromImage', () => {
     const hotspots = [makeHotspot('hs-1', '나무'), makeHotspot('hs-2', '문')];
 
     // Vision API 응답: 정규화된 좌표 (0-1 범위)
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({
         detections: [
           { hotspotId: 'hs-1', bbox: [0.1, 0.2, 0.15, 0.18], confidence: 0.9 },
@@ -116,7 +119,7 @@ describe('detectHotspotsFromImage', () => {
 
   it('감지된 모든 핫스팟의 신뢰도는 0.8이어야 함', async () => {
     const hotspots = [makeHotspot('hs-1')];
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({
         detections: [{ hotspotId: 'hs-1', bbox: [0.1, 0.1, 0.1, 0.1], confidence: 0.99 }],
       }),
@@ -138,7 +141,7 @@ describe('detectHotspotsFromImage', () => {
     const hotspots = [makeHotspot('hs-1'), makeHotspot('hs-2'), makeHotspot('hs-3')];
 
     // hs-3만 누락
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({
         detections: [
           { hotspotId: 'hs-1', bbox: [0.1, 0.2, 0.1, 0.1], confidence: 0.9 },
@@ -162,7 +165,7 @@ describe('detectHotspotsFromImage', () => {
 
   it('응답에서 감지된 핫스팟이 0개이면 fallback을 사용해야 함', async () => {
     const hotspots = [makeHotspot('hs-1')];
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({ detections: [] }),
     );
 
@@ -181,7 +184,7 @@ describe('detectHotspotsFromImage', () => {
 
   it('Vision API 호출이 실패하면 fallback smart positions를 반환해야 함', async () => {
     const hotspots = [makeHotspot('hs-1'), makeHotspot('hs-2')];
-    mockAnalyzeImage.mockRejectedValueOnce(new Error('API quota exceeded'));
+    mockProvider.analyzeImage.mockRejectedValueOnce(new Error('API quota exceeded'));
 
     const result = await detectHotspotsFromImage({
       imageBase64: 'img',
@@ -197,7 +200,7 @@ describe('detectHotspotsFromImage', () => {
 
   it('응답이 유효하지 않은 JSON이면 fallback을 사용해야 함', async () => {
     const hotspots = [makeHotspot('hs-1')];
-    mockAnalyzeImage.mockResolvedValueOnce('잘못된 JSON 응답입니다');
+    mockProvider.analyzeImage.mockResolvedValueOnce('잘못된 JSON 응답입니다');
 
     const result = await detectHotspotsFromImage({
       imageBase64: 'img',
@@ -215,7 +218,7 @@ describe('detectHotspotsFromImage', () => {
   it('정규화된 좌표가 올바르게 픽셀 좌표로 변환되어야 함', async () => {
     const hotspots = [makeHotspot('hs-1')];
     // 0.5, 0.5, 0.2, 0.1 → x=960, y=540, w=384, h=108
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({
         detections: [{ hotspotId: 'hs-1', bbox: [0.5, 0.5, 0.2, 0.1], confidence: 0.9 }],
       }),
@@ -239,7 +242,7 @@ describe('detectHotspotsFromImage', () => {
   it('Math.round가 적용되어 정수 픽셀 값을 반환해야 함', async () => {
     const hotspots = [makeHotspot('hs-1')];
     // 0.333... → Math.round(0.333 * 1920) = Math.round(639.36) = 639
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({
         detections: [{ hotspotId: 'hs-1', bbox: [1 / 3, 1 / 3, 0.1, 0.1], confidence: 0.9 }],
       }),
@@ -264,7 +267,7 @@ describe('detectHotspotsFromImage', () => {
       makeHotspot('hs-alpha', '책상'),
       makeHotspot('hs-beta', '의자'),
     ];
-    mockAnalyzeImage.mockRejectedValueOnce(new Error('timeout'));
+    mockProvider.analyzeImage.mockRejectedValueOnce(new Error('timeout'));
     mockCalcSmartPositions.mockReturnValueOnce([
       { x: 100, y: 200, width: 140, height: 100 },
       { x: 400, y: 300, width: 140, height: 100 },
@@ -285,7 +288,7 @@ describe('detectHotspotsFromImage', () => {
 
   it('fallback 호출 시 calcSmartHotspotPositions에 올바른 인자를 전달해야 함', async () => {
     const hotspots = [makeHotspot('hs-1', '문', 'navigate')];
-    mockAnalyzeImage.mockRejectedValueOnce(new Error('error'));
+    mockProvider.analyzeImage.mockRejectedValueOnce(new Error('error'));
 
     await detectHotspotsFromImage({
       imageBase64: 'img',
@@ -305,7 +308,7 @@ describe('detectHotspotsFromImage', () => {
 
   it('감지된 핫스팟의 area.type은 "rect"이어야 함', async () => {
     const hotspots = [makeHotspot('hs-1')];
-    mockAnalyzeImage.mockResolvedValueOnce(
+    mockProvider.analyzeImage.mockResolvedValueOnce(
       JSON.stringify({
         detections: [{ hotspotId: 'hs-1', bbox: [0.1, 0.1, 0.1, 0.1], confidence: 0.9 }],
       }),

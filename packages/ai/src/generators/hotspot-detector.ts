@@ -1,5 +1,5 @@
 import type { HotspotArea } from '@gi-engine/core';
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import { calcSmartHotspotPositions } from '../interview/blueprint-converter.js';
 
 export interface DetectedHotspot {
@@ -125,7 +125,7 @@ Respond with ONLY this JSON format:
 }`;
 
   try {
-    const responseText = await geminiClient.analyzeImage(imageBase64, prompt);
+    const responseText = await getProvider().analyzeImage(imageBase64, prompt);
     const bboxMap = parseBoundingBoxes(responseText, hotspots.map(h => h.hotspotId));
 
     const detected: DetectedHotspot[] = [];

@@ -15,16 +15,21 @@ import { QuickCreateEngine } from '../src/quick-create/quick-create-engine.js';
 import type { CaseBlueprint } from '../src/interview/types.js';
 import type { QuickCreateProgress } from '../src/quick-create/types.js';
 
-// ─── GeminiClient 모킹 ────────────────────────────────────────────────────────
+// ─── Provider Factory Mock ───────────────────────────────────────────────────
 
-vi.mock('../src/client.js', () => ({
-  geminiClient: {
-    generateText: vi.fn(),
-  },
+vi.mock('../src/providers/factory.js', () => ({
+  getProvider: vi.fn(),
 }));
 
-import { geminiClient } from '../src/client.js';
-const mockGenerateText = vi.mocked(geminiClient.generateText);
+import { getProvider } from '../src/providers/factory.js';
+
+const mockProvider = {
+  generateText: vi.fn(),
+  generateImage: vi.fn(),
+  analyzeImage: vi.fn(),
+};
+
+const mockGetProvider = vi.mocked(getProvider);
 
 // ─── 테스트 픽스처 ─────────────────────────────────────────────────────────────
 
@@ -147,16 +152,17 @@ describe('QuickCreateEngine', () => {
 
   beforeEach(() => {
     engine = new QuickCreateEngine();
+    mockGetProvider.mockReturnValue(mockProvider as any);
     // mockReset: mockResolvedValueOnce 큐 + 구현 완전 초기화 (테스트 간 오염 방지)
     // clearAllMocks는 호출 이력만 삭제하고 큐는 남김 -> 테스트 간 오염 발생
-    mockGenerateText.mockReset();
+    mockProvider.generateText.mockReset();
   });
 
   // ── 1. 타입 안전성 ────────────────────────────────────────────────────────────
 
   describe('타입 안전성', () => {
     it('startFromSentence가 CaseBlueprint 타입을 반환합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence('카페에서 독살 사건이 발생했다');
 
@@ -174,7 +180,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('BlueprintCharacter 필드가 올바른 역할 값을 가집니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const { blueprint } = await engine.startFromSentence('테스트 문장');
 
@@ -188,7 +194,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('BlueprintScene hotspotHints가 올바른 actionType을 가집니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const { blueprint } = await engine.startFromSentence('테스트 문장');
 
@@ -205,7 +211,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('BlueprintWord category가 유효한 WordCategory입니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const { blueprint } = await engine.startFromSentence('테스트 문장');
 
@@ -217,7 +223,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('mainPuzzle.requiredWordTempIds가 실제 word tempId를 참조합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const { blueprint } = await engine.startFromSentence('테스트 문장');
 
@@ -232,7 +238,7 @@ describe('QuickCreateEngine', () => {
 
   describe('E2E 흐름: 1문장 → 블루프린트 생성', () => {
     it('단일 문장에서 완전한 CaseBlueprint를 생성합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence(
         '점심시간 카페에서 파티시에 바리스타가 독을 넣었다',
@@ -248,7 +254,7 @@ describe('QuickCreateEngine', () => {
 
     it('withChoices=true 시 선택지를 함께 반환합니다', async () => {
       // 블루프린트 생성 + 4개 섹션 선택지 생성 (5회 호출)
-      mockGenerateText
+      mockProvider.generateText
         .mockResolvedValueOnce(makeBlueprintJson())        // blueprint
         .mockResolvedValue(makeChoicesJson());             // 4 choice sections
 
@@ -263,7 +269,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('진행률 콜백이 올바른 순서로 호출됩니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const progressEvents: QuickCreateProgress[] = [];
       await engine.startFromSentence('테스트 문장', {
@@ -280,7 +286,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('장르/분위기/시대 옵션이 전달됩니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence('조선시대 궁궐에서 독살 사건', {
         genre: 'historical',
@@ -291,11 +297,11 @@ describe('QuickCreateEngine', () => {
 
       expect(result.blueprint).toBeDefined();
       // 옵션이 전달되어 AI 호출이 1회 이루어졌음을 확인
-      expect(mockGenerateText).toHaveBeenCalledTimes(1);
+      expect(mockProvider.generateText).toHaveBeenCalledTimes(1);
     });
 
     it('applyChoicesToBlueprint가 선택 사항을 반영한 블루프린트를 반환합니다', async () => {
-      mockGenerateText
+      mockProvider.generateText
         .mockResolvedValueOnce(makeBlueprintJson())         // 최초 생성
         .mockResolvedValueOnce(makeBlueprintJson({ title: { ko: '개선된 사건', en: 'Improved' } }));  // 선택지 반영
 
@@ -325,26 +331,26 @@ describe('QuickCreateEngine', () => {
 
   describe('엣지 케이스', () => {
     it('빈 문자열 입력 시에도 API 호출을 진행합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence('');
 
       expect(result.blueprint).toBeDefined();
-      expect(mockGenerateText).toHaveBeenCalledTimes(1);
+      expect(mockProvider.generateText).toHaveBeenCalledTimes(1);
     });
 
     it('매우 긴 입력(500자 이상)에서도 정상 처리합니다', async () => {
       const longSentence = '카페에서 독살 사건이 발생했다. '.repeat(30); // ~450자
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence(longSentence);
 
       expect(result.blueprint).toBeDefined();
-      expect(mockGenerateText).toHaveBeenCalledTimes(1);
+      expect(mockProvider.generateText).toHaveBeenCalledTimes(1);
     });
 
     it('특수문자가 포함된 입력을 처리합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence(
         '카페 "블루문"에서 CEO & COO가 독살됐다! <테스트>',
@@ -354,7 +360,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('한국어/영어 혼합 입력을 처리합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const result = await engine.startFromSentence(
         'The 카페 manager poisoned 커피 during 점심시간',
@@ -365,7 +371,7 @@ describe('QuickCreateEngine', () => {
 
     it('AI가 마크다운 코드펜스로 감싼 JSON을 파싱합니다', async () => {
       const withFence = `\`\`\`json\n${makeBlueprintJson()}\n\`\`\``;
-      mockGenerateText.mockResolvedValueOnce(withFence);
+      mockProvider.generateText.mockResolvedValueOnce(withFence);
 
       const result = await engine.startFromSentence('테스트 문장');
 
@@ -373,7 +379,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('AI 응답이 빈 배열(subPuzzles=[])이어도 처리합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(
+      mockProvider.generateText.mockResolvedValueOnce(
         makeBlueprintJson({ subPuzzles: [] }),
       );
 
@@ -387,7 +393,7 @@ describe('QuickCreateEngine', () => {
 
   describe('블루프린트 검증 로직', () => {
     it('필수 필드 누락 시 에러를 throw합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(
+      mockProvider.generateText.mockResolvedValueOnce(
         JSON.stringify({ title: { ko: '미완성' }, genre: 'mystery' }), // characters 등 누락
       );
 
@@ -397,7 +403,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('캐릭터가 1명이면 에러를 throw합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(
+      mockProvider.generateText.mockResolvedValueOnce(
         makeBlueprintJson({
           characters: [{ name: '혼자', role: 'culprit', description: '유일한 인물', relationships: [] }],
         }),
@@ -409,7 +415,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('씬이 1개이면 에러를 throw합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(
+      mockProvider.generateText.mockResolvedValueOnce(
         makeBlueprintJson({
           scenes: [
             {
@@ -429,7 +435,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('단어가 4개 이하이면 에러를 throw합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce(
+      mockProvider.generateText.mockResolvedValueOnce(
         makeBlueprintJson({
           words: [
             { tempId: 'w1', display: { ko: '단어1', en: 'w1' }, category: 'person' },
@@ -446,7 +452,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('유효하지 않은 JSON 응답 시 파싱 에러를 throw합니다', async () => {
-      mockGenerateText.mockResolvedValueOnce('이것은 JSON이 아닙니다.');
+      mockProvider.generateText.mockResolvedValueOnce('이것은 JSON이 아닙니다.');
 
       await expect(engine.startFromSentence('테스트')).rejects.toThrow(
         /CaseBlueprint 파싱 실패/,
@@ -460,7 +466,7 @@ describe('QuickCreateEngine', () => {
     it('블루프린트 생성이 30초 이내에 완료됩니다 (모킹 환경)', async () => {
       // 실제 환경에서는 AI API 지연이 있지만, 모킹 환경에서는 즉시 응답
       // 이 테스트는 엔진 내부 오버헤드가 없음을 확인합니다
-      mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
 
       const startTime = Date.now();
       await engine.startFromSentence('성능 테스트 문장');
@@ -472,7 +478,7 @@ describe('QuickCreateEngine', () => {
     it('withChoices=true 시 선택지 생성이 병렬로 처리됩니다', async () => {
       // 4개 섹션이 병렬 처리되므로 순차 대비 빠름을 간접 확인
       const callOrder: number[] = [];
-      mockGenerateText.mockImplementation(async (_prompt: string, model: string) => {
+      mockProvider.generateText.mockImplementation(async (_prompt: string, model: string) => {
         if (model.includes('pro')) {
           callOrder.push(0); // 블루프린트 먼저
           return makeBlueprintJson();
@@ -491,7 +497,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('각 세션은 고유한 sessionId를 가집니다', async () => {
-      mockGenerateText.mockResolvedValue(makeBlueprintJson());
+      mockProvider.generateText.mockResolvedValue(makeBlueprintJson());
 
       const [r1, r2, r3] = await Promise.all([
         engine.startFromSentence('사건1'),
@@ -522,7 +528,7 @@ describe('QuickCreateEngine', () => {
     });
 
     it('선택지 생성 실패 시 폴백 선택지를 반환합니다', async () => {
-      mockGenerateText
+      mockProvider.generateText
         .mockResolvedValueOnce(makeBlueprintJson())           // blueprint
         .mockRejectedValue(new Error('API rate limit'));       // choices 실패
 
@@ -538,7 +544,7 @@ describe('QuickCreateEngine', () => {
 
 describe('CaseBlueprint 타입 호환성', () => {
   it('CaseBlueprint 타입이 Quick Create 엔진에서 올바르게 사용됩니다', async () => {
-    mockGenerateText.mockResolvedValueOnce(makeBlueprintJson());
+    mockProvider.generateText.mockResolvedValueOnce(makeBlueprintJson());
     const { blueprint } = await new QuickCreateEngine().startFromSentence('타입 호환성 테스트');
 
     // CaseBlueprint 필수 필드 구조 검증 (interview/types.ts 기준)

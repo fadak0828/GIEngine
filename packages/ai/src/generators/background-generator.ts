@@ -1,5 +1,5 @@
 import type { BackgroundGenerateRequest, BackgroundGenerateResult, GameContextForPrompt, HotspotPromptInfo } from '../types.js';
-import { geminiClient } from '../client.js';
+import { getProvider } from '../providers/factory.js';
 import { buildBackgroundPrompt, buildRichBackgroundPrompt } from '../prompts/background-prompts.js';
 import type { HotspotArea } from '@gi-engine/core';
 import { detectHotspotsFromImage, type DetectedHotspot, type HotspotDetectionInput } from './hotspot-detector.js';
@@ -42,7 +42,7 @@ export async function generateBackground(
     ? buildRichBackgroundPrompt(sceneDescription, gameContext, style, includeCharacter)
     : buildBackgroundPrompt({ sceneDescription, style });
 
-  const base64Data = await geminiClient.generateImage(prompt, aspectRatio);
+  const base64Data = await getProvider().generateImage(prompt, aspectRatio);
 
   const assetId = `asset_ai_bg_${Date.now()}`;
 
