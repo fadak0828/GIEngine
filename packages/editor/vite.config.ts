@@ -25,10 +25,22 @@ export default defineConfig({
     port: 5174,
   },
   build: {
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
         landing: path.resolve(__dirname, 'landing.html'),
+      },
+      output: {
+        manualChunks: (id: string) => {
+          if (id.includes('node_modules/react/')) return 'react-vendor';
+          if (id.includes('node_modules/@radix-ui/')) return 'radix-vendor';
+          if (id.includes('node_modules/immer/') || id.includes('node_modules/zustand/')) return 'state-vendor';
+          if (id.includes('node_modules/')) return 'misc-vendor';
+          if (id.includes('packages/ai/src/') || id.includes('packages/exporter/src/') || id.includes('packages/core/src/')) {
+            return 'gi-engine';
+          }
+        },
       },
     },
   },
