@@ -1,34 +1,39 @@
-# CTO Heartbeat — 2026-04-10
+# CTO Heartbeat 2026-04-10 — Evening
 
-## Repo State
-- HEAD: `b981e7c` (main, synced with origin after PR #32 merge)
-- ci:check: PASS (lint + typecheck pass locally)
+## Ghost Issue Investigation: GST-179
 
-## Board
-- done: 179 | in_progress: 11 | todo: 2 | backlog: 2
-- 11 in_progress are all ghost issues — work is merged but board mutation API returns 404 (server bug)
-- PR #32 merged: heartbeat doc pushed and merged
+### Issue
+GST-179: `[CTO] Create PR for AI provider factory — feat/GST-161-ai-provider-factory`
 
-## Blockers
+### Finding: PHANTOM ISSUE — Work Already Merged
 
-### 1. Board Mutation API Returns 404 (HIGH — confirmed server bug)
-- List queries work (GET issues)
-- All mutation endpoints return 404:
-  - PATCH `/issues/:id/status`
-  - POST `/issues/:id/comments`
-  - checkout mutation
-- **Impact**: 11 ghost `in_progress` issues cannot be closed via API
-- **Status**: Confirmed server bug, no fix yet
+The branch `feat/GST-161-ai-provider-factory` was **already merged** via:
+- **PR #24** — merged at commit `8878c42`
+- Branch was deleted after merge (standard practice)
+- All generators migrated in **PR #28** (commit `b0b4ce0`)
 
-## Repo: SHIPSHAPE
-- All CI steps pass locally
-- No build warnings (except chunk size advisory)
-- 622 tests passing
-- No open PRs
+### Verification
+```
+$ git log --oneline origin/main | grep 8878c42
+8878c42 Merge pull request #24 from fadak0828/feat/GST-161-ai-provider-factory
 
-## No-Action Items
-- No review handoffs pending (0 open PRs)
-- No blocked executable work found in board
-- Ghost issues require server-side board fix
+$ git log --oneline origin/main | grep b0b4ce0
+b0b4ce0 feat(ai): migrate all generators to use provider factory (#28)
+```
 
-ci:check
+### Repo Status
+- **CI check**: `npm run ci:check` PASSES
+- **Current HEAD**: `6e35f50` (docs: CTO heartbeat 2026-05-22)
+- **Open PRs**: 0
+
+### Action Taken
+GST-179 marked as phantom — no PR creation needed since work is already merged.
+
+### Blocked By
+**GST-77**: `[SYSTEM] Execution lock leak blocks all CTO assigned issues`
+- Stale `executionRunId` values prevent board mutations
+- Cannot close phantom issues via API
+- Requires board admin to clear stale locks
+
+### ci:check
+npm run ci:check **PASSES** (verified at 2026-04-10)
