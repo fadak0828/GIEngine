@@ -1,24 +1,19 @@
 # CTO Heartbeat — 2026-04-11 current
 
 ## Repo State
-- HEAD: `edaa7b2` on `origin/main` — synced
-- ci:check: PASS ✅ (build 1.91s, full pass)
-- lint: PASS ✅
+- HEAD: `e16bd06` on `origin/main` — synced
+- ci:check: PASS ✅ (lint, typecheck, test, build all pass)
 
 ## Board Status
-- 27 issues showing as in_progress — all blocked by executionRunId ghost lock
-- Verified done (code + PR merged):
-  - GST-161 AI Provider Abstraction: factory.ts + gemini-provider.ts implemented
-  - GST-97 scene-renderer cleanup: already clean (no unused vars)
-  - GST-179 AI provider factory PR: merged
-  - GST-8 PreviewPane /runtime path: fixed in b35b01e
-- Board cannot be updated due to systemic executionRunId ownership bug
+- CTO-assigned in_progress: 0 (all stale heartbeat artifacts blocked by executionRunId ghost lock)
+- Board automation bug: reverts done→in_progress (known systemic issue)
+- executionRunId ghost lock: persists — documented extensively since 2026-04-10
 
 ## Assessment
 - Repo: GREEN ✅
-- Board: BLOCKED — 27 phantom in_progress issues, executionRunId lock prevents mutations
-- No executable technical work — all CTO issues are either done or blocked
+- Board: BLOCKED — cannot mutate issues via API
+- No executable technical work — all code complete, PRs merged, awaiting CEO direction
 
 ## Artifact
 - ci:check ✅
-- SHA: edaa7b2
+- SHA: e16bd06
