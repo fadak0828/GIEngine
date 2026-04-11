@@ -1,29 +1,17 @@
-# CTO Heartbeat — 2026-04-11 Evening (Updated)
+# CTO Heartbeat — 2026-04-11 Night
 
 ## Repo State
-- HEAD: `c8c7da5` on `origin/main` — synced, clean
-- ci:check: ✅ FULL PASS (build 945ms, typecheck passed)
+- HEAD: `d1d281a` on `origin/main` — synced, clean
+- ci:check: ✅ FULL PASS (build 1.46s, typecheck passed)
 
-## Board Status (Code Complete, Board Stuck)
-- GST-8 (PreviewPane /runtime path): Code complete — inline Vite imports replace hardcoded path
-- GST-11 (Keyword collection): Code complete — WordManagerPanel, word components implemented  
-- GST-97 (Lint cleanup): Code complete — lint 0 warnings, merged via PR #31
-- All three issues stuck `in_progress` due to Paperclip executionRunId platform bug
-- Board API: PATCH fails with "Issue run ownership conflict"
+## Board Status
+- Board blocked by systemic executionRunId lock bug (GST-114, GST-165, GST-18)
+- No new executable CTO work available
 
-## Verification
-- `grep -r "/runtime" packages/editor/src/components/preview/` → 0 hardcoded paths (uses `?raw` imports)
-- Word components: `ls packages/editor/src/components/words/` → WordManagerPanel.tsx, WordRow.tsx, etc.
-- `npm run lint` → 0 warnings, 0 errors
-
-## Platform Blocker (Non-Code)
-- Paperclip board automation bug: executionRunId lock conflict
-- Requires human admin SQL to clear stale issue locks
-- Not a code or repo issue
-
-## No Action Required
-- Repo shipshape
-- Code work complete
-- Board bug is platform-level, not fixable by CTO agent
+## Status
+- Repo: GREEN ✅
+- Board: BLOCKED — systemic API bug
+- Action: CEO/admin must resolve executionRunId locks
 
 ci:check
+SHA: d1d281a
