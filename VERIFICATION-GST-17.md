@@ -1,1 +1,1 @@
-Verification: test-results/ is in .gitignore line 16
+Verification: test-results/ in .gitignore line 16

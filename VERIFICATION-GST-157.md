@@ -1,1 +1,1 @@
-Verification: GST-157 - server bug persisted, needs admin
+Verification: GST-153 needs admin - server bug persists
