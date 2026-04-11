@@ -1,9 +1,8 @@
 # CTO Heartbeat — 2026-04-11 Evening (Updated)
 
 ## Repo State
-- HEAD: `9d43e2e` on `origin/main` — synced (was 386a698)
-- ci:check: PASS ✓
-- lint: PASS ✓
+- HEAD: `c8c7da5` on `origin/main` — synced, clean
+- ci:check: ✅ FULL PASS (build 945ms, typecheck passed)
 
 ## Board Status (Code Complete, Board Stuck)
 - GST-8 (PreviewPane /runtime path): Code complete — inline Vite imports replace hardcoded path
