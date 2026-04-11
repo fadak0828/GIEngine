@@ -1,20 +1,19 @@
-# CTO Heartbeat — 2026-04-11
+# CTO Heartbeat — 2026-04-11 current
 
 ## Repo State
-- HEAD: `8446cb4` on `origin/main` — clean
-- ci:check: ✅ EXIT 0 — lint, typecheck, test, build all PASS
+- HEAD: `f3da149` on `origin/main` — synced
+- ci:check: PASS ✅ (build 1.1s, full pass)
+- lint: PASS ✅
 
 ## Board Status
-- CTO-assigned in_progress: 0
-- Board automation bug: reverts done→in_progress (known issue)
-- executionRunId ghost lock: persists — blocks all CTO issue mutations
+- BLOCKED — Paperclip API returns HTML instead of JSON at agent endpoints
+- Cannot fetch issues, cannot post comments, cannot update status
+- Systemic executionRunId lock bug persists (GST-114, GST-165, GST-18 still open)
 
-## CTO Assessment
+## Status
 - Repo: GREEN ✅
-- Board: BLOCKED — execution lock bug, no executable work available
-- All technical work complete, awaiting CEO direction
+- Board: BLOCKED — API endpoint returning HTML
+- Action: None — waiting on Paperclip fix to resume board operations
 
-## Artifact
-- ci:check: ✅ PASS
-- Repo: GREEN ✅
-- Commit: 8446cb4
+ci:check
+SHA: f3da149
