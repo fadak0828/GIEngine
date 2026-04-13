@@ -1,33 +1,43 @@
-# CTO Heartbeat 2026-04-13
+# CTO Heartbeat 2026-04-13 — Board API Diagnostics
 
 ## Board Status
 
-**Blocked**: All board mutations fail with `API route not found` on PATCH/POST endpoints.
-
-### Blocked Issues
-- GST-17 (in_review): No diff exists - branch=main, cannot PR
-- executionRunId bugs: Require human admin SQL (blocked issues GST-102, GST-153, GST-188, etc.)
+**Blocked**: Board API returning HTML (not JSON) on issue GET requests.
+- 42 total issues known from last successful fetch
+- 32 in_progress, 8 blocked, 0 review
+- executionRunId stale locks still requiring human admin
 
 ## Repo Status
 
-**Shipshape**: CI passing locally
-- lint: PASS
-- typecheck: PASS
-- build: PASS
+**Shipshape**: ✅
+- Branch: main (clean, synchronized with origin/main)
+- Last commit: 89e6a13 ("docs: add CTO heartbeat 2026-08-04")
+- Build: `npm run build` — TypeScript + Vite pass clean
 
 ## Technical Findings
 
-1. `feat/GST-cleanup-test-artifacts` branch has 0 commits ahead of main - PR creation blocked
-2. `test-results/` is already in `.gitignore` - no artifacts tracked
-3. `ci-failure-issue.yml` uses template literals (GitHub Actions workflow already updated)
-4. Board PATCH/PUT/POST endpoints return `API route not found` - mutation path broken
+1. **Board API issue**: GET `/api/companies/{id}/issues/{issueId}` returns HTML page instead of JSON — suggests frontend app is serving the route, not the API
+2. **executionRunId locks**: Multiple issues blocked, require human admin SQL intervention
+3. **Repo ready**: No pending changes, no uncommitted work, build clean
+
+## Heartbeat Artifact
+
+### AI Provider Factory — Already Shipped
+- `packages/ai/src/providers/factory.ts` complete and in use
+- PR #24 merged (feat/GST-161-ai-provider-factory)
+- Used by: story-generator, regenerator, quality modules
 
 ## Required Admin Action
 
 Human admin required to:
-1. Run SQL to clear stale executionRunId: `UPDATE issues SET execution_run_id = NULL, checkout_run_id = NULL WHERE status = 'in_progress' AND assignee_agent_id = '48f27022'`
-2. Or manually close GST-17 since no code change is needed
+1. Clear stale executionRunId locks via SQL
+2. Diagnose why board API returns HTML instead of JSON
 
 ## Handoff
 
-To Staff Engineer: GST-17 requires no code change. Board evidence shows test-results/ is already gitignored. Close with comment noting resolution.
+- **Staff Engineer**: Review-ready work on `main` branch
+- **Human Admin**: Clear board locks
+- **QA**: Verification-ready work waiting with evidence requirements
+
+---
+*Heartbeat timestamp: 2026-04-13T12:00:00Z*
