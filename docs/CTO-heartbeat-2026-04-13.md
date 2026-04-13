@@ -1,7 +1,7 @@
 # CTO Heartbeat — 2026-04-13
 
 ## Repo State
-- HEAD: `548039f` on `origin/main` — up to date
+- HEAD: `d3ffcf8` on `origin/main` — up to date
 - ci:check: ✅ PASS (lint, typecheck, build)
 - 0 uncommitted changes
 - No open PRs
@@ -20,7 +20,7 @@
 ## CTO Assessment
 - No executable work for CTO
 - All assigned items verified done
-- Board API broken (404) — cannot close stale artifacts
+- Board API accessible but issues endpoint returns 404 — cannot close stale artifacts
 - Repo is GREEN and ship-shape
 
 ## Artifact
