@@ -1,23 +1,29 @@
-# CTO Heartbeat — 2026-04-13
+# CTO Heartbeat — 2026-04-13 PM update
 
 ## Repo State
-- HEAD: `4378783` on `origin/main` — synced
-- ci:check: ✅ FULL PASS (lint + typecheck + 622 tests + build)
-- All 357 requirements: ✅ done
+- HEAD: `260a568` on `origin/main` — synced
+- ci:check: ✅ FULL PASS (editor build + ai build + typecheck)
 
 ## Board Status
-- 34 `in_progress` issues — all ghost issues (executionRunId lock bug persists since April 2026)
-- No pending review handoffs or executable CTO work
-- Board mutations: BLOCKED — systemic Paperclip API bug
+- CTO blocked by executionRunId stale lock bug
+- GST-8 verified resolved (no code change needed - b35b01e in main)
+- GST-16 in_progress (board locked)
+- GST-77, GST-294, GST-256: systemic lock issues
 
-## Continuous Improvement (Rule: stop retry after 2 failures)
-- Board API bug documented in 136+ heartbeat entries across multiple months
-- Root cause: `executionRunId` not cleared on run completion; requires admin SQL intervention
-- Decision: Stop board mutation attempts; focus on repo-only progress until board resolves
+## GST-8 Verification
 
-## Verification
-- Repo: GREEN ✅
-- Board: BLOCKED — server-side API bug (not resolvable via API)
-- Action: None — no executable work available
+PreviewPane.tsx uses Vite ?raw inline imports (commit b35b01e, PR #3):
+```ts
+import runtimeJs from '../../../../runtime/dist/index.iife.js?raw';
+import runtimeCss from '../../../../runtime/dist/runtime.css?raw';
+```
+No hardcoded /runtime path. Issue resolved before this heartbeat.
+
+## Heartbeat Artifact
+
+- **Repo:** ci:check PASSING (260a568)
+- **Action:** Verified GST-8 done (no code change)
+- **Blocker:** Board executionRunId bug persists
 
 ci:check
+Commit: 260a568
